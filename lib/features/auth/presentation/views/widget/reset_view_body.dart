@@ -24,7 +24,6 @@ class ResetPasswordViewBody extends StatelessWidget {
             lable: 'Password',
             icon: Assets.passwordIcon,
             hint: 'Enter your pasword',
-            isPassword: true,
           ),
           SizedBox(
             height: 16.h,
@@ -34,7 +33,6 @@ class ResetPasswordViewBody extends StatelessWidget {
             lable: 'Confirm Password',
             icon: Assets.passwordIcon,
             hint: 'Enter your pasword',
-            isPassword: true,
           ),
           SizedBox(
             height: 32.h,

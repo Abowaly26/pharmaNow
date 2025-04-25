@@ -8,9 +8,11 @@ class AnotherStepLogin extends StatelessWidget {
     super.key,
     required this.text,
     required this.icon,
+    this.onPressed,
   });
   final String text;
   final String icon;
+  final void Function()? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +20,7 @@ class AnotherStepLogin extends StatelessWidget {
       width: double.infinity,
       height: 48.h,
       child: OutlinedButton.icon(
-        onPressed: () {},
+        onPressed: onPressed,
         icon: SvgPicture.asset(
           icon,
           width: 24.w,

@@ -11,15 +11,22 @@ class CustomTextField extends StatelessWidget {
       required this.lable,
       required this.icon,
       required this.hint,
-      this.isPassword = false,
       this.onSaved,
-      required this.textInputType});
+      required this.textInputType,
+      this.validator,
+      this.controller,
+      this.obscureText = false,
+      this.suffixIcon});
   final String lable;
   final String icon;
   final String hint;
-  final bool? isPassword;
   final TextInputType textInputType;
   final void Function(String?)? onSaved;
+  final String? Function(String?)? validator;
+  final TextEditingController? controller;
+  final bool obscureText;
+  final Widget? suffixIcon;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,45 +44,37 @@ class CustomTextField extends StatelessWidget {
           height: 8.h,
         ),
         TextFormField(
+          obscureText: obscureText,
+          controller: controller,
           keyboardType: textInputType,
           onSaved: onSaved,
-          validator: (value) {
-            validator:
-            (value) {
-              if (value == null || value.isEmpty) {
-                return 'The field cannot be empty';
-              }
-              return null;
-            };
-          },
-          obscureText: isPassword == true,
+          validator: validator,
           decoration: InputDecoration(
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide: BorderSide(color: ColorManager.textInputColor)),
-            errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide: BorderSide(color: ColorManager.redColor)),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide: BorderSide(color: ColorManager.textInputColor)),
-            prefixIcon: Padding(
-              padding: EdgeInsets.all(12.r),
-              child: SvgPicture.asset(
-                icon,
-                width: 24,
-                height: 24,
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: ColorManager.textInputColor)),
+              errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: ColorManager.redColor)),
+              focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(
+                    color: ColorManager.redColor,
+                  )),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: ColorManager.textInputColor)),
+              prefixIcon: Padding(
+                padding: EdgeInsets.all(12.r),
+                child: SvgPicture.asset(
+                  icon,
+                  width: 24,
+                  height: 24,
+                ),
               ),
-            ),
-            hintText: hint,
-            hintStyle: TextStyle(color: ColorManager.textInputColor),
-            suffixIcon: isPassword == true
-                ? IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.visibility_off,
-                        color: ColorManager.textInputColor))
-                : null,
-          ),
+              hintText: hint,
+              hintStyle: TextStyle(color: ColorManager.textInputColor),
+              suffixIcon: suffixIcon),
         ),
       ],
     );
