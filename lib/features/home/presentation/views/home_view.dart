@@ -54,8 +54,8 @@ class _HomeViewState extends State<HomeView> {
             iconTheme: const IconThemeData(color: Colors.white),
           ),
           child: CurvedNavigationBar(
-            color: ColorManager.secondaryColor,
-            buttonBackgroundColor: ColorManager.secondaryColor,
+            color: Color(0xFF4046FF),
+            buttonBackgroundColor: Color(0xFF4046FF),
             backgroundColor: Colors.transparent,
             height: 58,
             animationCurve: Curves.bounceInOut,

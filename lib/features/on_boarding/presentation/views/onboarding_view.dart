@@ -177,7 +177,7 @@ class _OnboardingViewState extends State<OnboardingView> {
   Widget _buildInfoWidget(
       OnboardingData onboardingData, double height, double width) {
     // Calculate spacing based on screen height for consistent proportions
-    final verticalSpacing = height * 0.02;
+    final verticalSpacing = height * 0.03;
 
     return Padding(
       padding: EdgeInsets.symmetric(

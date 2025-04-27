@@ -80,7 +80,7 @@ class _VerificationViewBodyState extends State<VerificationViewBody> {
     String enteredCode =
         _controllers.map((controller) => controller.text).join();
     if (enteredCode == _expectedCode) {
-      showSuccessBottomSheet(context, 'Account created successfully!');
+      SuccessBottomSheet(text: 'Account created successfully!');
       // Navigate after successful verification
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.of(context).pushReplacement(MaterialPageRoute(

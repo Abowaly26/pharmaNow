@@ -13,6 +13,7 @@ import 'package:pharma_now/features/home/presentation/views/home_view.dart';
 
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
+import '../../../../../core/widgets/bottom_pop_up.dart';
 import '../../cubits/signin_cubit/signin_cubit.dart';
 
 class SiginViewBody extends StatefulWidget {
