@@ -39,8 +39,9 @@ class ResetPasswordViewBody extends StatelessWidget {
           ),
           ElevatedButton(
             style: ButtonStyles.primaryButton,
-            onPressed: () =>
-                SuccessBottomSheet(text: 'Account created successfully!'),
+            // onPressed: () =>
+            // SuccessBottomSheet(text: 'Account created successfully!'),
+            onPressed: () {},
             child: Text(
               'Reset',
               style: TextStyles.buttonLabel,

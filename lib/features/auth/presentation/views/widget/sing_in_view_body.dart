@@ -28,6 +28,44 @@ class _SiginViewBodyState extends State<SiginViewBody> {
   late String email, password;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  // Define TextEditingControllers to manage input fields
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  @override
+  void dispose() {
+    // Clean up controllers when the screen is disposed
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email is required';
+    }
+
+    // Validate email format using RegExp
+    final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegExp.hasMatch(value)) {
+      return 'Please enter a valid email address';
+    }
+
+    return null;
+  }
+
+  // Function to validate password
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -41,6 +79,8 @@ class _SiginViewBodyState extends State<SiginViewBody> {
                 onSaved: (p0) {
                   email = p0!;
                 },
+                validator: validateEmail,
+                controller: emailController,
                 textInputType: TextInputType.emailAddress,
                 lable: 'Email',
                 icon: Assets.emailIcon,
@@ -52,6 +92,8 @@ class _SiginViewBodyState extends State<SiginViewBody> {
               onSaved: (p0) {
                 password = p0!;
               },
+              validator: validatePassword,
+              controller: passwordController,
               textInputType: TextInputType.visiblePassword,
               lable: 'Password',
               icon: Assets.passwordIcon,

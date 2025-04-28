@@ -5,13 +5,13 @@ import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 
 class FireStoreSevice implements DatabaseService {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
   @override
   Future<void> addData({
     required String path,
     required Map<String, dynamic> data,
     String? documentId,
   }) async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
     if (documentId != null) {
       await firestore.collection(path).doc(documentId).set(data);
     } else {

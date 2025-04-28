@@ -58,14 +58,14 @@ class NewProductsListViewItem extends StatelessWidget {
 
                 // Favorite icon positioned absolutely
                 Positioned(
-                  top: 8,
-                  right: 8,
+                  top: 8.h,
+                  right: 8.w,
                   child: GestureDetector(
                     onTap: () {},
                     child: SvgPicture.asset(
                       isFavorite ? Assets.fav : Assets.nFav,
-                      width: 24,
-                      height: 24,
+                      width: 24.w,
+                      height: 24.h,
                     ),
                   ),
                 ),
@@ -81,7 +81,7 @@ class NewProductsListViewItem extends StatelessWidget {
   Widget _buildBottomContainer() {
     return Container(
       width: 148.w,
-      height: 90,
+      height: 90.h,
       decoration: BoxDecoration(
         color: ColorManager.buttom_info,
         borderRadius: BorderRadius.only(
@@ -123,8 +123,8 @@ class NewProductsListViewItem extends StatelessWidget {
                 ),
                 SvgPicture.asset(
                   Assets.cart,
-                  width: 32,
-                  height: 32,
+                  width: 32.w,
+                  height: 32.h,
                 )
               ],
             )

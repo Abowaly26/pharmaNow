@@ -52,7 +52,7 @@ class OffersListViewItem extends StatelessWidget {
                         image: NetworkImage('https://via.placeholder.com/150'),
                       ),
                     ),
-                    height: 80.h,
+                    height: 75.h,
                     alignment: Alignment.topCenter,
                     padding: EdgeInsets.only(top: 8.h, right: 8.w),
                     width: double.infinity,
@@ -113,7 +113,7 @@ class OffersListViewItem extends StatelessWidget {
   Widget _buildBottomContainer() {
     return Container(
       width: 148.w,
-      height: 90, // Increased height to prevent overflow
+      height: 90.h,
       decoration: BoxDecoration(
         color: ColorManager.buttom_info,
         borderRadius: BorderRadius.only(
@@ -127,7 +127,7 @@ class OffersListViewItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 148.w,
+              width: 160.w,
               child: Padding(
                 padding: EdgeInsets.only(top: 8.r),
                 child: Text(
@@ -155,8 +155,8 @@ class OffersListViewItem extends StatelessWidget {
                 ),
                 SvgPicture.asset(
                   Assets.cart,
-                  width: 32,
-                  height: 32,
+                  width: 32.w,
+                  height: 32.h,
                 )
               ],
             )

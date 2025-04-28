@@ -6,128 +6,116 @@ import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_style.dart';
 
-class SuccessBottomSheet extends StatelessWidget {
-  final String text;
+void showSuccessBottomSheet(
+  BuildContext context,
+  String? text,
+  void Function()? onPressed,
+) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    isDismissible: true,
+    builder: (BuildContext context) {
+      // Get the screen width
+      final screenWidth = MediaQuery.of(context).size.width;
 
-  const SuccessBottomSheet({
-    Key? key,
-    required this.text,
-  }) : super(key: key);
-
-  static void show(BuildContext context, String text) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      isDismissible: true,
-      builder: (BuildContext context) {
-        return SuccessBottomSheet(text: text);
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Get the screen width
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Container(
-      width: screenWidth,
-      padding: EdgeInsets.zero,
-      margin: EdgeInsets.zero,
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Success popup container
-          Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.topCenter,
-            children: [
-              // White container
-              Container(
-                width: screenWidth,
-                margin: const EdgeInsets.only(top: 35),
-                padding: const EdgeInsets.only(top: 55, bottom: 20),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
+      return Container(
+        width: screenWidth,
+        padding: EdgeInsets.zero,
+        margin: EdgeInsets.zero,
+        decoration: const BoxDecoration(
+          color: Colors.transparent,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Success popup container
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.topCenter,
+              children: [
+                // White container
+                Container(
+                  width: screenWidth,
+                  margin: const EdgeInsets.only(top: 35),
+                  padding: const EdgeInsets.only(top: 55, bottom: 20),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32),
+                      topRight: Radius.circular(32),
+                    ),
                   ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Success Title
-                    Text(
-                      'Success',
-                      style: TextStyles.mainTextOfPopUp,
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Success Message
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        text,
-                        textAlign: TextAlign.center,
-                        style: TextStyles.secdaryTextOfPopUp,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Success Title
+                      Text(
+                        'Success',
+                        style: TextStyles.mainTextOfPopUp,
                       ),
-                    ),
-                    SizedBox(height: 25.h),
+                      const SizedBox(height: 12),
 
-                    // OK Button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: ElevatedButton(
-                        style: ButtonStyles.primaryButton,
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                      // Success Message
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
-                          'Ok',
-                          style: TextStyles.buttonLabel,
+                          text!,
+                          textAlign: TextAlign.center,
+                          style: TextStyles.secdaryTextOfPopUp,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      SizedBox(height: 25.h),
 
-              // Success Icon that overlaps the top edge
-              Positioned(
-                top: 0,
-                child: Container(
-                  width: 91,
-                  height: 91,
-                  decoration: BoxDecoration(
-                    color: ColorManager.secondaryColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        spreadRadius: 1,
+                      // OK Button
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: ElevatedButton(
+                          style: ButtonStyles.primaryButton,
+                          onPressed: onPressed,
+                          child: Text(
+                            'Ok',
+                            style: TextStyles.buttonLabel,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      Assets.badgeCheck,
-                      width: 38.25,
-                      height: 38.25,
-                      fit: BoxFit.contain,
+                ),
+
+                // Success Icon that overlaps the top edge
+                Positioned(
+                  top: 0,
+                  child: Container(
+                    width: 91,
+                    height: 91,
+                    decoration: BoxDecoration(
+                      color: ColorManager.secondaryColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: SvgPicture.asset(
+                        Assets.badgeCheck,
+                        width: 38.25,
+                        height: 38.25,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

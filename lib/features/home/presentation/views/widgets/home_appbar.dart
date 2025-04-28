@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 
+import '../../../../../core/helper_functions/get_user.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../notifications/presentation/views/notification_view.dart';
 import '../../../../offers/presentation/views/offers_view.dart';
@@ -71,7 +72,7 @@ class HomeAppbar extends StatelessWidget {
           ),
           elevation: 0,
           title: Text(
-            'Hello Abo Waly 👋',
+            'Hello ${getUser().name} 👋',
             style: TextStyles.description,
           ),
           actions: [

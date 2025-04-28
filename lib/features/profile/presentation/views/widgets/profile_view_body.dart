@@ -3,6 +3,8 @@ import 'package:pharma_now/features/profile/presentation/views/widgets/profile_t
 import 'package:pharma_now/features/profile/presentation/views/widgets/profile_tab/edit_profile_view.dart';
 import 'package:pharma_now/features/profile/presentation/views/widgets/profile_tab/notification_view.dart';
 
+import '../../../../../core/helper_functions/get_user.dart';
+
 class ProfileViewBody extends StatelessWidget {
   const ProfileViewBody({super.key});
 
@@ -57,12 +59,12 @@ class ProfileViewBody extends StatelessWidget {
               ),
               SizedBox(height: 0.01 * height),
               Text(
-                'Mahmodul Hasan',
+                '${getUser().name}',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 0.01 * height),
               Text(
-                'Info.mh@gmail.com',
+                '${getUser().email}',
                 style: TextStyle(fontSize: 16, color: Color(0xff718096)),
               ),
               SizedBox(height: 0.04 * height),
