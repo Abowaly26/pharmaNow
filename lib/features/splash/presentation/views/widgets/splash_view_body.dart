@@ -4,7 +4,7 @@ import 'package:pharma_now/constants.dart';
 import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
-import 'package:pharma_now/features/home/presentation/views/home_view.dart';
+import 'package:pharma_now/features/home/presentation/views/main_view.dart';
 
 import '../../../../../core/services/firebase_auth_service.dart';
 import '../../../../on_boarding/presentation/views/onboarding_view.dart';
@@ -56,7 +56,7 @@ class _SplashViewBodyState extends State<SplashViewBody> {
       if (isOnBoardingViewSeen) {
         var isLoggedIn = FirebaseAuthService().isLoggedIn();
         if (isLoggedIn) {
-          Navigator.pushReplacementNamed(context, HomeView.routeName);
+          Navigator.pushReplacementNamed(context, MainView.routeName);
         } else {
           Navigator.pushReplacementNamed(context, SignInView.routeName);
         }

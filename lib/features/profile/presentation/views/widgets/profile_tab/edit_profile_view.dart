@@ -8,7 +8,7 @@ import '../../../../../../core/utils/button_style.dart';
 import '../../../../../../core/utils/color_manger.dart';
 import '../../../../../../core/widgets/custom_app_bar.dart';
 import '../../../../../../core/widgets/custom_text_field.dart';
-import '../../../../../home/presentation/views/home_view.dart';
+import '../../../../../home/presentation/views/main_view.dart';
 import '../../profile_view.dart';
 import '../profile_view_body.dart';
 import 'CustomButtom.dart';

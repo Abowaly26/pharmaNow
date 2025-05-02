@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pharma_now/features/profile/presentation/views/profile_view.dart';
 
 import '../../features/favorites/presentation/views/favorites.dart';
-import '../../features/home/presentation/views/widgets/home_view_body.dart';
+import '../../features/home/presentation/views/widgets/home_view.dart';
 
 class NavigationBarddd extends StatelessWidget {
   const NavigationBarddd({super.key});
@@ -36,7 +36,7 @@ class _NavState extends State<Nav> {
     ];
 
     final List<Widget> _screens = [
-      const HomeViewBody(), // Replace with your actual home content screen
+      const HomeView(), // Replace with your actual home content screen
       const FavoriteView(),
       // const ChatView(), // This was missing in your original code
       const ProfileView(),

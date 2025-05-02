@@ -8,7 +8,7 @@ import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 import '../../features/auth/presentation/views/forget_password_view.dart';
 import '../../features/auth/presentation/views/verification_view_signup.dart';
 import '../../features/favorites/presentation/views/favorites.dart';
-import '../../features/home/presentation/views/home_view.dart';
+import '../../features/home/presentation/views/main_view.dart';
 import '../../features/home/presentation/views/product_view.dart';
 import '../../features/new products/presentation/views/new_products_view.dart';
 import '../../features/notifications/presentation/views/notification_view.dart';
@@ -40,8 +40,8 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case ResetPasswordView.routeName:
       return MaterialPageRoute(builder: (context) => const ResetPasswordView());
 
-    case HomeView.routeName:
-      return MaterialPageRoute(builder: (context) => const HomeView());
+    case MainView.routeName:
+      return MaterialPageRoute(builder: (context) => const MainView());
 
     case FavoriteView.routeName:
       return MaterialPageRoute(builder: (context) => const FavoriteView());

@@ -4,7 +4,7 @@ import 'package:pharma_now/features/favorites/presentation/views/widgets/favoirt
 
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../../home/presentation/views/home_view.dart';
+import '../../../home/presentation/views/main_view.dart';
 
 class SearchView extends StatelessWidget {
   const SearchView({super.key});

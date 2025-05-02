@@ -1,22 +1,35 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/category_widget.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/new%20_products_list_view_item.dart';
-import 'package:pharma_now/features/home/presentation/views/product_view.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/section_widget.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
-import 'package:pharma_now/features/new%20products/presentation/views/new_products_view.dart';
-import 'package:pharma_now/features/offers/presentation/views/offers_view.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/section_widget.dart';
 
+import '../../../../../core/cubits/medicine_cubit/medicine_cubit.dart';
+import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
+import '../../../../new products/presentation/views/new_products_view.dart';
+import '../../../../offers/presentation/views/offers_view.dart';
 import '../../../../shopping by category/presentation/views/categories_view.dart';
+import '../product_view.dart';
+import 'new _products_list_view_item.dart';
 
-class HomeViewBody extends StatelessWidget {
+class HomeViewBody extends StatefulWidget {
   const HomeViewBody({super.key});
+
+  @override
+  State<HomeViewBody> createState() => _HomeViewBodyState();
+}
+
+class _HomeViewBodyState extends State<HomeViewBody> {
+  @override
+  void initState() {
+    context.read<MedicineCubit>().getMedicines();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

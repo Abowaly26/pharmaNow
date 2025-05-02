@@ -5,7 +5,7 @@ import 'package:pharma_now/features/notifications/presentation/views/widgets/not
 
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../../home/presentation/views/home_view.dart';
+import '../../../home/presentation/views/main_view.dart';
 
 class NotificationView extends StatelessWidget {
   const NotificationView({super.key});
@@ -21,7 +21,7 @@ class NotificationView extends StatelessWidget {
           title: 'Notifications',
           isBack: true,
           onPressed: () {
-            Navigator.pushReplacementNamed(context, HomeView.routeName);
+            Navigator.pushReplacementNamed(context, MainView.routeName);
           },
         ),
       ),

@@ -4,7 +4,7 @@ import 'package:pharma_now/features/favorites/presentation/views/widgets/favoirt
 
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../../home/presentation/views/home_view.dart';
+import '../../../home/presentation/views/main_view.dart';
 
 class CategoriesView extends StatelessWidget {
   const CategoriesView({super.key});
@@ -20,7 +20,7 @@ class CategoriesView extends StatelessWidget {
             title: 'Categories',
             isBack: true,
             onPressed: () {
-              Navigator.pushReplacementNamed(context, HomeView.routeName);
+              Navigator.pushReplacementNamed(context, MainView.routeName);
             }),
       ),
       body: FavoriteViewBody(),

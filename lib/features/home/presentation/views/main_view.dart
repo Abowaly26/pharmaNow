@@ -2,22 +2,22 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/home_appbar.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/home_view_body.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/home_view.dart';
 
 import '../../../../core/utils/color_manger.dart';
 import '../../../favorites/presentation/views/favorites.dart';
 import '../../../profile/presentation/views/profile_view.dart';
 import '../../../search/presentation/views/search_view.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+class MainView extends StatefulWidget {
+  const MainView({super.key});
   static const routeName = 'MyHomePage';
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<MainView> createState() => _MainViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _MainViewState extends State<MainView> {
   int _currentIndex = 0;
 
   final List<Widget> _items = [
@@ -28,7 +28,7 @@ class _HomeViewState extends State<HomeView> {
   ];
 
   final List<Widget> _screens = [
-    const HomeViewBody(),
+    const HomeView(),
     const SearchView(),
     const FavoriteView(),
     const ProfileView(),

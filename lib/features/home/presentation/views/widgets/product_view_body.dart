@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/features/home/presentation/views/home_view.dart';
+import 'package:pharma_now/features/home/presentation/views/main_view.dart';
 import 'package:pharma_now/features/home/presentation/views/product_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/related_product_list_view_item.dart';
 
