@@ -8,14 +8,14 @@ class MedicineEntity {
   final String code;
   final int quantity;
   final bool isNewProduct;
-  final File image;
+
   final num price;
   String? imageUrl;
   final String pharmacyName;
   final int pharmacyId;
   final String pharmcyAddress;
-  final num avgRating = 0;
-  final int ratingCount = 0;
+  final num avgRatting = 0;
+  final int rattingCount = 0;
   final List<ReviewEntity> reviews;
 
   MedicineEntity({
@@ -29,9 +29,7 @@ class MedicineEntity {
     required this.code,
     required this.quantity,
     required this.isNewProduct,
-    required this.image,
     required this.price,
-    required String pharmacyAddress,
     required num sellingCount,
   });
 }

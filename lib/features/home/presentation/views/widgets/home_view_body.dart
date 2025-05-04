@@ -2,11 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/category_list_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/category_widget.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/new_list_view.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/new_medicine_list_view_bloc_builder.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/section_widget.dart';
 
-import '../../../../../core/cubits/medicine_cubit/medicine_cubit.dart';
+import '../../../../../core/cubits/medicines_cubit/medicine_cubit.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
@@ -15,7 +19,7 @@ import '../../../../new products/presentation/views/new_products_view.dart';
 import '../../../../offers/presentation/views/offers_view.dart';
 import '../../../../shopping by category/presentation/views/categories_view.dart';
 import '../product_view.dart';
-import 'new _products_list_view_item.dart';
+import 'new _medicine_list_view_item.dart';
 
 class HomeViewBody extends StatefulWidget {
   const HomeViewBody({super.key});
@@ -25,10 +29,67 @@ class HomeViewBody extends StatefulWidget {
 }
 
 class _HomeViewBodyState extends State<HomeViewBody> {
+  // Controller for the banner PageView
+  late PageController _bannerController;
+  int _currentBannerIndex = 0;
+
+  // Sample banner data - you can replace this with your actual data
+  final List<BannerItem> _banners = [
+    BannerItem(
+      image: Assets.home_bannner,
+      title: 'Discount',
+      discount: '50%',
+      buttonText: 'Buy Now',
+    ),
+    BannerItem(
+      image: Assets.home_bannner, // Replace with other banner images
+      title: 'Special',
+      discount: '30%',
+      buttonText: 'Shop Now',
+    ),
+    BannerItem(
+      image: Assets.home_bannner, // Replace with other banner images
+      title: 'New Arrival',
+      discount: '20%',
+      buttonText: 'Explore',
+    ),
+  ];
+
   @override
   void initState() {
+    _bannerController = PageController(initialPage: 0);
     context.read<MedicineCubit>().getMedicines();
+
+    // Auto-sliding functionality
+    _startAutoSlide();
+
     super.initState();
+  }
+
+  void _startAutoSlide() {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        if (_currentBannerIndex < _banners.length - 1) {
+          _currentBannerIndex++;
+        } else {
+          _currentBannerIndex = 0;
+        }
+
+        _bannerController.animateToPage(
+          _currentBannerIndex,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeIn,
+        );
+
+        _startAutoSlide();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _bannerController.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,57 +100,22 @@ class _HomeViewBodyState extends State<HomeViewBody> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                SizedBox(
-                    width: double.infinity,
-                    child: Image.asset(
-                      Assets.home_bannner,
-                      fit: BoxFit.fill,
-                    )),
-                Positioned(
-                  top: 30,
-                  left: 42,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Discount ',
-                        style: TextStyles.bold24Black,
-                      ),
-                      Text(
-                        '50%',
-                        style: TextStyles.bold24Black
-                            .copyWith(color: ColorManager.redColorF5),
-                      ),
-                      SizedBox(),
-                      ElevatedButton(
-                          style: ButtonStyles.smallButton,
-                          onPressed: () {},
-                          child: Text(
-                            'Buy Now',
-                            style: TextStyles.buttonLabel,
-                          ))
-                    ],
-                  ),
-                )
-              ],
-            ),
-            SectionWidget(
-              sectionTitle: 'Categories',
-              onTap: () {
-                Navigator.pushReplacementNamed(
-                    context, CategoriesView.routeName);
-              },
-            ),
-            _buildCategoriesList(),
+            _buildBannerSlider(),
+            // SectionWidget(
+            //   sectionTitle: 'Categories',
+            //   onTap: () {
+            //     Navigator.pushReplacementNamed(
+            //         context, CategoriesView.routeName);
+            //   },
+            // ),
+            // CategoriesListView(),
             SectionWidget(
               sectionTitle: 'Offers',
               onTap: () {
                 Navigator.pushReplacementNamed(context, OffersView.routeName);
               },
             ),
-            _buildOffersList(),
+            OffersListView(),
             SectionWidget(
               sectionTitle: 'New Products',
               onTap: () {
@@ -97,7 +123,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                     context, NewProductView.routeName);
               },
             ),
-            _buildNewProductsList(),
+            NewMedicineListViewBlocBuilder(),
             SizedBox(
               height: 48,
             )
@@ -107,55 +133,105 @@ class _HomeViewBodyState extends State<HomeViewBody> {
     );
   }
 
-  _buildCategoriesList() {
-    return SizedBox(
-      height: 110.h,
-      child: ListView.builder(
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        itemCount: 5, // Replace with your actual item count
-        itemBuilder: (context, index) => CategoryWidget(
-            // Replace with your actual category data
-            // You'll need to provide actual category data here
+  Widget _buildBannerSlider() {
+    return Column(
+      children: [
+        SizedBox(
+          height: 200.h, // Adjust height as needed
+          child: PageView.builder(
+            controller: _bannerController,
+            itemCount: _banners.length,
+            onPageChanged: (index) {
+              setState(() {
+                _currentBannerIndex = index;
+              });
+            },
+            itemBuilder: (context, index) {
+              return _buildBannerItem(_banners[index]);
+            },
+          ),
+        ),
+        SizedBox(height: 8.h),
+        // Banner indicators
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            _banners.length,
+            (index) => Container(
+              width: 8.w,
+              height: 8.h,
+              margin: EdgeInsets.symmetric(horizontal: 4.w),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _currentBannerIndex == index
+                    ? ColorManager.secondaryColor.withOpacity(0.88)
+                    : ColorManager.colorOfsecondPopUp.withOpacity(0.5),
+              ),
             ),
-      ),
+          ),
+        ),
+      ],
     );
   }
 
-  _buildOffersList() {
-    return SizedBox(
-      height: 168.h,
-      child: ListView.builder(
-        itemCount: 5, // Replace with your actual item count
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) => OffersListViewItem(
-          index: index,
-          isFavorite: true,
-          onTap: () {
-            Navigator.pushReplacementNamed(context, ProductView.routeName);
-          },
-          onFavoritePressed:
-              () {}, // You'll need to provide actual product data here
+  Widget _buildBannerItem(BannerItem banner) {
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          height: 1800.h,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12.r),
+            child: Image.asset(
+              width: double.infinity,
+              banner.image,
+              fit: BoxFit.fill,
+            ),
+          ),
         ),
-      ),
+        Positioned(
+          top: 30,
+          left: 42,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                banner.title,
+                style: TextStyles.bold24Black,
+              ),
+              Text(
+                banner.discount,
+                style: TextStyles.bold24Black
+                    .copyWith(color: ColorManager.redColorF5),
+              ),
+              SizedBox(height: 8.h),
+              ElevatedButton(
+                style: ButtonStyles.smallButton,
+                onPressed: () {},
+                child: Text(
+                  banner.buttonText,
+                  style: TextStyles.buttonLabel,
+                ),
+              )
+            ],
+          ),
+        )
+      ],
     );
   }
+}
 
-  _buildNewProductsList() {
-    return SizedBox(
-      height: 188.h,
-      child: ListView.builder(
-        itemCount: 5, // Replace with your actual item count
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) => NewProductsListViewItem(
-          index: index,
-          isFavorite: true,
-          onFavoritePressed:
-              () {}, // You'll need to provide actual product data here
-        ),
-      ),
-    );
-  }
+// Banner data model
+class BannerItem {
+  final String image;
+  final String title;
+  final String discount;
+  final String buttonText;
+
+  BannerItem({
+    required this.image,
+    required this.title,
+    required this.discount,
+    required this.buttonText,
+  });
 }

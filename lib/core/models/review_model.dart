@@ -3,14 +3,14 @@ import 'package:pharma_now/core/enitites/review_entity.dart';
 class ReviewModel {
   final String name;
   final String image;
-  final num ratting;
+  final num rating;
   final String date;
   final String reviewDescription;
 
   ReviewModel({
     required this.name,
     required this.image,
-    required this.ratting,
+    required this.rating,
     required this.date,
     required this.reviewDescription,
   });
@@ -19,7 +19,7 @@ class ReviewModel {
     return ReviewModel(
       name: reviewEntity.name,
       image: reviewEntity.image,
-      ratting: reviewEntity.rating,
+      rating: reviewEntity.rating,
       date: reviewEntity.date,
       reviewDescription: reviewEntity.reviewDescription,
     );
@@ -27,11 +27,12 @@ class ReviewModel {
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
     return ReviewModel(
-      name: json['name'],
-      image: json['image'],
-      ratting: json['rating'],
-      date: json['date'],
-      reviewDescription: json['reviewDescription'],
+      name: json['name'] ?? '',
+      image: json['image'] ?? '',
+      rating:
+          json['ratting'] ?? 0, // Note: keeping "ratting" as in original code
+      date: json['date'] ?? '',
+      reviewDescription: json['reviewDescription'] ?? '',
     );
   }
 
@@ -39,17 +40,17 @@ class ReviewModel {
     return ReviewEntity(
       name: name,
       image: image,
-      rating: ratting,
+      rating: rating,
       date: date,
       reviewDescription: reviewDescription,
     );
   }
 
-  toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'name': name,
       'image': image,
-      'ratting': ratting,
+      'ratting': rating, // Note: keeping "ratting" as in original code
       'date': date,
       'reviewDescription': reviewDescription,
     };

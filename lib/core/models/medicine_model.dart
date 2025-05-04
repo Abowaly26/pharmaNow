@@ -1,7 +1,6 @@
 import 'dart:io';
-
+import 'package:pharma_now/core/helper_functions/get_avg_rating.dart';
 import 'package:pharma_now/core/models/review_model.dart';
-
 import '../enitites/medicine_entity.dart';
 
 class MedicineModel {
@@ -10,19 +9,18 @@ class MedicineModel {
   final String code;
   final int quantity;
   final bool isNewProduct;
-  final File image;
   final num price;
   String? imageUrl;
   final String pharmacyName;
   final int pharmacyId;
   final String pharmcyAddress;
-  final num avgRating = 0;
+  final num avgRating;
   final int ratingCount = 0;
   final num sellingCount;
-
   final List<ReviewModel> reviews;
 
   MedicineModel({
+    required this.avgRating,
     required this.sellingCount,
     required this.reviews,
     required this.pharmacyName,
@@ -34,27 +32,30 @@ class MedicineModel {
     required this.code,
     required this.quantity,
     required this.isNewProduct,
-    required this.image,
     required this.price,
   });
 
   factory MedicineModel.fromJson(Map<String, dynamic> json) {
+    List<ReviewModel> reviewsList = [];
+    if (json['reviews'] != null) {
+      reviewsList = List<ReviewModel>.from(
+          (json['reviews'] as List).map((e) => ReviewModel.fromJson(e)));
+    }
+
     return MedicineModel(
-      name: json['name'],
-      description: json['description'],
-      code: json['code'],
-      quantity: json['quantity'],
-      isNewProduct: json['isNewProduct'],
-      price: json['price'],
+      avgRating: getAvgRating(reviewsList),
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      code: json['code'] ?? '',
+      quantity: json['quantity'] ?? 0,
+      isNewProduct: json['isNewProduct'] ?? false,
+      price: json['price'] ?? 0,
       imageUrl: json['imageUrl'],
-      pharmacyName: json['pharmacyName'],
-      pharmacyId: json['pharmacyId'],
-      pharmcyAddress: json['pharmcyAddress'],
-      reviews: json['reviews'] != null
-          ? json['reviews'].map((e) => ReviewModel.fromJson(e)) //.toList()
-          : [],
-      sellingCount: json['sellingCount'],
-      image: File(json['image']),
+      pharmacyName: json['pharmacyName'] ?? '',
+      pharmacyId: json['pharmacyId'] ?? 0,
+      pharmcyAddress: json['pharmcyAddress'] ?? '',
+      reviews: reviewsList,
+      sellingCount: json['sellingCount'] ?? 0,
     );
   }
 
@@ -72,12 +73,10 @@ class MedicineModel {
       pharmcyAddress: pharmcyAddress,
       reviews: reviews.map((e) => e.toEntity()).toList(),
       sellingCount: sellingCount,
-      image: image,
-      pharmacyAddress: pharmcyAddress,
     );
   }
 
-  toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'name': name,
       'description': description,
@@ -90,6 +89,7 @@ class MedicineModel {
       'pharmacyId': pharmacyId,
       'pharmcyAddress': pharmcyAddress,
       'reviews': reviews.map((e) => e.toJson()).toList(),
+      'sellingCount': sellingCount,
     };
   }
 }

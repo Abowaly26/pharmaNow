@@ -56,7 +56,7 @@ class HomeAppbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: ColorManager.secondaryColor,
+        color: ColorManager.secondaryColor.withOpacity(0.9),
         borderRadius: BorderRadius.only(
             bottomRight: Radius.circular(35.r),
             bottomLeft: Radius.circular(35.r)),
