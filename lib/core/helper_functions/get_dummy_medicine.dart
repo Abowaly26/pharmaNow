@@ -7,15 +7,16 @@ MedicineEntity getDummyMedicine() {
     name: 'Paracetamol',
     description: 'This is a dummy description',
     code: '123456',
-    quantity: 10,
+    quantity: 0,
     isNewProduct: true,
-    price: 10,
-    imageUrl: null,
+    price: 0,
+    subabaseORImageUrl: null,
     pharmacyName: 'Pharmacy Name',
     pharmacyId: 2288,
     pharmcyAddress: 'Pharmacy Address',
     reviews: [],
     sellingCount: 10,
+    discountRating: 0,
   );
 }
 

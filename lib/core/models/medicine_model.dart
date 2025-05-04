@@ -10,7 +10,7 @@ class MedicineModel {
   final int quantity;
   final bool isNewProduct;
   final num price;
-  String? imageUrl;
+  String? subabaseORImageUrl;
   final String pharmacyName;
   final int pharmacyId;
   final String pharmcyAddress;
@@ -18,15 +18,17 @@ class MedicineModel {
   final int ratingCount = 0;
   final num sellingCount;
   final List<ReviewModel> reviews;
+  final int discountRating;
 
   MedicineModel({
+    required this.discountRating,
     required this.avgRating,
     required this.sellingCount,
     required this.reviews,
     required this.pharmacyName,
     required this.pharmacyId,
     required this.pharmcyAddress,
-    this.imageUrl,
+    this.subabaseORImageUrl,
     required this.name,
     required this.description,
     required this.code,
@@ -43,6 +45,7 @@ class MedicineModel {
     }
 
     return MedicineModel(
+      discountRating: json['discountRating'] ?? 0,
       avgRating: getAvgRating(reviewsList),
       name: json['name'] ?? '',
       description: json['description'] ?? '',
@@ -50,7 +53,7 @@ class MedicineModel {
       quantity: json['quantity'] ?? 0,
       isNewProduct: json['isNewProduct'] ?? false,
       price: json['price'] ?? 0,
-      imageUrl: json['imageUrl'],
+      subabaseORImageUrl: json['subabaseORImageUrl'],
       pharmacyName: json['pharmacyName'] ?? '',
       pharmacyId: json['pharmacyId'] ?? 0,
       pharmcyAddress: json['pharmcyAddress'] ?? '',
@@ -67,12 +70,13 @@ class MedicineModel {
       quantity: quantity,
       isNewProduct: isNewProduct,
       price: price,
-      imageUrl: imageUrl,
+      subabaseORImageUrl: subabaseORImageUrl,
       pharmacyName: pharmacyName,
       pharmacyId: pharmacyId,
       pharmcyAddress: pharmcyAddress,
       reviews: reviews.map((e) => e.toEntity()).toList(),
       sellingCount: sellingCount,
+      discountRating: discountRating,
     );
   }
 
@@ -84,7 +88,7 @@ class MedicineModel {
       'quantity': quantity,
       'isNewProduct': isNewProduct,
       'price': price,
-      'imageUrl': imageUrl,
+      'imageUrl': subabaseORImageUrl,
       'pharmacyName': pharmacyName,
       'pharmacyId': pharmacyId,
       'pharmcyAddress': pharmcyAddress,

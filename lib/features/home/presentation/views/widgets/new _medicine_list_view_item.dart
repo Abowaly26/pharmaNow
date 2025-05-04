@@ -63,7 +63,7 @@ class NewMedicineListViewItem extends StatelessWidget {
             padding: EdgeInsets.all(5.r),
             child: Center(
               child: Image.network(
-                'https://onemg.gumlet.io/l_watermark_346,w_480,h_480/a_ignore,w_480,h_480,c_fit,q_auto,f_auto/cropped/ljalzjzxyy64yutmr3tw.jpg',
+                "${medicineEntity.subabaseORImageUrl}",
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) =>
                     Center(child: Text('No image available')),
