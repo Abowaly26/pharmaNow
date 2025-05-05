@@ -2,28 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
 
+import '../../../../../core/enitites/medicine_entity.dart';
+
 class OffersListView extends StatelessWidget {
   // final int itemCount;
   // final Widget Function(BuildContext, int) itemBuilder;
 
   const OffersListView({
     Key? key,
+    required this.medicines,
     // required this.itemCount,
     // required this.itemBuilder,
   }) : super(key: key);
-
+  final List<MedicineEntity> medicines;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 168.h,
+      height: 188.h,
       child: ListView.builder(
-        itemCount: 13,
+        itemCount: medicines.length,
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) => OffersListViewItem(
           index: index,
           isFavorite: false,
           onFavoritePressed: () {},
+          medicineEntity: medicines[index],
         ),
       ),
     );

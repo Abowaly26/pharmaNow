@@ -99,7 +99,7 @@ class TextStyles {
       color: ColorManager.blackColor);
 
   static TextStyle sectionTitle = TextStyle(
-      fontSize: 16.sp,
+      fontSize: 14.sp,
       fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
       color: ColorManager.blackColor);

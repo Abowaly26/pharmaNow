@@ -49,4 +49,26 @@ class MedicineRepoImpl extends MedicineRepo {
           'An error occurred on the server. Please try again later.'));
     }
   }
+
+  @override
+  Future<Either<Failures, List<MedicineEntity>>> getMedicinesoffers() async {
+    try {
+      var data = await databaseService.getData(
+        path: BackendEndpoint.getMedicines,
+      ) as List<Map<String, dynamic>>;
+
+      List<MedicineModel> medicineModels =
+          data.map((e) => MedicineModel.fromJson(e)).toList();
+
+      List<MedicineEntity> medicines = medicineModels
+          .where((medicine) => medicine.discountRating > 0)
+          .map((model) => model.toEntity())
+          .toList();
+
+      return Right(medicines);
+    } catch (e) {
+      return left(ServerFailure(
+          'An error occurred on the server. Please try again later.'));
+    }
+  }
 }

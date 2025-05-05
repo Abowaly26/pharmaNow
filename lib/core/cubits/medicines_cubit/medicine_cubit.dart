@@ -31,4 +31,14 @@ class MedicineCubit extends Cubit<MedicineState> {
       (medicines) => emit(MedicineSuccess(medicines)),
     );
   }
+
+  Future<void> getMedicinesoffers() async {
+    emit(MedicineLoading());
+    final result = await medicineRepo.getMedicinesoffers();
+
+    result.fold(
+      (failure) => emit(MedicineFailure(failure.message)),
+      (medicines) => emit(MedicineSuccess(medicines)),
+    );
+  }
 }

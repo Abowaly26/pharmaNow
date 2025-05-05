@@ -1,0 +1,21 @@
+import 'package:flutter/cupertino.dart';
+import 'package:pharma_now/core/enitites/medicine_entity.dart';
+
+class CustomNetworkImage extends StatelessWidget {
+  const CustomNetworkImage({
+    super.key,
+    required this.imageUrl,
+  });
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) =>
+          Center(child: Text('No image available')),
+    );
+  }
+}

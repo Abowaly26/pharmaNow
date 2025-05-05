@@ -1,50 +1,47 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pharma_now/core/utils/app_images.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/widgets/custom_network_image.dart';
 
-class OffersListViewItem extends StatelessWidget {
+class BestSellingListViewItem extends StatelessWidget {
   final int index;
   final bool isFavorite;
   final VoidCallback onFavoritePressed;
-  final Function()? onTap;
   final MedicineEntity medicineEntity;
 
-  const OffersListViewItem({
+  const BestSellingListViewItem({
     super.key,
     required this.index,
     required this.isFavorite,
     required this.onFavoritePressed,
-    this.onTap,
     required this.medicineEntity,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsetsDirectional.only(end: 11.w),
-        child: Column(
-          children: [
-            _buildTopContainer(),
-            _buildBottomContainer(),
-          ],
-        ),
+    return Padding(
+      padding: EdgeInsetsDirectional.only(end: 12.w),
+      child: Column(
+        children: [
+          _buildTopContainer(),
+          _buildBottomContainer(),
+        ],
       ),
     );
   }
 
   Widget _buildTopContainer() {
     return Container(
-      width: 161.w,
+      width: 162.w,
       height: 90.h,
       decoration: BoxDecoration(
-        color: index.isEven
+        color: index.isOdd
             ? ColorManager.lightBlueColorF5C
             : ColorManager.lightGreenColorF5C,
         borderRadius: BorderRadius.only(
@@ -66,45 +63,31 @@ class OffersListViewItem extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
-              child: Image.network(
-                'https://via.placeholder.com/150',
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    Center(child: Text('No image available')),
-              ),
+              child: medicineEntity.subabaseORImageUrl == null
+                  ? Container(
+                      color: ColorManager.textInputColor,
+                      height: 80.h,
+                      width: 73.w,
+                    )
+                  : Flexible(
+                      child: CustomNetworkImage(
+                        imageUrl: medicineEntity.subabaseORImageUrl ?? '',
+                      ),
+                    ),
             ),
           ),
 
-          // Discount banner
+          // "New" banner
           Positioned(
-            top: 8.h,
+            top: 0,
             left: 0,
-            child: Stack(
-              alignment: Alignment.centerLeft,
-              children: [
-                SvgPicture.asset(
-                  Assets.gold_banner,
-                  height: 24.h,
-                  width: 48.w,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: 1.h,
-                    left: 20.0.h,
-                  ),
-                  child: Text(
-                    "50%",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
+            child: medicineEntity.isNewProduct
+                ? SvgPicture.asset(
+                    Assets.bannerNewProduct,
+                    height: 80.h,
+                    width: 106.w,
+                  )
+                : Container(),
           ),
 
           // Favorite icon
@@ -127,7 +110,7 @@ class OffersListViewItem extends StatelessWidget {
 
   Widget _buildBottomContainer() {
     return Container(
-      width: 161.w,
+      width: 162.w,
       height: 90.h,
       decoration: BoxDecoration(
         color: ColorManager.buttom_info,
@@ -152,44 +135,44 @@ class OffersListViewItem extends StatelessWidget {
             SizedBox(
               width: 175.w,
               child: Text(
-                medicineEntity.name ?? 'Product Name',
+                medicineEntity.name ?? 'Medicine Name',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyles.listView_product_name,
               ),
             ),
             Text(
-              'Category',
+              medicineEntity.pharmacyName ?? 'Pharmacy Name',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyles.listView_product_subInf,
             ),
             Spacer(),
-            Padding(
-              padding: EdgeInsets.only(left: 4.r),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '\$19.99',
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    ' ${medicineEntity.price} EGP',
                     style: TextStyles.listView_product_name
-                        .copyWith(fontSize: 12.sp, color: Color(0xFF20B83A)),
+                        .copyWith(fontSize: 10.sp, color: Color(0xFF20B83A)),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 8.r),
-                    child: GestureDetector(
-                      onTap: () {
-                        // Add to cart functionality
-                      },
-                      child: SvgPicture.asset(
-                        Assets.cart,
-                        width: 32.w,
-                        height: 32.h,
-                      ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 8.r),
+                  child: GestureDetector(
+                    onTap: () {
+                      // Add to cart functionality
+                    },
+                    child: SvgPicture.asset(
+                      Assets.cart,
+                      width: 32.w,
+                      height: 32.h,
                     ),
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             )
           ],
         ),

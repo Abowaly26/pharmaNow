@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/features/home/presentation/views/main_view.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/product_view_body.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/medicine_details_view_body.dart';
 
 import '../../../../core/utils/app_images.dart';
 

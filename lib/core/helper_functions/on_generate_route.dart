@@ -9,7 +9,7 @@ import '../../features/auth/presentation/views/forget_password_view.dart';
 import '../../features/auth/presentation/views/verification_view_signup.dart';
 import '../../features/favorites/presentation/views/favorites.dart';
 import '../../features/home/presentation/views/main_view.dart';
-import '../../features/home/presentation/views/product_view.dart';
+import '../../features/home/presentation/views/medicine_details_view.dart';
 import '../../features/new products/presentation/views/new_products_view.dart';
 import '../../features/notifications/presentation/views/notification_view.dart';
 import '../../features/offers/presentation/views/offers_view.dart';

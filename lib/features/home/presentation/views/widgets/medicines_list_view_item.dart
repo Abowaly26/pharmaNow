@@ -8,13 +8,13 @@ import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
 
-class NewMedicineListViewItem extends StatelessWidget {
+class MedicineListViewItem extends StatelessWidget {
   final int index;
   final bool isFavorite;
   final VoidCallback onFavoritePressed;
   final MedicineEntity medicineEntity;
 
-  const NewMedicineListViewItem({
+  const MedicineListViewItem({
     super.key,
     required this.index,
     required this.isFavorite,
@@ -37,7 +37,7 @@ class NewMedicineListViewItem extends StatelessWidget {
 
   Widget _buildTopContainer() {
     return Container(
-      width: 163.w,
+      width: 162.w,
       height: 90.h,
       decoration: BoxDecoration(
         color: index.isOdd
@@ -63,7 +63,7 @@ class NewMedicineListViewItem extends StatelessWidget {
             padding: EdgeInsets.all(5.r),
             child: Center(
               child: Image.network(
-                "${medicineEntity.subabaseORImageUrl}",
+                medicineEntity.subabaseORImageUrl ?? '',
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) =>
                     Center(child: Text('No image available')),
@@ -75,11 +75,13 @@ class NewMedicineListViewItem extends StatelessWidget {
           Positioned(
             top: 0,
             left: 0,
-            child: SvgPicture.asset(
-              Assets.bannerNewProduct,
-              height: 80.h,
-              width: 106.w,
-            ),
+            child: medicineEntity.isNewProduct
+                ? SvgPicture.asset(
+                    Assets.bannerNewProduct,
+                    height: 80.h,
+                    width: 106.w,
+                  )
+                : Container(),
           ),
 
           // Favorite icon
@@ -102,7 +104,7 @@ class NewMedicineListViewItem extends StatelessWidget {
 
   Widget _buildBottomContainer() {
     return Container(
-      width: 163.w,
+      width: 162.w,
       height: 90.h,
       decoration: BoxDecoration(
         color: ColorManager.buttom_info,
@@ -127,7 +129,7 @@ class NewMedicineListViewItem extends StatelessWidget {
             SizedBox(
               width: 175.w,
               child: Text(
-                'Alex Junior',
+                medicineEntity.name ?? 'Product Name',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyles.listView_product_name,
@@ -140,31 +142,31 @@ class NewMedicineListViewItem extends StatelessWidget {
               style: TextStyles.listView_product_subInf,
             ),
             Spacer(),
-            Padding(
-              padding: EdgeInsets.only(left: 7.r),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '\$19.99',
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    '${medicineEntity.price} EGP',
                     style: TextStyles.listView_product_name
-                        .copyWith(fontSize: 12.sp),
+                        .copyWith(fontSize: 10.sp, color: Color(0xFF20B83A)),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 8.r),
-                    child: GestureDetector(
-                      onTap: () {
-                        // Add to cart functionality
-                      },
-                      child: SvgPicture.asset(
-                        Assets.cart,
-                        width: 32.w,
-                        height: 32.h,
-                      ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 8.r),
+                  child: GestureDetector(
+                    onTap: () {
+                      // Add to cart functionality
+                    },
+                    child: SvgPicture.asset(
+                      Assets.cart,
+                      width: 32.w,
+                      height: 32.h,
                     ),
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             )
           ],
         ),

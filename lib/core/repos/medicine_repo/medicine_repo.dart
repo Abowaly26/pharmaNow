@@ -6,4 +6,5 @@ import '../../errors/failures.dart';
 abstract class MedicineRepo {
   Future<Either<Failures, List<MedicineEntity>>> getMedicines();
   Future<Either<Failures, List<MedicineEntity>>> getBestSellingMedicines();
+  Future<Either<Failures, List<MedicineEntity>>> getMedicinesoffers();
 }

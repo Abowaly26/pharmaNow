@@ -30,5 +30,8 @@ List<MedicineEntity> getDummyMedicines() {
     getDummyMedicine(),
     getDummyMedicine(),
     getDummyMedicine(),
+    getDummyMedicine(),
+    getDummyMedicine(),
+    getDummyMedicine(),
   ];
 }

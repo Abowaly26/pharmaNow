@@ -4,8 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/category_list_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/category_widget.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/new_list_view.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/new_medicine_list_view_bloc_builder.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view_bloc_builder.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_bloc_builder.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/section_widget.dart';
@@ -18,8 +19,10 @@ import '../../../../../core/utils/text_style.dart';
 import '../../../../new products/presentation/views/new_products_view.dart';
 import '../../../../offers/presentation/views/offers_view.dart';
 import '../../../../shopping by category/presentation/views/categories_view.dart';
-import '../product_view.dart';
-import 'new _medicine_list_view_item.dart';
+import '../medicine_details_view.dart';
+import 'best_selling_list_view.dart';
+import 'best_selling_list_view_bloc_builder.dart';
+import 'medicines_list_view_item.dart';
 
 class HomeViewBody extends StatefulWidget {
   const HomeViewBody({super.key});
@@ -59,6 +62,8 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   void initState() {
     _bannerController = PageController(initialPage: 0);
     context.read<MedicineCubit>().getMedicines();
+    context.read<MedicineCubit>().getBestSellingMedicines();
+    context.read<MedicineCubit>().getMedicinesoffers();
 
     // Auto-sliding functionality
     _startAutoSlide();
@@ -95,7 +100,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.w),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,21 +114,35 @@ class _HomeViewBodyState extends State<HomeViewBody> {
             //   },
             // ),
             // CategoriesListView(),
+
+            SectionWidget(
+              sectionTitle: 'Best selling',
+              onTap: () {
+                Navigator.pushReplacementNamed(context, OffersView.routeName);
+              },
+            ),
+
+            BestSellingListViewBlocBuilder(),
             SectionWidget(
               sectionTitle: 'Offers',
               onTap: () {
                 Navigator.pushReplacementNamed(context, OffersView.routeName);
               },
             ),
-            OffersListView(),
+
+            OffersListViewBlocBuilder(),
+            SizedBox(
+              height: 8,
+            ),
+
             SectionWidget(
-              sectionTitle: 'New Products',
+              sectionTitle: 'Medicines',
               onTap: () {
                 Navigator.pushReplacementNamed(
                     context, NewProductView.routeName);
               },
             ),
-            NewMedicineListViewBlocBuilder(),
+            MedicineListViewBlocBuilder(),
             SizedBox(
               height: 48,
             )

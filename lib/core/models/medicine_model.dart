@@ -38,29 +38,31 @@ class MedicineModel {
   });
 
   factory MedicineModel.fromJson(Map<String, dynamic> json) {
-    List<ReviewModel> reviewsList = [];
-    if (json['reviews'] != null) {
-      reviewsList = List<ReviewModel>.from(
-          (json['reviews'] as List).map((e) => ReviewModel.fromJson(e)));
-    }
-
     return MedicineModel(
       discountRating: json['discountRating'] ?? 0,
-      avgRating: getAvgRating(reviewsList),
+      avgRating: getAvgRating(json['reviews'] != null
+          ? List<ReviewModel>.from(
+              json['reviews'].map((e) => ReviewModel.fromJson(e)))
+          : []),
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       code: json['code'] ?? '',
       quantity: json['quantity'] ?? 0,
       isNewProduct: json['isNewProduct'] ?? false,
       price: json['price'] ?? 0,
-      subabaseORImageUrl: json['subabaseORImageUrl'],
+      subabaseORImageUrl: json['subabaseImageUrl'],
       pharmacyName: json['pharmacyName'] ?? '',
       pharmacyId: json['pharmacyId'] ?? 0,
       pharmcyAddress: json['pharmcyAddress'] ?? '',
-      reviews: reviewsList,
+      reviews: json['reviews'] != null
+          ? List<ReviewModel>.from(
+              json['reviews'].map((e) => ReviewModel.fromJson(e)))
+          : [],
       sellingCount: json['sellingCount'] ?? 0,
     );
   }
+
+  get discountRate => null;
 
   MedicineEntity toEntity() {
     return MedicineEntity(
@@ -77,6 +79,8 @@ class MedicineModel {
       reviews: reviews.map((e) => e.toEntity()).toList(),
       sellingCount: sellingCount,
       discountRating: discountRating,
+      avgRating: avgRating,
+      ratingCount: ratingCount,
     );
   }
 
@@ -88,12 +92,13 @@ class MedicineModel {
       'quantity': quantity,
       'isNewProduct': isNewProduct,
       'price': price,
-      'imageUrl': subabaseORImageUrl,
+      'subabaseORImageUrl': subabaseORImageUrl,
       'pharmacyName': pharmacyName,
       'pharmacyId': pharmacyId,
       'pharmcyAddress': pharmcyAddress,
       'reviews': reviews.map((e) => e.toJson()).toList(),
       'sellingCount': sellingCount,
+      'discountRating': discountRating,
     };
   }
 }
