@@ -10,9 +10,9 @@ import '../../features/auth/presentation/views/verification_view_signup.dart';
 import '../../features/favorites/presentation/views/favorites.dart';
 import '../../features/home/presentation/views/main_view.dart';
 import '../../features/home/presentation/views/medicine_details_view.dart';
-import '../../features/new products/presentation/views/new_products_view.dart';
+import '../../features/info_medicines/presentation/views/info_medicines_view.dart';
 import '../../features/notifications/presentation/views/notification_view.dart';
-import '../../features/offers/presentation/views/offers_view.dart';
+import '../../features/offers/presentation/views/info_offers_view.dart';
 import '../../features/on_boarding/presentation/views/onboarding_view.dart';
 import '../../features/profile/presentation/views/profile_view.dart';
 import '../../features/profile/presentation/views/widgets/profile_tab/edit_profile_view.dart';
@@ -46,8 +46,8 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case FavoriteView.routeName:
       return MaterialPageRoute(builder: (context) => const FavoriteView());
 
-    case NewProductView.routeName:
-      return MaterialPageRoute(builder: (context) => const NewProductView());
+    case InfoMedicinesView.routeName:
+      return MaterialPageRoute(builder: (context) => const InfoMedicinesView());
 
     case NotificationView.routeName:
       return MaterialPageRoute(builder: (context) => const NotificationView());

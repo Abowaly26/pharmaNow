@@ -5,7 +5,7 @@ import 'package:pharma_now/core/services/firebase_auth_service.dart';
 import 'package:pharma_now/core/services/firestore_sevice.dart';
 import 'package:pharma_now/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
-
+import 'package:pharma_now/features/search/presentation/cubit/cubit/search_cubit.dart';
 import '../repos/medicine_repo/medicine_repo_impl.dart';
 
 final getIt = GetIt.instance;
@@ -17,8 +17,10 @@ void setupGetit() {
     firebaseAuthService: getIt<FirebaseAuthService>(),
     databaseService: getIt<DatabaseService>(),
   ));
-
   getIt.registerSingleton<MedicineRepo>(MedicineRepoImpl(
     getIt<DatabaseService>(),
   ));
+
+  // Register SearchCubit
+  getIt.registerFactory<SearchCubit>(() => SearchCubit(getIt<MedicineRepo>()));
 }

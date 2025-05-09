@@ -2,27 +2,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/category_list_view.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/category_widget.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view.dart';
+
 import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view_bloc_builder.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_bloc_builder.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/section_widget.dart';
 
+import '../../../../../core/cubits/best_selling_cubit/best_selling_cubit.dart';
 import '../../../../../core/cubits/medicines_cubit/medicine_cubit.dart';
+import '../../../../../core/cubits/offers_cubit/offers_cubit.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
-import '../../../../new products/presentation/views/new_products_view.dart';
-import '../../../../offers/presentation/views/offers_view.dart';
-import '../../../../shopping by category/presentation/views/categories_view.dart';
-import '../medicine_details_view.dart';
-import 'best_selling_list_view.dart';
+import '../../../../info_medicines/presentation/views/info_medicines_view.dart';
+import '../../../../offers/presentation/views/info_offers_view.dart';
 import 'best_selling_list_view_bloc_builder.dart';
-import 'medicines_list_view_item.dart';
 
 class HomeViewBody extends StatefulWidget {
   const HomeViewBody({super.key});
@@ -35,6 +29,9 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   // Controller for the banner PageView
   late PageController _bannerController;
   int _currentBannerIndex = 0;
+
+  // For refreshing state control
+  final RefreshController _refreshController = RefreshController();
 
   // Sample banner data - you can replace this with your actual data
   final List<BannerItem> _banners = [
@@ -61,14 +58,30 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   @override
   void initState() {
     _bannerController = PageController(initialPage: 0);
-    context.read<MedicineCubit>().getMedicines();
-    context.read<MedicineCubit>().getBestSellingMedicines();
-    context.read<MedicineCubit>().getMedicinesoffers();
-
+    _loadData();
     // Auto-sliding functionality
     _startAutoSlide();
 
     super.initState();
+  }
+
+  // Function to load data
+  void _loadData() {
+    context.read<MedicinesCubit>().getMedicines();
+    context.read<BestSellingCubit>().getBestSellingMedicines();
+    context.read<OffersCubit>().getMedicinesoffers();
+  }
+
+  // Function to handle refresh event
+  Future<void> _onRefresh() async {
+    // Reload all data
+    _loadData();
+
+    // Wait to complete the refresh (adjust time as needed)
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    // Complete refresh and stop loading indicator
+    _refreshController.refreshCompleted();
   }
 
   void _startAutoSlide() {
@@ -94,6 +107,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   @override
   void dispose() {
     _bannerController.dispose();
+    _refreshController.dispose();
     super.dispose();
   }
 
@@ -101,52 +115,66 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.w),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildBannerSlider(),
-            // SectionWidget(
-            //   sectionTitle: 'Categories',
-            //   onTap: () {
-            //     Navigator.pushReplacementNamed(
-            //         context, CategoriesView.routeName);
-            //   },
-            // ),
-            // CategoriesListView(),
+      child: SmartRefresher(
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        header: const WaterDropHeader(
+          waterDropColor: ColorManager.secondaryColor,
+          complete: Icon(Icons.check, color: ColorManager.secondaryColor),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildBannerSlider(),
+              SectionWidget(
+                sectionTitle: 'Offers',
+                onTap: () {
+                  Navigator.pushReplacementNamed(context, OffersView.routeName);
+                },
+              ),
+              OffersListViewBlocBuilder(),
+              SizedBox(
+                height: 8,
+              ),
+              SectionWidget(
+                sectionTitle: 'Medicines',
+                onTap: () {
+                  Navigator.pushReplacementNamed(
+                      context, InfoMedicinesView.routeName);
+                },
+              ),
+              MedicineListViewBlocBuilder(),
 
-            SectionWidget(
-              sectionTitle: 'Best selling',
-              onTap: () {
-                Navigator.pushReplacementNamed(context, OffersView.routeName);
-              },
-            ),
-
-            BestSellingListViewBlocBuilder(),
-            SectionWidget(
-              sectionTitle: 'Offers',
-              onTap: () {
-                Navigator.pushReplacementNamed(context, OffersView.routeName);
-              },
-            ),
-
-            OffersListViewBlocBuilder(),
-            SizedBox(
-              height: 8,
-            ),
-
-            SectionWidget(
-              sectionTitle: 'Medicines',
-              onTap: () {
-                Navigator.pushReplacementNamed(
-                    context, NewProductView.routeName);
-              },
-            ),
-            MedicineListViewBlocBuilder(),
-            SizedBox(
-              height: 48,
-            )
-          ],
+              // Best selling section with BlocBuilder to check data availability
+              BlocBuilder<BestSellingCubit, BestSellingState>(
+                builder: (context, state) {
+                  if (state is BestSellingSuccess &&
+                      state.medicines.isNotEmpty) {
+                    // Show best selling section only if data exists
+                    return Column(
+                      children: [
+                        SectionWidget(
+                          sectionTitle: 'Best selling',
+                          onTap: () {
+                            Navigator.pushReplacementNamed(
+                                context, OffersView.routeName);
+                          },
+                        ),
+                        BestSellingListViewBlocBuilder(),
+                      ],
+                    );
+                  } else {
+                    // If no data, don't show anything
+                    return SizedBox();
+                  }
+                },
+              ),
+              SizedBox(
+                height: 48,
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -253,4 +281,100 @@ class BannerItem {
     required this.discount,
     required this.buttonText,
   });
+}
+
+// Custom refresh controller class
+class RefreshController extends ChangeNotifier {
+  bool _isRefreshing = false;
+  bool _isLoading = false;
+
+  bool get isRefreshing => _isRefreshing;
+  bool get isLoading => _isLoading;
+
+  void refreshCompleted() {
+    _isRefreshing = false;
+    notifyListeners();
+  }
+
+  void loadComplete() {
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void refreshFailed() {
+    _isRefreshing = false;
+    notifyListeners();
+  }
+
+  void loadFailed() {
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void requestRefresh() {
+    if (_isRefreshing) return;
+    _isRefreshing = true;
+    notifyListeners();
+  }
+
+  void requestLoading() {
+    if (_isLoading) return;
+    _isLoading = true;
+    notifyListeners();
+  }
+
+  void dispose() {
+    super.dispose();
+  }
+}
+
+// Custom pull-to-refresh widget
+class SmartRefresher extends StatefulWidget {
+  final Widget child;
+  final RefreshController controller;
+  final Future<void> Function() onRefresh;
+  final Widget header;
+
+  const SmartRefresher({
+    Key? key,
+    required this.child,
+    required this.controller,
+    required this.onRefresh,
+    required this.header,
+  }) : super(key: key);
+
+  @override
+  State<SmartRefresher> createState() => _SmartRefresherState();
+}
+
+class _SmartRefresherState extends State<SmartRefresher> {
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () async => await widget.onRefresh(),
+      backgroundColor: Colors.white,
+      color: ColorManager.secondaryColor,
+      displacement: 20.0,
+      strokeWidth: 2.5,
+      child: widget.child,
+    );
+  }
+}
+
+// Custom water drop header widget
+class WaterDropHeader extends StatelessWidget {
+  final Color waterDropColor;
+  final Widget complete;
+
+  const WaterDropHeader({
+    Key? key,
+    required this.waterDropColor,
+    required this.complete,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox
+        .shrink(); // Hide this element as we're using built-in RefreshIndicator
+  }
 }

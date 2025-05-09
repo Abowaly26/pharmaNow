@@ -45,7 +45,7 @@ class _MainViewState extends State<MainView> {
             backgroundColor: ColorManager.primaryColor,
             appBar: _currentIndex == 0
                 ? PreferredSize(
-                    preferredSize: Size.fromHeight(104.h),
+                    preferredSize: Size.fromHeight(80.h),
                     child: HomeAppbar(),
                   )
                 : null,
@@ -56,8 +56,8 @@ class _MainViewState extends State<MainView> {
                 iconTheme: const IconThemeData(color: Colors.white),
               ),
               child: CurvedNavigationBar(
-                color: Color(0xFF4046FF),
-                buttonBackgroundColor: Color(0xFF4046FF),
+                color: Color(0xFF5555FF),
+                buttonBackgroundColor: Color(0xFF5555FF),
                 backgroundColor: Colors.transparent,
                 height: 58,
                 animationCurve: Curves.bounceInOut,

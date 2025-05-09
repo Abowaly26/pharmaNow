@@ -2,12 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 
 import '../../../../../core/enitites/medicine_entity.dart';
+import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
-import '../../../../../core/widgets/custom_network_image.dart';
 
 class BestSellingListViewItem extends StatelessWidget {
   final int index;
@@ -53,7 +52,7 @@ class BestSellingListViewItem extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
             blurRadius: 6,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -69,14 +68,20 @@ class BestSellingListViewItem extends StatelessWidget {
                       height: 80.h,
                       width: 73.w,
                     )
-                  : Flexible(
-                      child: CustomNetworkImage(
-                        imageUrl: medicineEntity.subabaseORImageUrl ?? '',
+                  : Image.network(
+                      medicineEntity.subabaseORImageUrl!,
+                      fit: BoxFit.contain,
+                      height: 80.h,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: ColorManager.textInputColor,
+                        height: 80.h,
+                        width: 73.w,
+                        child: const Center(child: Text('Image Error')),
                       ),
                     ),
             ),
           ),
-
           // "New" banner
           Positioned(
             top: 0,
@@ -89,7 +94,6 @@ class BestSellingListViewItem extends StatelessWidget {
                   )
                 : Container(),
           ),
-
           // Favorite icon
           Positioned(
             top: 8.h,
@@ -122,7 +126,7 @@ class BestSellingListViewItem extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
             blurRadius: 6,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -135,28 +139,28 @@ class BestSellingListViewItem extends StatelessWidget {
             SizedBox(
               width: 175.w,
               child: Text(
-                medicineEntity.name ?? 'Medicine Name',
+                medicineEntity.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyles.listView_product_name,
               ),
             ),
             Text(
-              medicineEntity.pharmacyName ?? 'Pharmacy Name',
+              medicineEntity.pharmacyName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyles.listView_product_subInf,
             ),
-            Spacer(),
+            const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    ' ${medicineEntity.price} EGP',
-                    style: TextStyles.listView_product_name
-                        .copyWith(fontSize: 10.sp, color: Color(0xFF20B83A)),
+                    '${medicineEntity.price} EGP',
+                    style: TextStyles.listView_product_name.copyWith(
+                        fontSize: 10.sp, color: const Color(0xFF20B83A)),
                   ),
                 ),
                 Padding(

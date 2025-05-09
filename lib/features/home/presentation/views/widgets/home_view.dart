@@ -11,9 +11,11 @@ import 'package:pharma_now/features/home/presentation/views/widgets/medicines_li
 import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/section_widget.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
-import 'package:pharma_now/features/new%20products/presentation/views/new_products_view.dart';
-import 'package:pharma_now/features/offers/presentation/views/offers_view.dart';
+import 'package:pharma_now/features/info_medicines/presentation/views/info_medicines_view.dart';
+import 'package:pharma_now/features/offers/presentation/views/info_offers_view.dart';
 
+import '../../../../../core/cubits/best_selling_cubit/best_selling_cubit.dart';
+import '../../../../../core/cubits/offers_cubit/offers_cubit.dart';
 import '../../../../../core/services/get_it_service.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
@@ -25,10 +27,18 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MedicineCubit(
-        getIt.get<MedicineRepo>(),
-      ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => MedicinesCubit(getIt.get<MedicineRepo>()),
+        ),
+        BlocProvider(
+          create: (context) => BestSellingCubit(getIt.get<MedicineRepo>()),
+        ),
+        BlocProvider(
+          create: (context) => OffersCubit(getIt.get<MedicineRepo>()),
+        ),
+      ],
       child: const HomeViewBody(),
     );
   }

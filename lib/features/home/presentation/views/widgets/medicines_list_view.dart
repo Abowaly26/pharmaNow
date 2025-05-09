@@ -3,13 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view_item.dart';
 
-class MedicineListView extends StatelessWidget {
+class MedicinesListView extends StatelessWidget {
   // final int itemCount;
   // final Widget Function(BuildContext, int) itemBuilder;
 
   final List<MedicineEntity> medicines;
 
-  const MedicineListView({
+  const MedicinesListView({
     Key? key,
     required this.medicines,
     // required this.itemCount,

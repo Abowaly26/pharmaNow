@@ -30,7 +30,6 @@ class BestSellingListView extends StatelessWidget {
                 index: index,
                 isFavorite: false,
                 onFavoritePressed: () {},
-                // medicineEntity: medicines[index],
               )),
     );
   }

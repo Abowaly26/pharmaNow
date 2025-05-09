@@ -60,4 +60,49 @@ class FireStoreSevice implements DatabaseService {
     var data = await firestore.collection(path).doc(docuementId).get();
     return data.exists;
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> searchMedicines({
+    required String path,
+    required String query,
+  }) async {
+    // If query is empty, return empty list
+    if (query.isEmpty || query.trim().isEmpty) {
+      return [];
+    }
+
+    try {
+      // Clean the query for better search
+      String searchQuery = query.trim().toLowerCase();
+
+      // Get all medicines from collection
+      final QuerySnapshot snapshot = await firestore.collection(path).get();
+
+      // Local filtering for more flexible search
+      final List<Map<String, dynamic>> results = [];
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final String name = (data['name'] ?? '').toString().toLowerCase();
+        final String description =
+            (data['description'] ?? '').toString().toLowerCase();
+        final String code = (data['code'] ?? '').toString().toLowerCase();
+
+        // Check if any of the fields contain our search query
+        if (name.contains(searchQuery) ||
+            description.contains(searchQuery) ||
+            code.contains(searchQuery)) {
+          // Add document ID to the data for reference
+          final Map<String, dynamic> result = {...data};
+          result['id'] = doc.id;
+          results.add(result);
+        }
+      }
+
+      return results;
+    } catch (error) {
+      print('Search error: $error');
+      throw Exception('Search error : $error');
+    }
+  }
 }

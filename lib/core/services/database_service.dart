@@ -13,4 +13,7 @@ abstract class DatabaseService {
 
   Future<bool> checkIfDataExist(
       {required String path, required String docuementId});
+
+  Future<List<Map<String, dynamic>>> searchMedicines(
+      {required String path, required String query});
 }

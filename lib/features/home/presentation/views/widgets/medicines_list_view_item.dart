@@ -7,6 +7,7 @@ import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 
 class MedicineListViewItem extends StatelessWidget {
   final int index;
@@ -58,22 +59,31 @@ class MedicineListViewItem extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Product Image
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
-              child: Image.network(
-                medicineEntity.subabaseORImageUrl ?? '',
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    Center(child: Text('No image available')),
-              ),
+              child: medicineEntity.subabaseORImageUrl == null
+                  ? Container(
+                      color: ColorManager.textInputColor.withOpacity(0.2),
+                      height: 80.h,
+                      width: 80.w,
+                    )
+                  : Image.network(
+                      medicineEntity.subabaseORImageUrl!,
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return _buildLoadingAnimation();
+                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(child: Text('No image available')),
+                    ),
             ),
           ),
-
-          // "New" banner
+          // Banner logic - Show either New banner OR Discount banner
+          // Priority: 1. New product banner, 2. Discount banner, 3. No banner
           Positioned(
-            top: 0,
+            top: medicineEntity.isNewProduct ? 0 : 8.h,
             left: 0,
             child: medicineEntity.isNewProduct
                 ? SvgPicture.asset(
@@ -81,7 +91,35 @@ class MedicineListViewItem extends StatelessWidget {
                     height: 80.h,
                     width: 106.w,
                   )
-                : Container(),
+                : (medicineEntity.discountRating != null &&
+                        medicineEntity.discountRating > 0)
+                    ? Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          SvgPicture.asset(
+                            Assets.gold_banner,
+                            height: 24.h,
+                            width: 48.w,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 1.h,
+                              left: 20.0.h,
+                            ),
+                            child: Text(
+                              "${medicineEntity.discountRating}%",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(), // No banner if neither new nor has discount
           ),
 
           // Favorite icon
@@ -104,7 +142,7 @@ class MedicineListViewItem extends StatelessWidget {
 
   Widget _buildBottomContainer() {
     return Container(
-      width: 162.w,
+      width: 161.w,
       height: 90.h,
       decoration: BoxDecoration(
         color: ColorManager.buttom_info,
@@ -116,7 +154,7 @@ class MedicineListViewItem extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
             blurRadius: 6,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -129,48 +167,84 @@ class MedicineListViewItem extends StatelessWidget {
             SizedBox(
               width: 175.w,
               child: Text(
-                medicineEntity.name ?? 'Product Name',
+                medicineEntity.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyles.listView_product_name,
               ),
             ),
             Text(
-              medicineEntity.pharmacyName ?? 'Pharmacy Name',
+              medicineEntity.pharmacyName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyles.listView_product_subInf,
             ),
-            Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    '${medicineEntity.price} EGP',
-                    style: TextStyles.listView_product_name
-                        .copyWith(fontSize: 10.sp, color: Color(0xFF20B83A)),
+            const Spacer(),
+            Padding(
+              padding: EdgeInsets.only(left: 4.r),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Show the original price with strikethrough if there's a discount
+                      if (medicineEntity.discountRating > 0)
+                        Text(
+                          '${medicineEntity.price} EGP',
+                          style: TextStyles.listView_product_name.copyWith(
+                            fontSize: 10.sp,
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      // Show discounted price or regular price
+                      Text(
+                        medicineEntity.discountRating > 0
+                            ? '${_calculateDiscountedPrice(medicineEntity.price.toDouble(), medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
+                            : '${medicineEntity.price} EGP',
+                        style: TextStyles.listView_product_name.copyWith(
+                          fontSize: 11.sp,
+                          color: const Color(0xFF20B83A),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 8.r),
-                  child: GestureDetector(
-                    onTap: () {
-                      // Add to cart functionality
-                    },
-                    child: SvgPicture.asset(
-                      Assets.cart,
-                      width: 32.w,
-                      height: 32.h,
+                  Padding(
+                    padding: EdgeInsets.only(top: 8.r, right: 8.r),
+                    child: GestureDetector(
+                      onTap: () {
+                        // Add to cart functionality
+                      },
+                      child: SvgPicture.asset(
+                        Assets.cart,
+                        width: 32.w,
+                        height: 32.h,
+                      ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             )
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildLoadingAnimation() {
+    return ShimmerLoadingPlaceholder(
+        width: 100.w,
+        height: 120.h,
+        baseColor: Colors.white.withOpacity(0.2),
+        highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
+  }
+
+// Helper method to calculate the discounted price
+  String _calculateDiscountedPrice(
+      double originalPrice, double discountPercentage) {
+    double discountAmount = originalPrice * (discountPercentage / 100);
+    double discountedPrice = originalPrice - discountAmount;
+    return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
   }
 }

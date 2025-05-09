@@ -1,60 +1,54 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:pharma_now/core/utils/app_images.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
-import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
-// استيراد ملف مكون التحميل الجديد
 
-class OffersListViewItem extends StatelessWidget {
+class InfoMedicinesListViewItem extends StatelessWidget {
   final int index;
   final bool isFavorite;
   final VoidCallback onFavoritePressed;
-  final Function()? onTap;
   final MedicineEntity medicineEntity;
 
-  const OffersListViewItem({
+  const InfoMedicinesListViewItem({
     super.key,
     required this.index,
     required this.isFavorite,
     required this.onFavoritePressed,
-    this.onTap,
     required this.medicineEntity,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsetsDirectional.only(end: 11.w),
-        child: Column(
-          children: [
-            _buildTopContainer(),
-            _buildBottomContainer(),
-          ],
-        ),
+    return Padding(
+      padding: EdgeInsets.only(
+        top: 12.h,
+        left: 16.r,
+        right: 16.r,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildLeftContainer(),
+          _buildRightContainer(),
+        ],
       ),
     );
   }
 
-  Widget _buildTopContainer() {
+  Widget _buildLeftContainer() {
     return Container(
-      width: 161.w,
-      height: 90.h,
+      width: 106.w,
+      height: 124.h,
       decoration: BoxDecoration(
         color: index.isEven
             ? ColorManager.lightBlueColorF5C
             : ColorManager.lightGreenColorF5C,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(12.r),
-          topRight: Radius.circular(12.r),
-        ),
+            topLeft: Radius.circular(8.r), bottomLeft: Radius.circular(8.r)),
         border: Border.all(color: ColorManager.greyColorC6),
         boxShadow: [
           BoxShadow(
@@ -66,6 +60,7 @@ class OffersListViewItem extends StatelessWidget {
       ),
       child: Stack(
         children: [
+          // Product Image
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
@@ -86,62 +81,60 @@ class OffersListViewItem extends StatelessWidget {
                     ),
             ),
           ),
+
+          // Banner logic - Show either New banner OR Discount banner
           Positioned(
-            top: 8.h,
+            top: medicineEntity.isNewProduct ? 0 : 8.h,
             left: 0,
-            child: medicineEntity.discountRating > 0
-                ? Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      SvgPicture.asset(
-                        Assets.gold_banner,
-                        height: 24.h,
-                        width: 48.w,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 1.h, left: 20.0.h),
-                        child: Text(
-                          "${medicineEntity.discountRating}%",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 9.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+            child: medicineEntity.isNewProduct
+                ? SvgPicture.asset(
+                    Assets.bannerNewProduct,
+                    height: 80.h,
+                    width: 80.w,
                   )
-                : Container(),
-          ),
-          Positioned(
-            top: 8.h,
-            right: 8.w,
-            child: GestureDetector(
-              onTap: onFavoritePressed,
-              child: SvgPicture.asset(
-                isFavorite ? Assets.fav : Assets.nFav,
-                width: 24.w,
-                height: 24.h,
-              ),
-            ),
+                : (medicineEntity.discountRating != null &&
+                        medicineEntity.discountRating > 0)
+                    ? Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          SvgPicture.asset(
+                            Assets.gold_banner,
+                            height: 24.h,
+                            width: 48.w,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 1.h,
+                              left: 20.0.h,
+                            ),
+                            child: Text(
+                              "${medicineEntity.discountRating}%",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(), // No banner if neither new nor has discount
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomContainer() {
+  Widget _buildRightContainer() {
     return Container(
-      width: 161.w,
-      height: 90.h,
+      width: 237.w,
+      height: 124.h,
       decoration: BoxDecoration(
         color: ColorManager.buttom_info,
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(12.r),
-          bottomRight: Radius.circular(12.r),
-        ),
+            bottomRight: Radius.circular(8.r), topRight: Radius.circular(8.r)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -155,15 +148,33 @@ class OffersListViewItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 8.h),
-            SizedBox(
-              width: 175.w,
-              child: Text(
-                medicineEntity.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyles.listView_product_name,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 148.w,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 8.r),
+                    child: Text(
+                      medicineEntity.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyles.listView_product_name,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: onFavoritePressed,
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 8.r, top: 4.r),
+                    child: SvgPicture.asset(
+                      isFavorite ? Assets.fav : Assets.nFav,
+                      width: 24.w,
+                      height: 24.h,
+                    ),
+                  ),
+                ),
+              ],
             ),
             Text(
               medicineEntity.pharmacyName,
@@ -173,13 +184,15 @@ class OffersListViewItem extends StatelessWidget {
             ),
             const Spacer(),
             Padding(
-              padding: EdgeInsets.only(left: 4.r),
+              padding: EdgeInsets.only(bottom: 8.r, right: 8.r),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Show the original price with strikethrough if there's a discount
                       if (medicineEntity.discountRating > 0)
                         Text(
                           '${medicineEntity.price} EGP',
@@ -189,6 +202,7 @@ class OffersListViewItem extends StatelessWidget {
                             color: Colors.grey,
                           ),
                         ),
+                      // Show discounted price or regular price
                       Text(
                         medicineEntity.discountRating > 0
                             ? '${_calculateDiscountedPrice(medicineEntity.price.toDouble(), medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
@@ -200,20 +214,19 @@ class OffersListViewItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 8.r, right: 8.r),
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: SvgPicture.asset(
-                        Assets.cart,
-                        width: 32.w,
-                        height: 32.h,
-                      ),
+                  GestureDetector(
+                    onTap: () {
+                      // Add to cart functionality
+                    },
+                    child: SvgPicture.asset(
+                      Assets.cart,
+                      width: 32.w,
+                      height: 32.h,
                     ),
-                  )
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -228,6 +241,7 @@ class OffersListViewItem extends StatelessWidget {
         highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
   }
 
+  // Helper method to calculate the discounted price
   String _calculateDiscountedPrice(
       double originalPrice, double discountPercentage) {
     double discountAmount = originalPrice * (discountPercentage / 100);
@@ -235,5 +249,3 @@ class OffersListViewItem extends StatelessWidget {
     return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
   }
 }
-
-// ملاحظة: تم حذف class BouncingDotsAnimation لأنه تم استبداله بمكون ShimmerLoadingPlaceholder الجديد

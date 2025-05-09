@@ -7,7 +7,7 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import '../../../../../core/helper_functions/get_user.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../notifications/presentation/views/notification_view.dart';
-import '../../../../offers/presentation/views/offers_view.dart';
+import '../../../../offers/presentation/views/info_offers_view.dart';
 import '../../../../search/presentation/views/search_view.dart';
 import '../../../../shopping by category/presentation/views/categories_view.dart';
 import '../../ui_model/action_item.dart';
@@ -57,13 +57,14 @@ class HomeAppbar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: ColorManager.secondaryColor.withOpacity(0.9),
+        // color: Color(0xFF3A86FF),
         borderRadius: BorderRadius.only(
             bottomRight: Radius.circular(35.r),
             bottomLeft: Radius.circular(35.r)),
       ),
       alignment: Alignment.bottomCenter,
       padding:
-          EdgeInsets.only(top: 44.h, left: 24.w, right: 24.w, bottom: 16.h),
+          EdgeInsets.only(top: 20.h, left: 24.w, right: 24.w, bottom: 16.h),
       child: AppBar(
           backgroundColor: Colors.transparent,
           leading: CircleAvatar(

@@ -5,16 +5,13 @@ import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_
 import '../../../../../core/enitites/medicine_entity.dart';
 
 class OffersListView extends StatelessWidget {
-  // final int itemCount;
-  // final Widget Function(BuildContext, int) itemBuilder;
+  final List<MedicineEntity> medicines;
 
   const OffersListView({
     Key? key,
     required this.medicines,
-    // required this.itemCount,
-    // required this.itemBuilder,
   }) : super(key: key);
-  final List<MedicineEntity> medicines;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
