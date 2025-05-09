@@ -44,8 +44,11 @@ class SearchViewBody extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SvgPicture.asset(Assets.search_ups_icon,
-                            width: 150.w, height: 115.h),
+                        Icon(
+                          Icons.search_off,
+                          size: 90.sp,
+                          color: ColorManager.textInputColor,
+                        ),
                         SizedBox(height: 16.h),
                         Text(
                           'No results found for "${state.searchQuery}"',
@@ -197,7 +200,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
             : ColorManager.lightGreenColorF5C,
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(8.r), bottomLeft: Radius.circular(8.r)),
-        border: Border.all(color: ColorManager.colorOfsecondPopUp),
+        border: Border.all(color: ColorManager.greyColorC6, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -328,7 +331,10 @@ class SearchMedicinesListViewItem extends StatelessWidget {
               medicineEntity.pharmacyName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyles.listView_product_subInf,
+              style: TextStyles.listView_product_name.copyWith(
+                fontSize: 10.sp,
+                color: ColorManager.textInputColor,
+              ),
             ),
             SizedBox(height: 4.h),
             // Add description here
@@ -338,7 +344,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 10.sp,
-                color: Colors.grey[600],
+                color: ColorManager.textInputColor,
                 height: 1.2,
               ),
             ),

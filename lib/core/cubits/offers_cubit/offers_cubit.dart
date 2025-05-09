@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
 import 'package:pharma_now/core/repos/medicine_repo/medicine_repo.dart';
-import 'package:pharma_now/features/offers/presentation/views/widgets/inf_offers_view_body.dart';
+
 import '../../enitites/medicine_entity.dart';
 part 'offers_state.dart';
 

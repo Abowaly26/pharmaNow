@@ -5,7 +5,6 @@ import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/text_style.dart';
 
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../offers/presentation/views/info_offers_view.dart';
 
 class SectionWidget extends StatelessWidget {
   const SectionWidget({super.key, required this.sectionTitle, this.onTap});

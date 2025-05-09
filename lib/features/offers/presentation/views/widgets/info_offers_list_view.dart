@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/features/offers/presentation/views/widgets/info_offers_list_view_item.dart';
+
 import '../../../../../core/enitites/medicine_entity.dart';
 
 class InfoOffersListView extends StatelessWidget {

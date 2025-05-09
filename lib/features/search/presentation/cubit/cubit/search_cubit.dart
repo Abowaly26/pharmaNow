@@ -1,8 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/search/presentation/cubit/cubit/search_state.dart';
-
 import '../../../../../core/repos/medicine_repo/medicine_repo.dart';
 import '../../../../../core/utils/backend_endpoint.dart';
 
@@ -10,8 +8,11 @@ class SearchCubit extends Cubit<SearchState> {
   final MedicineRepo _productrepo;
   Timer? _debounce;
   String _lastQuery = '';
+  final List<String> _recentSearches = []; // List to store recent searches
+  final int _maxRecentSearches = 5; // Maximum number of recent searches to keep
 
-  SearchCubit(this._productrepo) : super(SearchInitial());
+  SearchCubit(this._productrepo)
+      : super(const SearchInitial()); // Pass empty list initially
 
   Future<void> searchProducts({required String query}) async {
     // Cancel the current timer if active
@@ -22,7 +23,9 @@ class SearchCubit extends Cubit<SearchState> {
 
     // If query is empty
     if (cleanQuery.isEmpty) {
-      emit(SearchInitial());
+      emit(SearchInitial(
+          recentSearches:
+              _recentSearches)); // Emit initial state with recent searches
       return;
     }
 
@@ -35,10 +38,9 @@ class SearchCubit extends Cubit<SearchState> {
     _lastQuery = cleanQuery;
 
     // Use a timer to delay (debounce) to prevent frequent searches
-    _debounce = Timer(Duration(milliseconds: 500), () async {
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
       // Show loading state
       emit(SearchLoading());
-
       try {
         // Execute search
         final response = await _productrepo.searchMedicines(
@@ -51,21 +53,37 @@ class SearchCubit extends Cubit<SearchState> {
             // Debug output
             print(
                 'Search results: ${medicines.length} items found for "$cleanQuery"');
+            // Add the successful search query to recent searches
+            _addRecentSearch(cleanQuery);
             emit(SearchSuccess(products: medicines, searchQuery: cleanQuery));
           },
         );
       } catch (error) {
         // Handle unexpected errors
         print('Unexpected search error: $error');
-        emit(SearchError(message: 'حدث خطأ غير متوقع: $error'));
+        emit(SearchError(message: 'Unexpected error: $error'));
       }
     });
+  }
+
+  // Method to add a search query to the recent searches list
+  void _addRecentSearch(String query) {
+    // Avoid adding duplicate recent searches
+    _recentSearches.remove(query);
+    // Add the new query to the beginning of the list
+    _recentSearches.insert(0, query);
+    // Keep only the latest _maxRecentSearches
+    if (_recentSearches.length > _maxRecentSearches) {
+      _recentSearches.removeRange(_maxRecentSearches, _recentSearches.length);
+    }
   }
 
   // Reset state function
   void resetSearch() {
     _lastQuery = '';
-    emit(SearchInitial());
+    emit(SearchInitial(
+        recentSearches:
+            _recentSearches)); // Emit initial state with recent searches
   }
 
   @override

@@ -180,7 +180,22 @@ class InfoMedicinesListViewItem extends StatelessWidget {
               medicineEntity.pharmacyName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyles.listView_product_subInf,
+              style: TextStyles.listView_product_name.copyWith(
+                fontSize: 11.sp,
+                color: ColorManager.textInputColor,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            // Add description here
+            Text(
+              medicineEntity.description ?? 'No description available',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10.sp,
+                color: ColorManager.greyColor,
+                height: 1.2,
+              ),
             ),
             const Spacer(),
             Padding(

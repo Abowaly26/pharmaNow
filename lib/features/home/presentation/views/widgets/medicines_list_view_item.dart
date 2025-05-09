@@ -177,7 +177,10 @@ class MedicineListViewItem extends StatelessWidget {
               medicineEntity.pharmacyName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyles.listView_product_subInf,
+              style: TextStyles.listView_product_name.copyWith(
+                fontSize: 10.sp,
+                color: ColorManager.textInputColor,
+              ),
             ),
             const Spacer(),
             Padding(

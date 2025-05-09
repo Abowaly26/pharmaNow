@@ -8,8 +8,17 @@ abstract class SearchState extends Equatable {
   List<Object?> get props => [];
 }
 
-// Initial state that can include recent searches and recently viewed items
-class SearchInitial extends SearchState {}
+// Initial state that can include recent searches
+class SearchInitial extends SearchState {
+  final List<String> recentSearches; // Add list of recent searches
+
+  const SearchInitial(
+      {this.recentSearches = const []}); // Initialize with an empty list
+
+  @override
+  List<Object?> get props =>
+      [recentSearches]; // Include recent searches in props
+}
 
 // Loading state when search is in progress
 class SearchLoading extends SearchState {}

@@ -2,17 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/features/offers/presentation/views/widgets/inf_offers_view_body.dart';
+
 import '../../../../core/cubits/offers_cubit/offers_cubit.dart';
-import '../../../../core/repos/medicine_repo/medicine_repo.dart'
-    show MedicineRepo;
-import '../../../../core/services/get_it_service.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pharma_now/features/offers/presentation/views/widgets/inf_offers_view_body.dart';
-import '../../../../core/cubits/offers_cubit/offers_cubit.dart';
-import '../../../../core/repos/medicine_repo/medicine_repo.dart'
-    show MedicineRepo;
+import '../../../../core/repos/medicine_repo/medicine_repo.dart';
 import '../../../../core/services/get_it_service.dart';
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';

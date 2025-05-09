@@ -12,7 +12,6 @@ import 'package:pharma_now/features/home/presentation/views/medicine_details_vie
 import 'package:pharma_now/features/home/presentation/views/widgets/section_widget.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
 import 'package:pharma_now/features/info_medicines/presentation/views/info_medicines_view.dart';
-import 'package:pharma_now/features/offers/presentation/views/info_offers_view.dart';
 
 import '../../../../../core/cubits/best_selling_cubit/best_selling_cubit.dart';
 import '../../../../../core/cubits/offers_cubit/offers_cubit.dart';

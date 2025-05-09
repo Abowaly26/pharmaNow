@@ -88,7 +88,7 @@ class _SearchtextfieldState extends State<Searchtextfield> {
           hintText: 'Search ...', // Updated hint text
           hintStyle: TextStyle(
             fontSize: 16.sp,
-            color: ColorManager.colorOfsecondPopUp,
+            color: ColorManager.textInputColor,
             fontWeight: FontWeight.w400,
           ),
           contentPadding:
@@ -107,21 +107,12 @@ class _SearchtextfieldState extends State<Searchtextfield> {
           ),
           prefixIcon: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: Icon(
-              Icons.search,
-              color: ColorManager.colorOfsecondPopUp,
-              size: 24.sp,
+            child: SvgPicture.asset(
+              Assets.search_normal,
+              width: 24.w,
             ),
           ),
           // Settings/filter icon on the right
-          suffixIcon: Padding(
-            padding: EdgeInsets.only(right: 12.w),
-            child: Icon(
-              Icons.tune,
-              color: Colors.grey.shade400,
-              size: 24.sp,
-            ),
-          ),
         ),
       ),
     );

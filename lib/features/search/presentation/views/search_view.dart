@@ -21,11 +21,11 @@ class SearchView extends StatelessWidget {
         backgroundColor: ColorManager.primaryColor,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(48.sp),
-          child: PharmaAppBar(
+          child: const PharmaAppBar(
             title: 'Search',
           ),
         ),
-        body: SearchViewBody(),
+        body: const SearchViewBody(),
       ),
     );
   }

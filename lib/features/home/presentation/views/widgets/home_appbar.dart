@@ -7,7 +7,7 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import '../../../../../core/helper_functions/get_user.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../notifications/presentation/views/notification_view.dart';
-import '../../../../offers/presentation/views/info_offers_view.dart';
+
 import '../../../../search/presentation/views/search_view.dart';
 import '../../../../shopping by category/presentation/views/categories_view.dart';
 import '../../ui_model/action_item.dart';
