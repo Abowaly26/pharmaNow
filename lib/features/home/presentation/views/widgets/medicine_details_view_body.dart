@@ -163,6 +163,7 @@ class MedicineDetailsViewBody extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     SizedBox(height: 20.h),
                     Text(
                       "Description",
@@ -171,21 +172,23 @@ class MedicineDetailsViewBody extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 10.h),
                     Expanded(
-                      child: SingleChildScrollView(
-                        physics: BouncingScrollPhysics(),
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 24.h),
-                          child: Text(
-                            medicineEntity.description ??
-                                "Beta Mine is an innovative product that enhances brain health thanks to its rich ingredients, including Vitamin B6, which supports nerve function and maintains heart health.",
-                            style: TextStyle(
-                              color: Color(0xffA7AEB5),
-                              fontSize: 16,
-                              height: 1.5,
+                      child: ScrollConfiguration(
+                        behavior: SmoothScrollBehavior(),
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 4.w, vertical: 4.h),
+                            child: Text(
+                              medicineEntity.description ??
+                                  "Beta Mine is an innovative product that enhances brain health thanks to its rich ingredients, including Vitamin B6, which supports nerve function and maintains heart health.",
+                              style: const TextStyle(
+                                color: Color(0xffA7AEB5),
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
                             ),
-                            textAlign: TextAlign.justify,
                           ),
                         ),
                       ),
@@ -275,6 +278,19 @@ class MedicineDetailsViewBody extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class SmoothScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const ClampingScrollPhysics();
   }
 }
 

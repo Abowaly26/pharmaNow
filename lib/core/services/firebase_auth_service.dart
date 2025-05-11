@@ -1,13 +1,9 @@
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
-import 'package:pharma_now/core/widgets/navigation_bar.dart';
-
-import '../widgets/bottom_pop_up.dart';
 
 class FirebaseAuthService {
   Future deleteUser() async {

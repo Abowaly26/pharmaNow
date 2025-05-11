@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pharma_now/features/favorites/presentation/views/widgets/favoirtes_view_body.dart';
+import 'package:pharma_now/features/info_offers/presentation/views/widgets/inf_offers_view_body.dart';
 
+import '../../../../core/cubits/offers_cubit/offers_cubit.dart';
+import '../../../../core/repos/medicine_repo/medicine_repo.dart';
+import '../../../../core/services/get_it_service.dart';
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../home/presentation/views/main_view.dart';
 
-class CategoriesView extends StatelessWidget {
-  const CategoriesView({super.key});
-  static const routeName = 'CategoriesView';
+class OffersView extends StatelessWidget {
+  const OffersView({super.key});
+
+  static const routeName = 'OffersView';
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +22,16 @@ class CategoriesView extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(48.sp),
         child: PharmaAppBar(
-            title: 'Categories',
+            title: 'Offers',
             isBack: true,
             onPressed: () {
               Navigator.pushReplacementNamed(context, MainView.routeName);
             }),
       ),
-      body: FavoriteViewBody(),
+      body: BlocProvider(
+        create: (context) => OffersCubit(getIt.get<MedicineRepo>()),
+        child: const InfoOffersListViewBody(),
+      ),
     );
   }
 }

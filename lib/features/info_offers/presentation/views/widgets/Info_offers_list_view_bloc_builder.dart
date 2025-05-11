@@ -4,7 +4,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../../core/cubits/offers_cubit/offers_cubit.dart';
 import '../../../../../core/helper_functions/get_dummy_medicine.dart';
 import '../../../../../core/widgets/custom_error_widget.dart';
-import 'info_offers_list_view.dart';
+import '../../../../info_offers/presentation/views/widgets/info_offers_list_view.dart';
 
 class InfoOffersListViewBlocBuilder extends StatelessWidget {
   const InfoOffersListViewBlocBuilder({super.key});

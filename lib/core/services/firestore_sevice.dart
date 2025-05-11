@@ -1,9 +1,5 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pharma_now/core/services/database_service.dart';
-import 'package:pharma_now/features/auth/data/models/user_model.dart';
-import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 
 class FireStoreSevice implements DatabaseService {
   FirebaseFirestore firestore = FirebaseFirestore.instance;

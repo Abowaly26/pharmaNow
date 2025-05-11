@@ -16,7 +16,7 @@ import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../info_medicines/presentation/views/info_medicines_view.dart';
 
-import '../../../../offers/presentation/views/info_offers_view.dart';
+import '../../../../info_offers/presentation/views/info_offers_view.dart';
 import 'best_selling_list_view_bloc_builder.dart';
 
 class HomeViewBody extends StatefulWidget {

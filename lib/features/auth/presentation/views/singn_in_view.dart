@@ -6,7 +6,6 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
 import 'package:pharma_now/features/auth/presentation/cubits/signin_cubit/signin_cubit.dart';
-import 'package:pharma_now/features/auth/presentation/views/widget/sing_in_view_body.dart';
 import 'package:pharma_now/features/auth/presentation/views/widget/singin_view_body_bloc_consumer.dart';
 
 class SignInView extends StatelessWidget {

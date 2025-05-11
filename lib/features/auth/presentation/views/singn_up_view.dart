@@ -4,8 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
 import 'package:pharma_now/features/auth/presentation/cubits/sinup_cubit/signup_cubit.dart';
-import 'package:pharma_now/features/auth/presentation/views/widget/sing_in_view_body.dart';
-import 'package:pharma_now/features/auth/presentation/views/widget/singn_up_view_body.dart';
+
 import 'package:pharma_now/features/auth/presentation/views/widget/sinup_view_body_bloc_consumer.dart';
 
 import '../../../../core/utils/color_manger.dart';

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 
 MedicineEntity getDummyMedicine() {

@@ -3,7 +3,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_style.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_up_view.dart';
 
 // AppBar buildAppBar({
 //   required String title,

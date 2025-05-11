@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:pharma_now/core/enitites/medicine_entity.dart';
 
 class CustomNetworkImage extends StatelessWidget {
   const CustomNetworkImage({

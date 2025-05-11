@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
-import 'package:pharma_now/features/offers/presentation/views/widgets/info_offers_list_view_item.dart';
+import 'package:pharma_now/features/info_offers/presentation/views/widgets/info_offers_list_view_item.dart';
 
 import '../../../../../core/enitites/medicine_entity.dart';
 

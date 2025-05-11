@@ -8,8 +8,6 @@ import '../../../../../core/helper_functions/get_user.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../notifications/presentation/views/notification_view.dart';
 
-import '../../../../search/presentation/views/search_view.dart';
-import '../../../../shopping by category/presentation/views/categories_view.dart';
 import '../../ui_model/action_item.dart';
 
 class HomeAppbar extends StatelessWidget {

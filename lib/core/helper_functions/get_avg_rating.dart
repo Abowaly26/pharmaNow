@@ -1,4 +1,3 @@
-import 'package:pharma_now/core/enitites/review_entity.dart';
 import 'package:pharma_now/core/models/review_model.dart';
 
 num getAvgRating(List<ReviewModel> reviews) {

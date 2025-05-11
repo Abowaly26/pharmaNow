@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:pharma_now/core/helper_functions/get_avg_rating.dart';
 import 'package:pharma_now/core/models/review_model.dart';
 import '../enitites/medicine_entity.dart';

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
 
-import '../utils/app_images.dart';
 import '../utils/color_manger.dart';
 
 class PasswordFiled extends StatefulWidget {

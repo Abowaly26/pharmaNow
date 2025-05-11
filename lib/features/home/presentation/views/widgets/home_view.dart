@@ -17,9 +17,6 @@ import '../../../../../core/cubits/best_selling_cubit/best_selling_cubit.dart';
 import '../../../../../core/cubits/offers_cubit/offers_cubit.dart';
 import '../../../../../core/services/get_it_service.dart';
 import '../../../../../core/utils/button_style.dart';
-import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
-import '../../../../shopping by category/presentation/views/categories_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});

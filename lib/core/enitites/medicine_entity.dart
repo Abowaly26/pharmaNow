@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:pharma_now/core/enitites/review_entity.dart';
 
 class MedicineEntity {
