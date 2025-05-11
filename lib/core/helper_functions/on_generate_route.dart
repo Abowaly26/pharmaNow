@@ -71,8 +71,8 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case EditProfile.routeName:
       return MaterialPageRoute(builder: (context) => EditProfile());
 
-    case ProductView.routeName:
-      return MaterialPageRoute(builder: (context) => ProductView());
+    case MedicineDetailsView.routeName:
+      return MaterialPageRoute(builder: (context) => MedicineDetailsView());
 
     case ForgetPasswordView.routeName:
       return MaterialPageRoute(

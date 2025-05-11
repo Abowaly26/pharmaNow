@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
+import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view_item.dart';
 
 class MedicinesListView extends StatelessWidget {
@@ -24,11 +25,23 @@ class MedicinesListView extends StatelessWidget {
           itemCount: medicines.length,
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,
-          itemBuilder: (context, index) => MedicineListViewItem(
-                index: index,
-                isFavorite: false,
-                onFavoritePressed: () {},
-                medicineEntity: medicines[index],
+          itemBuilder: (context, index) => GestureDetector(
+                onTap: () {
+                  // Navigate to medicine details view
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => MedicineDetailsView(
+                        medicineEntity: medicines[index],
+                      ),
+                    ),
+                  );
+                },
+                child: MedicineListViewItem(
+                  index: index,
+                  isFavorite: false,
+                  onFavoritePressed: () {},
+                  medicineEntity: medicines[index],
+                ),
               )),
     );
   }

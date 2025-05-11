@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/features/home/presentation/views/main_view.dart';
-import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/related_product_list_view_item.dart';
+import 'package:pharma_now/core/enitites/medicine_entity.dart';
 
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
 
-class ProductViewBody extends StatelessWidget {
-  const ProductViewBody({super.key, this.isFavorite = false});
+class MedicineDetailsViewBody extends StatelessWidget {
+  const MedicineDetailsViewBody({
+    super.key,
+    this.isFavorite = false,
+    required this.medicineEntity,
+  });
+
   final bool isFavorite;
+  final MedicineEntity medicineEntity;
 
   @override
   Widget build(BuildContext context) {
@@ -23,161 +27,252 @@ class ProductViewBody extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          SizedBox(
-            height: height * 0.7, // Adjusted height to accommodate button below
-            child: Stack(
-              children: [
-                // Background clip path
-                ClipPath(
-                  clipper: BottomInnerOvalClipper(),
-                  child: Container(
-                    height: 0.15 * height,
-                    color: ColorManager.secondaryColor,
-                  ),
-                ),
+          // Product Card Section
+          _buildProductCardSection(context, height, width),
 
-                // Product card
-                Positioned(
-                  height: 0.62 * height,
-                  top: 0.009 * height,
-                  left: 30,
-                  right: 30,
-                  child: Material(
-                    shadowColor: Color(0xff407BFF).withOpacity(0.24),
-                    elevation: 7,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      height: 0.9 * height,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                      decoration: BoxDecoration(
-                        color: ColorManager.primaryColor,
-                        borderRadius: BorderRadius.circular(24.r),
+          SizedBox(height: 160.h), // زيادة المسافة بين الكارد والزر
+
+          // Completely Separated Add to Cart Button Section
+          _buildAddToCartButton(),
+
+          SizedBox(height: 16.h), // Bottom padding
+        ],
+      ),
+    );
+  }
+
+  // Extracted Product Card Section
+  Widget _buildProductCardSection(
+      BuildContext context, double height, double width) {
+    return Container(
+      constraints: BoxConstraints(
+        minHeight: height * 0.6,
+        maxHeight: height * 0.8,
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Background clip path
+          ClipPath(
+            clipper: BottomInnerOvalClipper(),
+            child: Container(
+              height: 0.15 * height,
+              color: ColorManager.secondaryColor,
+            ),
+          ),
+
+          // Product card
+          Positioned(
+            top: 0.02 * height,
+            left: 20,
+            right: 20,
+            child: Material(
+              shadowColor: Color(0xff407BFF).withOpacity(0.24),
+              elevation: 7,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                decoration: BoxDecoration(
+                  color: ColorManager.primaryColor,
+                  borderRadius: BorderRadius.circular(24.r),
+                ),
+                constraints: BoxConstraints(
+                  minHeight: 0.65 * height,
+                  maxHeight: 0.73 * height,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 0.22 * height), // Space for image
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            medicineEntity.name,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {},
+                          child: SvgPicture.asset(
+                            isFavorite ? Assets.fav : Assets.nFav,
+                            width: 32.w,
+                            height: 32.h,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6.h),
+                    Text(
+                      medicineEntity.pharmacyName ?? "pharmacy name",
+                      style: TextStyles.listView_product_name.copyWith(
+                        fontSize: 14.sp,
+                        color: ColorManager.textInputColor,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 0.21 * height),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ),
+                    SizedBox(height: 16.h),
+                    Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF2F4F9),
+                            borderRadius: BorderRadius.all(Radius.circular(32)),
+                          ),
+                          child: Row(
                             children: [
-                              Text("Beta Mind",
-                                  style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w600)),
-                              GestureDetector(
-                                onTap: () {},
-                                child: SvgPicture.asset(
-                                  isFavorite ? Assets.fav : Assets.nFav,
-                                  width: 32.w,
-                                  height: 32.h,
+                              IconButton(
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.remove,
+                                  size: 24.sp,
+                                ),
+                              ),
+                              SizedBox(width: 0.05 * width),
+                              Text(
+                                "1",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 20.sp,
+                                ),
+                              ),
+                              SizedBox(width: 0.05 * width),
+                              IconButton(
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.add_circle_outlined,
+                                  size: 32.sp,
+                                  color: ColorManager.secondaryColor,
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 12.h),
-                          Text(
-                            "75ml",
-                            style: TextStyle(
-                                color: Color(0xff7B7D82),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500),
+                        ),
+                        Spacer(),
+                        Text(
+                          "${medicineEntity.price} LE",
+                          style: TextStyle(
+                            color: Color(0xFF375DFB),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
-                          // SizedBox(height: 0.02 * height),
-                          SizedBox(height: 16.h),
-                          Row(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Color(0xFFF2F4F9),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(32))),
-                                child: Row(children: [
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(
-                                      Icons.remove,
-                                      size: 24.sp,
-                                    ),
-                                  ),
-                                  SizedBox(width: 0.05 * width),
-                                  Text("1",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 20.sp,
-                                      )),
-                                  SizedBox(width: 0.05 * width),
-                                  IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(
-                                        Icons.add_circle_outlined,
-                                        size: 32.sp,
-                                        color: ColorManager.secondaryColor,
-                                      ))
-                                ]),
-                              ),
-                              Spacer(),
-                              Text("200 LE",
-                                  style: TextStyle(
-                                      color: Color(0xFF375DFB),
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          SizedBox(height: 16.h),
-                          Text("Description",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500)),
-                          SizedBox(
-                            height: 12.h,
-                          ),
-                          Text(
-                            textAlign: TextAlign.left,
-                            maxLines: 10,
-                            overflow: TextOverflow.ellipsis,
-                            "Beta Mine is an innovative product that enhances brain health thanks to its rich ingredients,including Vitamin B6, which supports nerve function and maintains heart health.",
-                            style: TextStyle(color: Color(0xffA7AEB5)),
-                          )
-                        ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20.h),
+                    Text(
+                      "Description",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ),
-
-                // Product image
-                Positioned(
-                  top: 0.03 * height,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                      child: Image(
-                    image: NetworkImage(
-                      'https://i.postimg.cc/2yLfw0qy/image-20.png',
+                    SizedBox(height: 16.h),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: BouncingScrollPhysics(),
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: 24.h),
+                          child: Text(
+                            medicineEntity.description ??
+                                "Beta Mine is an innovative product that enhances brain health thanks to its rich ingredients, including Vitamin B6, which supports nerve function and maintains heart health.",
+                            style: TextStyle(
+                              color: Color(0xffA7AEB5),
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.justify,
+                          ),
+                        ),
+                      ),
                     ),
-                  )),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
 
-          // Elevated button now placed under the Stack
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ButtonStyles.primaryButton,
-                onPressed: () {
-                  // Navigator.pushReplacementNamed(context, HomeView.routeName);
-                },
-                child: Text(
-                  'Add to Cart',
-                  style: TextStyles.buttonLabel,
+          // Product image
+          Positioned(
+            top: 0.03 * height,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                height: 180.h,
+                width: 180.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Builder(
+                  builder: (context) {
+                    final String imageUrl = medicineEntity.subabaseORImageUrl ??
+                        'https://i.postimg.cc/2yLfw0qy/image-20.png';
+
+                    return Image(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                            color: ColorManager.secondaryColor,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.image_not_supported,
+                        size: 80.sp,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Completely Separated Add to Cart Button
+  Widget _buildAddToCartButton() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      decoration: BoxDecoration(
+          // يمكنك إضافة ظل أو حدود إذا أردت تمييز الزر أكثر
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: ColorManager.secondaryColor.withOpacity(0.1),
+          //     spreadRadius: 1,
+          //     blurRadius: 5,
+          //     offset: Offset(0, -2),
+          //   ),
+          // ],
+          ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 50.h, // زيادة حجم الزر قليلاً لجعله أكثر بروزاً
+        child: ElevatedButton(
+          style: ButtonStyles.primaryButton,
+          onPressed: () {
+            // Add to cart functionality
+          },
+          child: Text(
+            'Add to Cart',
+            style: TextStyles.buttonLabel,
+          ),
+        ),
       ),
     );
   }

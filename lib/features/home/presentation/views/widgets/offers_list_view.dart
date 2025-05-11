@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
 
 import '../../../../../core/enitites/medicine_entity.dart';
@@ -24,6 +25,16 @@ class OffersListView extends StatelessWidget {
           index: index,
           isFavorite: false,
           onFavoritePressed: () {},
+          onTap: () {
+            // Navigate to medicine details view
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MedicineDetailsView(
+                  medicineEntity: medicines[index],
+                ),
+              ),
+            );
+          },
           medicineEntity: medicines[index],
         ),
       ),

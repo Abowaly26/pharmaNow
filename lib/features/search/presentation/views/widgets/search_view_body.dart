@@ -7,6 +7,7 @@ import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../../core/widgets/searchtextfield.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import '../../../../home/presentation/views/medicine_details_view.dart';
 import '../../cubit/cubit/search_cubit.dart';
 import '../../cubit/cubit/search_state.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
@@ -77,8 +78,14 @@ class SearchViewBody extends StatelessWidget {
 
                         return GestureDetector(
                           onTap: () {
-                            // Navigate to medicine details page
-                            // Could be implemented here
+                            // Navigate to medicine details view
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => MedicineDetailsView(
+                                  medicineEntity: medicine,
+                                ),
+                              ),
+                            );
                           },
                           child: SearchMedicinesListViewItem(
                             index: index,

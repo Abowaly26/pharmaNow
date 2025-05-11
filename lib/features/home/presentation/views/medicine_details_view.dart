@@ -2,17 +2,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/features/home/presentation/views/main_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/medicine_details_view_body.dart';
 
 import '../../../../core/utils/app_images.dart';
 
-class ProductView extends StatelessWidget {
+class MedicineDetailsView extends StatelessWidget {
   static const String routeName = "ProductView";
 
-  const ProductView({
+  final MedicineEntity? medicineEntity;
+
+  const MedicineDetailsView({
     super.key,
+    this.medicineEntity,
   });
 
   @override
@@ -38,9 +42,12 @@ class ProductView extends StatelessWidget {
           ),
         ),
       ),
-      body: ProductViewBody(
-        isFavorite: true,
-      ),
+      body: medicineEntity != null 
+        ? MedicineDetailsViewBody(
+            isFavorite: false, // Default value, can be updated later with proper provider
+            medicineEntity: medicineEntity!,
+          )
+        : Center(child: Text('Medicine details not available')),
     );
   }
 }
