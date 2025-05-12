@@ -7,7 +7,6 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import '../../../../../core/helper_functions/get_user.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../notifications/presentation/views/notification_view.dart';
-
 import '../../ui_model/action_item.dart';
 
 class HomeAppbar extends StatelessWidget {
@@ -34,20 +33,20 @@ class HomeAppbar extends StatelessWidget {
         );
       },
     ),
-    ActionItem(
-      icon: Badge(
-          backgroundColor: ColorManager.greenColor,
-          label: Text('2'),
-          textColor: ColorManager.primaryColor,
-          child: SvgPicture.asset(
-            Assets.shoppingCartIcon,
-            width: 24,
-            height: 24,
-          )),
-      callback: (BuildContext ctx) {
-        // Your second action callback
-      },
-    ),
+    // ActionItem(
+    //   icon: SvgPicture.asset(
+    //     Assets.search_normal,
+    //     colorFilter: ColorFilter.mode(
+    //       ColorManager.primaryColor,
+    //       BlendMode.srcIn,
+    //     ),
+    //     width: 24,
+    //     height: 24,
+    //   ),
+    //   callback: (BuildContext ctx) {
+    //     // Your second action callback
+    //   },
+    // ),
   ];
 
   @override
@@ -61,8 +60,7 @@ class HomeAppbar extends StatelessWidget {
             bottomLeft: Radius.circular(35.r)),
       ),
       alignment: Alignment.bottomCenter,
-      padding:
-          EdgeInsets.only(top: 20.h, left: 24.w, right: 24.w, bottom: 16.h),
+      padding: EdgeInsets.only(top: 20.h, left: 24.w, bottom: 16.h),
       child: AppBar(
           backgroundColor: Colors.transparent,
           leading: CircleAvatar(

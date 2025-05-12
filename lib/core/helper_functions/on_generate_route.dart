@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_now/Cart/presentation/views/cart_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/singn_up_view.dart';
@@ -68,6 +69,9 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
 
     case MedicineDetailsView.routeName:
       return MaterialPageRoute(builder: (context) => MedicineDetailsView());
+
+    case CartView.routeName:
+      return MaterialPageRoute(builder: (context) => CartView());
 
     case ForgetPasswordView.routeName:
       return MaterialPageRoute(

@@ -115,4 +115,9 @@ class TextStyles {
       fontFamily: 'Inter',
       fontWeight: FontWeight.w400,
       color: Color(0xFFB8C0CB));
+
+  static const TextStyle semiBold11 = TextStyle(
+    fontWeight: FontWeight.w600,
+    fontSize: 11,
+  );
 }

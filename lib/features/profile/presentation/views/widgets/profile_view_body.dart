@@ -4,6 +4,7 @@ import 'package:pharma_now/features/profile/presentation/views/widgets/profile_t
 import 'package:pharma_now/features/profile/presentation/views/widgets/profile_tab/notification_view.dart';
 
 import '../../../../../core/helper_functions/get_user.dart';
+import '../../../../../core/utils/app_images.dart';
 
 class ProfileViewBody extends StatelessWidget {
   const ProfileViewBody({super.key});
@@ -32,9 +33,9 @@ class ProfileViewBody extends StatelessWidget {
                   ),
                   CircleAvatar(
                     radius: avatarRadius,
-                    backgroundImage: const NetworkImage(
-                      'https://randomuser.me/api/portraits/men/32.jpg',
-                    ),
+                    backgroundImage: Image.asset(
+                      Assets.profile,
+                    ).image,
                   ),
                   Positioned(
                     // Adjust positioning of camera icon for smaller avatar

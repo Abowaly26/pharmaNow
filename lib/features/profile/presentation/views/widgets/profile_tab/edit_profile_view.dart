@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/text_style.dart';
 
+import '../../../../../../core/helper_functions/get_user.dart';
 import '../../../../../../core/utils/app_images.dart';
 import '../../../../../../core/utils/button_style.dart';
 import '../../../../../../core/utils/color_manger.dart';
@@ -29,7 +30,7 @@ class EditProfile extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(48.sp),
         child: PharmaAppBar(
-          title: 'Notifications',
+          title: 'Edit Profile',
           isBack: true,
           onPressed: () {
             Navigator.pop(
@@ -57,9 +58,9 @@ class EditProfile extends StatelessWidget {
                     ),
                     CircleAvatar(
                       radius: avatarRadius,
-                      backgroundImage: const NetworkImage(
-                        'https://randomuser.me/api/portraits/men/32.jpg',
-                      ),
+                      backgroundImage: Image.asset(
+                        Assets.profile,
+                      ).image,
                     ),
                     Positioned(
                       left: width * 0.32,
@@ -82,7 +83,7 @@ class EditProfile extends StatelessWidget {
                 ),
                 SizedBox(height: 0.01 * height),
                 Text(
-                  'Mahmodul Hasan',
+                  '${getUser().name}',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -90,7 +91,7 @@ class EditProfile extends StatelessWidget {
                 ),
                 SizedBox(height: 0.01 * height),
                 Text(
-                  'Info.mh@gmail.com',
+                  '${getUser().email}',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey,

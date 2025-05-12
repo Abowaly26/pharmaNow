@@ -69,4 +69,20 @@ class Assets {
   static const String search_icon = "assets/images/search-normal-icon.svg";
   static const String search_ups_icon1 = "assets/images/search_ups.svg";
   static const String search_normal = "assets/images/search-normal.svg";
+
+  static const String homeIconbold = "assets/images/vuesax/bold/home.svg";
+
+  static const String favIconbold = "assets/images/vuesax/bold/fav.svg";
+
+  static const String shoppingCartIconbold =
+      "assets/images/vuesax/bold/shopping-cart.svg";
+
+  static const String profileIconbold = "assets/images/vuesax/bold/user.svg";
+
+  static const String favIconOutline = "assets/images/vuesax/outline/fav.svg";
+  static const String homeIconOutline = "assets/images/vuesax/outline/home.svg";
+  static const String shoppingCartIconOutline =
+      "assets/images/vuesax/outline/shopping-cart.svg";
+  static const String profileIconOutline =
+      "assets/images/vuesax/outline/user.svg";
 }
