@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -9,23 +8,35 @@ import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 // استيراد ملف مكون التحميل الجديد
 
 class OffersListViewItem extends StatelessWidget {
   final int index;
-  final bool isFavorite;
-  final VoidCallback onFavoritePressed;
   final Function()? onTap;
   final MedicineEntity medicineEntity;
 
   const OffersListViewItem({
     super.key,
     required this.index,
-    required this.isFavorite,
-    required this.onFavoritePressed,
     this.onTap,
     required this.medicineEntity,
   });
+  
+  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
+  // Convert medicine entity to model for storing in favorites
+  Map<String, dynamic> _convertEntityToModel() {
+    return {
+      'id': medicineEntity.code,
+      'name': medicineEntity.name,
+      'price': medicineEntity.price,
+      'imageUrl': medicineEntity.subabaseORImageUrl,
+      'pharmacyName': medicineEntity.pharmacyName,
+      'discountRating': medicineEntity.discountRating,
+      'isNewProduct': medicineEntity.isNewProduct,
+      'description': medicineEntity.description,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,16 +126,15 @@ class OffersListViewItem extends StatelessWidget {
                   )
                 : Container(),
           ),
+          // زر المفضلة - يستخدم مكون FavoriteButton المشترك لإضافة/إزالة العرض من المفضلة
+          // Favorite icon - uses the shared FavoriteButton component to add/remove offer from favorites
           Positioned(
             top: 8.h,
             right: 8.w,
-            child: GestureDetector(
-              onTap: onFavoritePressed,
-              child: SvgPicture.asset(
-                isFavorite ? Assets.fav : Assets.nFav,
-                width: 24.w,
-                height: 24.h,
-              ),
+            child: FavoriteButton(
+              itemId: medicineEntity.code,
+              itemData: _convertEntityToModel(),
+              size: 24,
             ),
           ),
         ],

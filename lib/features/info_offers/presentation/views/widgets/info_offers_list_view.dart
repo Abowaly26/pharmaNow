@@ -33,8 +33,16 @@ class InfoOffersListView extends StatelessWidget {
           child: InfoOffersListViewItem(
             medicineEntity: medicines[index],
             index: index,
-            isFavorite: true,
-            onFavoritePressed: () {},
+            onTap: () {
+              // Navigate to medicine details view
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => MedicineDetailsView(
+                    medicineEntity: medicines[index],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

@@ -38,9 +38,16 @@ class MedicinesListView extends StatelessWidget {
                 },
                 child: MedicineListViewItem(
                   index: index,
-                  isFavorite: false,
-                  onFavoritePressed: () {},
                   medicineEntity: medicines[index],
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => MedicineDetailsView(
+                          medicineEntity: medicines[index],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               )),
     );

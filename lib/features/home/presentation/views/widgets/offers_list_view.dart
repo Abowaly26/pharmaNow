@@ -23,8 +23,6 @@ class OffersListView extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) => OffersListViewItem(
           index: index,
-          isFavorite: false,
-          onFavoritePressed: () {},
           onTap: () {
             // Navigate to medicine details view
             Navigator.of(context).push(

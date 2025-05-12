@@ -67,7 +67,6 @@ class Assets {
   static const String nFav = "assets/images/favorite_off.svg";
   static const String bannerNewProduct = "assets/images/bannerNewProduct.svg";
   static const String search_icon = "assets/images/search-normal-icon.svg";
-  static const String search_ups_icon1 = "assets/images/search_ups2.svg";
+  static const String search_ups_icon1 = "assets/images/search_ups.svg";
   static const String search_normal = "assets/images/search-normal.svg";
-  static const String search_normal2 = "assets/images/image 21 (1).png";
 }

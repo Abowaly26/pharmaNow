@@ -5,6 +5,7 @@ import 'package:pharma_now/core/services/firebase_auth_service.dart';
 import 'package:pharma_now/core/services/firestore_sevice.dart';
 import 'package:pharma_now/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
+import 'package:pharma_now/features/favorites/di/favorites_injection.dart';
 import 'package:pharma_now/features/search/presentation/cubit/cubit/search_cubit.dart';
 import '../repos/medicine_repo/medicine_repo_impl.dart';
 
@@ -23,4 +24,7 @@ void setupGetit() {
 
   // Register SearchCubit
   getIt.registerFactory<SearchCubit>(() => SearchCubit(getIt<MedicineRepo>()));
+  
+  // تسجيل خدمات المفضلات
+  FavoritesInjection.init();
 }

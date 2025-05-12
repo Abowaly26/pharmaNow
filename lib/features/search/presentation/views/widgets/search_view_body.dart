@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../../core/widgets/searchtextfield.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../home/presentation/views/medicine_details_view.dart';
+import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 import '../../cubit/cubit/search_cubit.dart';
 import '../../cubit/cubit/search_state.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
@@ -45,18 +47,32 @@ class SearchViewBody extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 90.sp,
-                          color: ColorManager.textInputColor,
+                        SvgPicture.asset(
+                          Assets.search_ups_icon1,
+                          width: 160.sp,
+                          height: 160.sp,
+                          // color: ColorManager.textInputColor,
                         ),
+                        // Icon(
+                        //   Icons.search_off,
+                        //   size: 90.sp,
+                        //   color: ColorManager.textInputColor,
+                        // ),
                         SizedBox(height: 16.h),
                         Text(
-                          'No results found for "${state.searchQuery}"',
+                          'Ups!... no results found for "${state.searchQuery}"',
+                          textAlign: TextAlign.center,
+                          style: TextStyles.sectionTitle.copyWith(
+                            color: ColorManager.blackColor,
+                            fontSize: 18.sp,
+                          ),
+                        ),
+                        Text(
+                          'Please try another search',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 18.sp,
-                            color: ColorManager.colorOfArrows,
+                            fontSize: 16.sp,
+                            color: ColorManager.textInputColor,
                           ),
                         ),
                       ],
@@ -69,37 +85,31 @@ class SearchViewBody extends StatelessWidget {
                   itemCount: state.products.length,
                   itemBuilder: (context, index) {
                     final medicine = state.products[index];
-                    // Using a stateful builder to manage favorite state locally for demo
-                    return StatefulBuilder(
-                      builder: (context, setState) {
-                        // This would normally come from a provider or another state management solution
-                        bool isFavorite =
-                            false; // Replace with actual favorite state ?? false;
-
-                        return GestureDetector(
-                          onTap: () {
-                            // Navigate to medicine details view
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => MedicineDetailsView(
-                                  medicineEntity: medicine,
-                                ),
-                              ),
-                            );
-                          },
-                          child: SearchMedicinesListViewItem(
-                            index: index,
-                            isFavorite: isFavorite,
-                            onFavoritePressed: () {
-                              setState(() {
-                                isFavorite = !isFavorite;
-                              });
-                              // Here you would usually call a method to update favorites in your state management
-                            },
-                            medicineEntity: medicine,
+                    return GestureDetector(
+                      onTap: () {
+                        // Navigate to medicine details view
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MedicineDetailsView(
+                              medicineEntity: medicine,
+                            ),
                           ),
                         );
                       },
+                      child: SearchMedicinesListViewItem(
+                        index: index,
+                        medicineEntity: medicine,
+                        onTap: () {
+                          // Navigate to medicine details view
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => MedicineDetailsView(
+                                medicineEntity: medicine,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     );
                   },
                 );
@@ -167,32 +177,48 @@ class SearchViewBody extends StatelessWidget {
 
 class SearchMedicinesListViewItem extends StatelessWidget {
   final int index;
-  final bool isFavorite;
-  final VoidCallback onFavoritePressed;
   final MedicineEntity medicineEntity;
+  final VoidCallback? onTap;
 
   const SearchMedicinesListViewItem({
     super.key,
     required this.index,
-    required this.isFavorite,
-    required this.onFavoritePressed,
     required this.medicineEntity,
+    this.onTap,
   });
+
+  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
+  // Convert medicine entity to model for storing in favorites
+  Map<String, dynamic> _convertEntityToModel() {
+    return {
+      'id': medicineEntity.code,
+      'name': medicineEntity.name,
+      'price': medicineEntity.price,
+      'imageUrl': medicineEntity.subabaseORImageUrl,
+      'pharmacyName': medicineEntity.pharmacyName,
+      'discountRating': medicineEntity.discountRating,
+      'isNewProduct': medicineEntity.isNewProduct,
+      'description': medicineEntity.description,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 12.h,
-        left: 16.r,
-        right: 16.r,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildLeftContainer(),
-          _buildRightContainer(),
-        ],
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: 12.h,
+          left: 16.r,
+          right: 16.r,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildLeftContainer(),
+            _buildRightContainer(context),
+          ],
+        ),
       ),
     );
   }
@@ -285,7 +311,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
     );
   }
 
-  Widget _buildRightContainer() {
+  Widget _buildRightContainer(BuildContext context) {
     return Container(
       width: 237.w,
       height: 124.h,
@@ -321,15 +347,14 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: onFavoritePressed,
-                  child: Padding(
-                    padding: EdgeInsets.only(right: 8.r, top: 4.r),
-                    child: SvgPicture.asset(
-                      isFavorite ? Assets.fav : Assets.nFav,
-                      width: 24.w,
-                      height: 24.h,
-                    ),
+                // زر المفضلة - يستخدم مكون FavoriteButton المشترك
+                // Favorite button - uses the shared FavoriteButton component
+                Padding(
+                  padding: EdgeInsets.only(right: 8.r, top: 4.r),
+                  child: FavoriteButton(
+                    itemId: medicineEntity.code,
+                    itemData: _convertEntityToModel(),
+                    size: 24,
                   ),
                 ),
               ],
@@ -408,10 +433,11 @@ class SearchMedicinesListViewItem extends StatelessWidget {
 
   Widget _buildLoadingAnimation() {
     return ShimmerLoadingPlaceholder(
-        width: 100.w,
-        height: 120.h,
-        baseColor: Colors.white.withOpacity(0.2),
-        highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
+      height: 100.h,
+      width: 100.w,
+      baseColor: Colors.white.withOpacity(0.2),
+      highlightColor: ColorManager.secondaryColor.withOpacity(0.4),
+    );
   }
 
   // Helper method to calculate the discounted price

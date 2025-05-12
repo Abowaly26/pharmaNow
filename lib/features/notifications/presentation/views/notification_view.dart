@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pharma_now/features/favorites/presentation/views/widgets/favoirtes_view_body.dart';
 import 'package:pharma_now/features/notifications/presentation/views/widgets/notification_view_body.dart';
 
 import '../../../../core/utils/color_manger.dart';

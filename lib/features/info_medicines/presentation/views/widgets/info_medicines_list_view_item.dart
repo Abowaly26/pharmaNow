@@ -6,35 +6,53 @@ import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 
 class InfoMedicinesListViewItem extends StatelessWidget {
   final int index;
-  final bool isFavorite;
-  final VoidCallback onFavoritePressed;
   final MedicineEntity medicineEntity;
+  final VoidCallback? onTap;
 
   const InfoMedicinesListViewItem({
     super.key,
     required this.index,
-    required this.isFavorite,
-    required this.onFavoritePressed,
     required this.medicineEntity,
+    this.onTap,
   });
+
+  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
+  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
+  // Convert medicine entity to model for storing in favorites
+  Map<String, dynamic> _convertEntityToModel() {
+    return {
+      'id': medicineEntity.code,
+      'name': medicineEntity.name,
+      'price': medicineEntity.price,
+      'imageUrl': medicineEntity.subabaseORImageUrl,
+      'pharmacyName': medicineEntity.pharmacyName,
+      'discountRating': medicineEntity.discountRating,
+      'isNewProduct': medicineEntity.isNewProduct,
+      'description': medicineEntity.description,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 12.h,
-        left: 16.r,
-        right: 16.r,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildLeftContainer(),
-          _buildRightContainer(),
-        ],
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: 12.h,
+          left: 16.r,
+          right: 16.r,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildLeftContainer(),
+            _buildRightContainer(context),
+          ],
+        ),
       ),
     );
   }
@@ -127,7 +145,7 @@ class InfoMedicinesListViewItem extends StatelessWidget {
     );
   }
 
-  Widget _buildRightContainer() {
+  Widget _buildRightContainer(BuildContext context) {
     return Container(
       width: 237.w,
       height: 124.h,
@@ -163,15 +181,14 @@ class InfoMedicinesListViewItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: onFavoritePressed,
-                  child: Padding(
-                    padding: EdgeInsets.only(right: 8.r, top: 4.r),
-                    child: SvgPicture.asset(
-                      isFavorite ? Assets.fav : Assets.nFav,
-                      width: 24.w,
-                      height: 24.h,
-                    ),
+                // زر المفضلة - يستخدم مكون FavoriteButton المشترك لإضافة/إزالة الدواء من المفضلة
+                // Favorite button - uses the shared FavoriteButton component to add/remove medicine from favorites
+                Padding(
+                  padding: EdgeInsets.only(right: 8.r, top: 4.r),
+                  child: FavoriteButton(
+                    itemId: medicineEntity.code,
+                    itemData: _convertEntityToModel(),
+                    size: 24,
                   ),
                 ),
               ],

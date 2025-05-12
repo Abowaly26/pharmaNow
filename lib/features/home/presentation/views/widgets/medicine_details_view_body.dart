@@ -2,21 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
-
-import '../../../../../core/utils/app_images.dart';
+import 'package:pharma_now/core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
+import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 
 class MedicineDetailsViewBody extends StatelessWidget {
   const MedicineDetailsViewBody({
     super.key,
-    this.isFavorite = false,
     required this.medicineEntity,
   });
 
-  final bool isFavorite;
   final MedicineEntity medicineEntity;
+
+  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
+  // Convert medicine entity to model for storing in favorites
+  Map<String, dynamic> _convertEntityToModel() {
+    return {
+      'id': medicineEntity.code,
+      'name': medicineEntity.name,
+      'price': medicineEntity.price,
+      'imageUrl': medicineEntity.subabaseORImageUrl,
+      'pharmacyName': medicineEntity.pharmacyName,
+      'discountRating': medicineEntity.discountRating,
+      'isNewProduct': medicineEntity.isNewProduct,
+      'description': medicineEntity.description,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,13 +110,14 @@ class MedicineDetailsViewBody extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: SvgPicture.asset(
-                            isFavorite ? Assets.fav : Assets.nFav,
-                            width: 32.w,
-                            height: 32.h,
-                          ),
+                        // زر المفضلة - يستخدم مكون FavoriteButton المشترك لإضافة/إزالة الدواء من المفضلة
+                        // Favorite button - uses the shared FavoriteButton component to add/remove medicine from favorites
+                        FavoriteButton(
+                          itemId: medicineEntity.code,
+                          itemData: _convertEntityToModel(),
+                          size: 32,
+                          activeColor: Colors.red,
+                          inactiveColor: Colors.grey,
                         ),
                       ],
                     ),
@@ -153,14 +167,33 @@ class MedicineDetailsViewBody extends StatelessWidget {
                           ),
                         ),
                         Spacer(),
-                        Text(
-                          "${medicineEntity.price} LE",
-                          style: TextStyle(
-                            color: Color(0xFF375DFB),
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        Column(
+                          children: [
+                            if (medicineEntity.discountRating > 0)
+                              Text(
+                                '${medicineEntity.price} EGP',
+                                style:
+                                    TextStyles.listView_product_name.copyWith(
+                                  fontSize: 12.sp,
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Colors.grey,
+                                ),
+                              ),
+
+                            // Show discounted price or regular price
+
+                            Text(
+                              medicineEntity.discountRating > 0
+                                  ? '${_calculateDiscountedPrice(medicineEntity.price.toDouble(), medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
+                                  : '${medicineEntity.price} EGP',
+                              style: TextStyle(
+                                color: Color(0xFF375DFB),
+                                fontSize: 22.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
 
@@ -197,6 +230,45 @@ class MedicineDetailsViewBody extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+          Positioned(
+            top: medicineEntity.isNewProduct ? 16.h : 48.h,
+            left: 18.2.w,
+            child: medicineEntity.isNewProduct
+                ? SvgPicture.asset(
+                    Assets.bannerNewProduct,
+                    height: 132.h,
+                    width: 106.w,
+                  )
+                : (medicineEntity.discountRating != null &&
+                        medicineEntity.discountRating > 0)
+                    ? Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          SvgPicture.asset(
+                            Assets.gold_banner,
+                            height: 32.h,
+                            width: 48.w,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 1.h,
+                              left: 28.0.h,
+                            ),
+                            child: Text(
+                              "${medicineEntity.discountRating}%",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(), // No banner if neither new nor has discount
           ),
 
           // Product image
@@ -279,6 +351,13 @@ class MedicineDetailsViewBody extends StatelessWidget {
       ),
     );
   }
+
+  String _calculateDiscountedPrice(
+      double originalPrice, double discountPercentage) {
+    double discountAmount = originalPrice * (discountPercentage / 100);
+    double discountedPrice = originalPrice - discountAmount;
+    return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
+  }
 }
 
 class SmoothScrollBehavior extends ScrollBehavior {
@@ -312,4 +391,11 @@ class BottomInnerOvalClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  // Helper method to calculate the discounted price
+  String _calculateDiscountedPrice(
+      double originalPrice, double discountPercentage) {
+    double discountAmount = originalPrice * (discountPercentage / 100);
+    double discountedPrice = originalPrice - discountAmount;
+    return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
+  }
 }

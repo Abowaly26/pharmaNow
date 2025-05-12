@@ -6,22 +6,35 @@ import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
+import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 
 class InfoOffersListViewItem extends StatelessWidget {
   final int index;
-  final bool isFavorite;
-  final VoidCallback onFavoritePressed;
   final Function()? onTap;
   final MedicineEntity medicineEntity;
 
   const InfoOffersListViewItem({
     super.key,
     required this.index,
-    required this.isFavorite,
-    required this.onFavoritePressed,
     this.onTap,
     required this.medicineEntity,
   });
+  
+  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
+  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
+  // Convert medicine entity to model for storing in favorites
+  Map<String, dynamic> _convertEntityToModel() {
+    return {
+      'id': medicineEntity.code,
+      'name': medicineEntity.name,
+      'price': medicineEntity.price,
+      'imageUrl': medicineEntity.subabaseORImageUrl,
+      'pharmacyName': medicineEntity.pharmacyName,
+      'discountRating': medicineEntity.discountRating,
+      'isNewProduct': medicineEntity.isNewProduct,
+      'description': medicineEntity.description,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +50,7 @@ class InfoOffersListViewItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildLeftContainer(),
-            _buildRightContainer(),
+            _buildRightContainer(context),
           ],
         ),
       ),
@@ -124,7 +137,7 @@ class InfoOffersListViewItem extends StatelessWidget {
     );
   }
 
-  Widget _buildRightContainer() {
+  Widget _buildRightContainer(BuildContext context) {
     return Container(
       width: 237.w,
       height: 124.h,
@@ -161,15 +174,14 @@ class InfoOffersListViewItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: onFavoritePressed,
-                  child: Padding(
-                    padding: EdgeInsets.only(right: 8.r, top: 4.r),
-                    child: SvgPicture.asset(
-                      isFavorite ? Assets.fav : Assets.nFav,
-                      width: 24.w,
-                      height: 24.h,
-                    ),
+                // زر المفضلة - يستخدم مكون FavoriteButton المشترك لإضافة/إزالة العرض من المفضلة
+                // Favorite button - uses the shared FavoriteButton component to add/remove offer from favorites
+                Padding(
+                  padding: EdgeInsets.only(right: 8.r, top: 4.r),
+                  child: FavoriteButton(
+                    itemId: medicineEntity.code,
+                    itemData: _convertEntityToModel(),
+                    size: 24,
                   ),
                 ),
               ],

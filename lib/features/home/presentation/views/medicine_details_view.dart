@@ -44,7 +44,6 @@ class MedicineDetailsView extends StatelessWidget {
       ),
       body: medicineEntity != null 
         ? MedicineDetailsViewBody(
-            isFavorite: false, // Default value, can be updated later with proper provider
             medicineEntity: medicineEntity!,
           )
         : Center(child: Text('Medicine details not available')),
