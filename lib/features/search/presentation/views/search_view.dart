@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../home/presentation/views/main_view.dart';
 import '../cubit/cubit/search_cubit.dart';
 import 'widgets/search_view_body.dart';
 
@@ -21,7 +22,11 @@ class SearchView extends StatelessWidget {
         backgroundColor: ColorManager.primaryColor,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(48.sp),
-          child: const PharmaAppBar(
+          child: PharmaAppBar(
+            isBack: true,
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, MainView.routeName);
+            },
             title: 'Search',
           ),
         ),

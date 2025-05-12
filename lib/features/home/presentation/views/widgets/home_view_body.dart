@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
 
 import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view_bloc_builder.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_bloc_builder.dart';
@@ -14,7 +15,10 @@ import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/widgets/searchtextfield.dart';
 import '../../../../info_medicines/presentation/views/info_medicines_view.dart';
+import '../../../../search/presentation/cubit/cubit/search_cubit.dart';
+import '../../../../search/presentation/views/search_view.dart';
 
 import '../../../../info_offers/presentation/views/info_offers_view.dart';
 import 'best_selling_list_view_bloc_builder.dart';
@@ -127,6 +131,19 @@ class _HomeViewBodyState extends State<HomeViewBody> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Search bar
+              Padding(
+                padding: EdgeInsets.only(bottom: 12.h),
+                child: BlocProvider(
+                  create: (context) => GetIt.instance<SearchCubit>(),
+                  child: Searchtextfield(
+                    readOnly: true,
+                    onTap: () {
+                      Navigator.pushNamed(context, SearchView.routeName);
+                    },
+                  ),
+                ),
+              ),
               _buildBannerSlider(),
               SectionWidget(
                 sectionTitle: 'Offers',
@@ -285,7 +302,7 @@ class BannerItem {
 }
 
 // Custom refresh controller class
-class RefreshController extends ChangeNotifier {
+class RefreshController {
   bool _isRefreshing = false;
   bool _isLoading = false;
 
@@ -294,38 +311,32 @@ class RefreshController extends ChangeNotifier {
 
   void refreshCompleted() {
     _isRefreshing = false;
-    notifyListeners();
   }
 
   void loadComplete() {
     _isLoading = false;
-    notifyListeners();
   }
 
   void refreshFailed() {
     _isRefreshing = false;
-    notifyListeners();
   }
 
   void loadFailed() {
     _isLoading = false;
-    notifyListeners();
   }
 
   void requestRefresh() {
     if (_isRefreshing) return;
     _isRefreshing = true;
-    notifyListeners();
   }
 
   void requestLoading() {
     if (_isLoading) return;
     _isLoading = true;
-    notifyListeners();
   }
 
   void dispose() {
-    super.dispose();
+    // Nothing to dispose
   }
 }
 
