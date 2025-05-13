@@ -15,7 +15,7 @@ class ActiveItem extends StatelessWidget {
     return Center(
       child: Container(
         padding: EdgeInsets.only(
-          right: 16.w,
+          right: 7.w,
         ),
         decoration: ShapeDecoration(
           color: const Color(0xFFEEEEEE),
@@ -43,7 +43,7 @@ class ActiveItem extends StatelessWidget {
               )),
             ),
             SizedBox(
-              width: 4.w,
+              width: 3.w,
             ),
             Text(
               text,

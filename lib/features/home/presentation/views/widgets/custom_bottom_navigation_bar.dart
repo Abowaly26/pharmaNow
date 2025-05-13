@@ -75,36 +75,33 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar>
           )
         ],
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.w),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: bottomNavigationBarEntity.asMap().entries.map((e) {
-            var index = e.key;
-            var entity = e.value;
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: bottomNavigationBarEntity.asMap().entries.map((e) {
+          var index = e.key;
+          var entity = e.value;
 
-            return Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  // Trigger animation and state update
-                  _animationController.forward(from: 0.0);
-                  setState(() {
-                    selectedIndex = index;
-                    widget.onItemTapped(index);
-                  });
-                },
-                child: Center(
-                  child: NavigationBarItem(
-                    isSelected: selectedIndex == index,
-                    bottomNavigationBarEntity: entity,
-                    animation: _scaleAnimation,
-                  ),
+          return Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                // Trigger animation and state update
+                _animationController.forward(from: 0.0);
+                setState(() {
+                  selectedIndex = index;
+                  widget.onItemTapped(index);
+                });
+              },
+              child: Center(
+                child: NavigationBarItem(
+                  isSelected: selectedIndex == index,
+                  bottomNavigationBarEntity: entity,
+                  animation: _scaleAnimation,
                 ),
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
