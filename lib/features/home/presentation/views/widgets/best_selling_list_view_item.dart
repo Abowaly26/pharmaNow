@@ -6,7 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 
 class BestSellingListViewItem extends StatelessWidget {
   final int index;

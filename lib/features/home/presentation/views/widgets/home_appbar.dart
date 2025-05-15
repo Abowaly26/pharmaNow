@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/core/utils/app_images.dart';
-import 'package:pharma_now/core/utils/color_manger.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../core/helper_functions/get_user.dart';
-import '../../../../../core/utils/text_style.dart';
 import '../../../../notifications/presentation/views/notification_view.dart';
+import '../../../../profile/presentation/providers/profile_provider.dart';
 import '../../ui_model/action_item.dart';
+import '../../../../../core/utils/color_manger.dart';
+import '../../../../../core/utils/app_images.dart';
+import '../../../../../core/utils/text_styles.dart';
+import '../../../../../core/utils/app_images.dart';
+import '../../../../../core/utils/app_images.dart';
 
 class HomeAppbar extends StatelessWidget {
   HomeAppbar({super.key});
 
-  // Define actions list without using context
   late final List<ActionItem> actions = [
     ActionItem(
       icon: Badge(
@@ -24,7 +27,6 @@ class HomeAppbar extends StatelessWidget {
             width: 24,
             height: 24,
           )),
-      // Changed to accept BuildContext in the callback
       callback: (BuildContext ctx) {
         Navigator.of(ctx).pushReplacement(
           MaterialPageRoute(
@@ -33,20 +35,6 @@ class HomeAppbar extends StatelessWidget {
         );
       },
     ),
-    // ActionItem(
-    //   icon: SvgPicture.asset(
-    //     Assets.search_normal,
-    //     colorFilter: ColorFilter.mode(
-    //       ColorManager.primaryColor,
-    //       BlendMode.srcIn,
-    //     ),
-    //     width: 24,
-    //     height: 24,
-    //   ),
-    //   callback: (BuildContext ctx) {
-    //     // Your second action callback
-    //   },
-    // ),
   ];
 
   @override
@@ -54,7 +42,6 @@ class HomeAppbar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: ColorManager.secondaryColor.withOpacity(0.9),
-        // color: Color(0xFF3A86FF),
         borderRadius: BorderRadius.only(
             bottomRight: Radius.circular(35.r),
             bottomLeft: Radius.circular(35.r)),
@@ -63,14 +50,55 @@ class HomeAppbar extends StatelessWidget {
       padding: EdgeInsets.only(top: 20.h, left: 24.w, bottom: 16.h),
       child: AppBar(
           backgroundColor: Colors.transparent,
-          leading: CircleAvatar(
-            radius: 24.r,
-            backgroundImage: AssetImage('assets/images/profile.png'),
+          leadingWidth: 45.w,
+          leading: Padding(
+            padding: EdgeInsets.only(left: 8.w),
+            child: Consumer<ProfileProvider>(
+              builder: (context, provider, child) {
+                return CircleAvatar(
+                  radius: 20.r,
+                  backgroundImage: provider.profileImageUrl != null
+                      ? NetworkImage(provider.profileImageUrl!)
+                      : null,
+                  backgroundColor: Colors.purple,
+                  child: provider.profileImageUrl == null
+                      ? Text(
+                          provider.currentUser != null &&
+                                  provider.currentUser!.name.isNotEmpty
+                              ? provider.currentUser!.name[0].toUpperCase()
+                              : getUser().name.isNotEmpty
+                                  ? getUser().name[0].toUpperCase()
+                                  : '?',
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
+                );
+              },
+            ),
           ),
-          elevation: 0,
-          title: Text(
-            'Hello ${getUser().name} 👋',
-            style: TextStyles.description,
+          titleSpacing: 8.w, // Remove spacing between leading and title
+          title: Consumer<ProfileProvider>(
+            builder: (context, provider, child) {
+              final userName = provider.currentUser != null &&
+                      provider.currentUser!.name.isNotEmpty
+                  ? provider.currentUser!.name
+                  : getUser().name;
+
+              final displayName = userName.length > 10
+                  ? '${userName.substring(0, 8)}...'
+                  : userName;
+
+              return Text(
+                'Hello $displayName 👋',
+                style: TextStyles.description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              );
+            },
           ),
           actions: [
             SizedBox(
@@ -79,12 +107,36 @@ class HomeAppbar extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: actions
                         .map((e) => InkWell(
-                              onTap: () =>
-                                  e.callback(context), // Pass the context here
+                              onTap: () => e.callback(context),
                               child: e.icon,
                             ))
                         .toList()))
           ]),
     );
   }
+}
+
+class ArcPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final strokeWidth = 5.0;
+    final rect = Offset.zero & size;
+
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      rect.deflate(strokeWidth / 2),
+      1.45,
+      5.2,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

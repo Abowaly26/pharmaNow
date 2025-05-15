@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/models/medicine_model.dart';
 import 'package:pharma_now/features/favorites/presentation/providers/favorites_provider.dart';
-import 'package:pharma_now/core/utils/text_style.dart';
+import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';

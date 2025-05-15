@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/searchtextfield.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../home/presentation/views/medicine_details_view.dart';

@@ -18,6 +18,7 @@ import '../../features/on_boarding/presentation/views/onboarding_view.dart';
 import '../../features/profile/presentation/views/profile_view.dart';
 import '../../features/profile/presentation/views/widgets/profile_tab/edit_profile_view.dart';
 import '../../features/profile/presentation/views/widgets/profile_tab/notification_view.dart';
+import '../../features/profile/presentation/views/widgets/profile_tab/change_password_view.dart';
 import '../../features/search/presentation/views/search_view.dart';
 
 Route<dynamic> onGenerateRoute(RouteSettings setting) {
@@ -66,6 +67,9 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
 
     case EditProfile.routeName:
       return MaterialPageRoute(builder: (context) => EditProfile());
+
+    case ChangePasswordView.routeName:
+      return MaterialPageRoute(builder: (context) => ChangePasswordView());
 
     case MedicineDetailsView.routeName:
       return MaterialPageRoute(builder: (context) => MedicineDetailsView());

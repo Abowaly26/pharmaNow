@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
-import 'package:pharma_now/core/utils/text_style.dart';
+import 'package:pharma_now/core/utils/text_styles.dart';
 
 // AppBar buildAppBar({
 //   required String title,

@@ -10,9 +10,16 @@ UserEntity getUser() {
   var jsonString = prefs.getString(kUserData);
 
   if (jsonString == null || jsonString.isEmpty) {
-    throw Exception("No user data found in SharedPreferences");
+    // بدلاً من رمي استثناء، نُرجع كائن UserModel فارغ بقيم افتراضية
+    return UserModel(name: '', email: '', uId: '');
   }
 
-  var userEntity = UserModel.fromJson(jsonDecode(jsonString));
-  return userEntity;
+  try {
+    var userEntity = UserModel.fromJson(jsonDecode(jsonString));
+    return userEntity;
+  } catch (e) {
+    // معالجة أي خطأ في تحليل البيانات
+    print("Error parsing user data: $e");
+    return UserModel(name: '', email: '', uId: '');
+  }
 }

@@ -7,12 +7,16 @@ class SettingItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback? onTap;
+  final Color? iconColor;
+  final Color? textColor;
 
   const SettingItem({
     super.key,
     required this.icon,
     required this.title,
     this.onTap,
+    this.iconColor,
+    this.textColor,
   });
 
   @override
@@ -31,8 +35,8 @@ class SettingItem extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                color: Color(0xFF3638DA),
-                size: 24,
+                color: iconColor ?? Color(0xFF3638DA),
+                size: 20,
               ),
             ),
             SizedBox(width: 16),
@@ -40,13 +44,13 @@ class SettingItem extends StatelessWidget {
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 18.sp,
-                  color: Color(0xff4F5A69),
+                  fontSize: 14.sp,
+                  color: textColor ?? Color(0xff4F5A69),
                 ),
               ),
             ),
             Icon(Icons.arrow_forward_ios,
-                size: 16, color: ColorManager.colorOfArrows),
+                size: 14, color: ColorManager.colorOfArrows),
           ],
         ),
       ),

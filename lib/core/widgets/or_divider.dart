@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
-import 'package:pharma_now/core/utils/text_style.dart';
+import 'package:pharma_now/core/utils/text_styles.dart';
 
 class OrDivider extends StatelessWidget {
   const OrDivider({super.key});

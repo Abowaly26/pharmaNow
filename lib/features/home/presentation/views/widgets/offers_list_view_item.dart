@@ -6,7 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 // استيراد ملف مكون التحميل الجديد
@@ -22,7 +22,7 @@ class OffersListViewItem extends StatelessWidget {
     this.onTap,
     required this.medicineEntity,
   });
-  
+
   // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {

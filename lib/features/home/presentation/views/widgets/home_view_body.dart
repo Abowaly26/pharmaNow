@@ -14,7 +14,7 @@ import '../../../../../core/cubits/offers_cubit/offers_cubit.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/searchtextfield.dart';
 import '../../../../info_medicines/presentation/views/info_medicines_view.dart';
 import '../../../../search/presentation/cubit/cubit/search_cubit.dart';

@@ -7,7 +7,7 @@ import 'package:pharma_now/features/auth/presentation/views/widget/verification_
 
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/bottom_pop_up.dart';
 
 class ResetPasswordViewBody extends StatelessWidget {

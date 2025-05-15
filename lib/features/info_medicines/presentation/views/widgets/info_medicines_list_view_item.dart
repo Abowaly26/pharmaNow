@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 

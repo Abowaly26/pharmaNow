@@ -5,7 +5,7 @@ import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 
 class MedicineDetailsViewBody extends StatelessWidget {

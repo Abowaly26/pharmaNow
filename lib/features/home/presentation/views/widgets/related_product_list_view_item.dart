@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 
 class RelatedProudcutListViewItem extends StatelessWidget {
   final int index;

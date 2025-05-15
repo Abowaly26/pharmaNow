@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../../core/utils/color_manger.dart';
-import '../../../../core/utils/text_style.dart';
+import '../../../../core/utils/text_styles.dart';
 
 class ActiveItem extends StatelessWidget {
   const ActiveItem({super.key, required this.text, required this.image});

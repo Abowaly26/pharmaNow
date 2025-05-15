@@ -7,6 +7,7 @@ import 'package:pharma_now/core/helper_functions/on_generate_route.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
 import 'package:pharma_now/features/favorites/di/favorites_injection.dart';
+import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 import 'package:pharma_now/firebase_options.dart';
 
@@ -33,6 +34,7 @@ class PharmaNow extends StatelessWidget {
       // إضافة مزود المفضلات للتطبيق
       providers: [
         ...FavoritesInjection.getFavoritesProviders(),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
       child: ScreenUtilInit(
           designSize: Size(375, 812),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
-import 'package:pharma_now/core/utils/text_style.dart';
+import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/widgets/or_divider.dart';
 import 'package:pharma_now/core/widgets/anotherStepLogin.dart';
 import 'package:pharma_now/core/widgets/password_field.dart';

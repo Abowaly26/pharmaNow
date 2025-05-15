@@ -6,7 +6,7 @@ import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_style.dart';
+import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 
@@ -21,7 +21,7 @@ class MedicineListViewItem extends StatelessWidget {
     required this.medicineEntity,
     this.onTap,
   });
-  
+
   // من أجل تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
   // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
   // Convert medicine entity to model for storing in favorites
