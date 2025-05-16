@@ -19,7 +19,7 @@ class MedicineListViewBlocBuilder extends StatelessWidget {
             medicines: state.medicines,
           );
         } else if (state is MedicinesFailure) {
-          return CustomErrorWidget(text: state.errMessage);
+          return CustomErrorWidget(message: state.errMessage);
         } else {
           return Skeletonizer(
             enabled: true,

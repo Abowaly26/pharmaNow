@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 abstract class Failures {
   final String message;
   Failures(this.message);

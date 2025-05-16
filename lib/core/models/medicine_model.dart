@@ -1,5 +1,6 @@
 import 'package:pharma_now/core/helper_functions/get_avg_rating.dart';
 import 'package:pharma_now/core/models/review_model.dart';
+import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 import '../enitites/medicine_entity.dart';
 
 class MedicineModel {
@@ -100,4 +101,43 @@ class MedicineModel {
       'discountRating': discountRating,
     };
   }
+}
+
+// داخل ملف user_model.dart
+class UserModel implements UserEntity {
+  // ... باقي الخصائص مثل uId, name, email
+  final String? profileImageUrl; // <-- هذه الخاصية مهمة
+
+  UserModel({
+    // ... required this.uId, required this.name, required this.email,
+    this.profileImageUrl,
+  });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      // ... uId: json['uId'], name: json['name'], email: json['email'],
+      profileImageUrl:
+          json['profileImageUrl'] as String?, // يتم جلبها من Firestore
+    );
+  }
+
+  // قد تحتاج أيضاً إلى دالة toJson إذا كنت تقوم بتحديث هذا الحقل في Firestore
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    // ... data['uId'] = this.uId;
+    data['profileImageUrl'] = this.profileImageUrl;
+    return data;
+  }
+
+  @override
+  // TODO: implement email
+  String get email => throw UnimplementedError();
+
+  @override
+  // TODO: implement name
+  String get name => throw UnimplementedError();
+
+  @override
+  // TODO: implement uId
+  String get uId => throw UnimplementedError();
 }

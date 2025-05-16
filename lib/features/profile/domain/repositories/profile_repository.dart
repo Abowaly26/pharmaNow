@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:pharma_now/core/errors/exceptions.dart';
 import 'package:pharma_now/features/auth/data/models/user_model.dart';
 import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 import 'firebase_profile_error_handler.dart';
@@ -27,18 +28,19 @@ class FirebaseProfileRepository implements ProfileRepository {
     final User? currentUser = _firebaseAuth.currentUser;
 
     if (currentUser == null) {
+      log('No user logged in for profile update',
+          name: 'FirebaseProfileRepository');
       throw Exception('No user is currently logged in');
     }
 
-    // Update displayName in Auth
+    log('Updating user profile for UID: ${currentUser.uid}',
+        name: 'FirebaseProfileRepository');
     await currentUser.updateDisplayName(userEntity.name);
-
-    // Update user data in Firestore
-    await _firestore.collection('users').doc(currentUser.uid).update({
+    await _firestore.collection('users').doc(currentUser.uid).set({
       'name': userEntity.name,
       'email': userEntity.email,
-      // Add any additional fields here
-    });
+    }, SetOptions(merge: true)); // Use set with merge to avoid overwriting
+    log('User profile updated in Firestore', name: 'FirebaseProfileRepository');
   }
 
   @override
@@ -106,9 +108,22 @@ class FirebaseProfileRepository implements ProfileRepository {
   @override
   Future<void> logoutUser() async {
     try {
+      // Clear local state
       await _firebaseAuth.signOut();
+      
+      // Clear any local storage or cache if needed
+      // This would depend on your app's specific requirements
+      
+      // Clear any other providers or streams
+      // For example, if you have a user provider:
+      // final userProvider = Provider.of<UserProvider>(context, listen: false);
+      // userProvider.clearUser();
+      
     } catch (e) {
-      throw Exception('Failed to log out: ${e.toString()}');
+      log('Logout error: $e', name: 'FirebaseProfileRepository');
+      throw CustomException(
+        message: 'Failed to log out: ${e.toString()}'
+      );
     }
   }
 
@@ -138,6 +153,27 @@ class FirebaseProfileRepository implements ProfileRepository {
       await currentUser.delete();
     } catch (e) {
       throw Exception('Failed to delete account: ${e.toString()}');
+    }
+  }
+
+  Future<UserEntity?> getUserProfile(String uid) async {
+    log('Fetching user profile for UID: $uid',
+        name: 'FirebaseProfileRepository');
+    try {
+      final docSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (docSnapshot.exists) {
+        log('User profile found in Firestore',
+            name: 'FirebaseProfileRepository');
+        return UserModel.fromJson(docSnapshot.data()!);
+      }
+      log('No user profile found in Firestore',
+          name: 'FirebaseProfileRepository');
+      return null;
+    } catch (e) {
+      log('Error fetching user profile: $e', name: 'FirebaseProfileRepository');
+      throw CustomException(
+          message: 'Failed to fetch user profile: ${e.toString()}');
     }
   }
 

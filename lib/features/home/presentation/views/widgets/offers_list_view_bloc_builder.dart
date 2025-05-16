@@ -18,7 +18,7 @@ class OffersListViewBlocBuilder extends StatelessWidget {
             medicines: state.medicines,
           );
         } else if (state is OffersFailure) {
-          return CustomErrorWidget(text: state.errMessage);
+          return CustomErrorWidget(message: state.errMessage);
         } else {
           return Skeletonizer(
             enabled: true,

@@ -1,47 +1,46 @@
-import 'dart:io';
+import 'dart:developer';
+import 'dart:io'; // Can be removed if no longer used in this file
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
+// import 'package:image_picker/image_picker.dart'; // Removed
 import 'package:provider/provider.dart';
-
-import '../../../../../../core/helper_functions/get_user.dart';
 import '../../../../../../core/utils/app_images.dart';
 import '../../../../../../core/utils/button_style.dart';
 import '../../../../../../core/utils/color_manger.dart';
 import '../../../../../../core/widgets/custom_app_bar.dart';
 import '../../../../../../core/widgets/custom_text_field.dart';
-import '../../../../../home/presentation/views/widgets/home_appbar.dart';
 import '../../../../presentation/providers/profile_provider.dart';
-import '../profile_view_body.dart';
-import 'change_password_view.dart';
 
 class EditProfile extends StatefulWidget {
   static const String routeName = "EditProfile";
-
   @override
   State<EditProfile> createState() => _EditProfileState();
 }
 
 class _EditProfileState extends State<EditProfile> {
   final TextEditingController _nameController = TextEditingController();
-  File? _selectedImage;
-  bool _isUploading = false;
+  // File? _selectedImage; // Removed
+  // bool _isUploading = false; // Removed
 
+  @override
   @override
   void initState() {
     super.initState();
-    // Use username from Provider if available, otherwise from getUser()
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<ProfileProvider>(context, listen: false);
       if (provider.currentUser != null &&
           provider.currentUser!.name.isNotEmpty) {
-        setState(() {
-          _nameController.text = provider.currentUser!.name;
-        });
+        _nameController.text = provider.currentUser!.name;
       } else {
-        _nameController.text = getUser().name;
+        final firebaseUser = FirebaseAuth.instance.currentUser;
+        _nameController.text = firebaseUser?.displayName ??
+            firebaseUser?.email?.split('@')[0] ??
+            '';
       }
+      log('Initialized name controller with: ${_nameController.text}',
+          name: 'EditProfile');
     });
   }
 
@@ -51,59 +50,32 @@ class _EditProfileState extends State<EditProfile> {
     super.dispose();
   }
 
-  Future<void> _selectImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  // Removed _selectImage function
+  // Future<void> _selectImage() async { ... }
 
-    if (image != null) {
-      setState(() {
-        _selectedImage = File(image.path);
-      });
-
-      // Upload image immediately
-      _uploadProfileImage();
-    }
-  }
-
-  Future<void> _uploadProfileImage() async {
-    if (_selectedImage == null) return;
-
-    setState(() {
-      _isUploading = true;
-    });
-
-    try {
-      final provider = Provider.of<ProfileProvider>(context, listen: false);
-      await provider.updateProfileImage(_selectedImage!);
-
-      if (provider.status == ProfileStatus.error) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(provider.errorMessage)));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Profile image updated successfully')));
-      }
-    } finally {
-      setState(() {
-        _isUploading = false;
-      });
-    }
-  }
+  // Removed _uploadProfileImage function
+  // Future<void> _uploadProfileImage() async { ... }
 
   Future<void> _updateProfile() async {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a valid name')));
+      return;
+    }
 
     await provider.updateProfile(
       name: _nameController.text.trim(),
     );
-
-    if (provider.status == ProfileStatus.error) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(provider.errorMessage)));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')));
-      Navigator.pop(context);
+    if (mounted) {
+      if (provider.status == ProfileStatus.error) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(provider.errorMessage)));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile updated successfully')));
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -114,14 +86,14 @@ class _EditProfileState extends State<EditProfile> {
     final width = size.width;
     final height = size.height;
     final avatarRadius = width * 0.2;
-    final outerCircleSize = avatarRadius * 2.2;
 
     return Scaffold(
       backgroundColor: ColorManager.primaryColor,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(48.sp),
         child: PharmaAppBar(
-          title: 'Edit Profile',
+          // Ensure PharmaAppBar is defined correctly
+          title: 'Edit Profile', // App bar title
           isBack: true,
           onPressed: () => Navigator.pop(context),
         ),
@@ -133,89 +105,46 @@ class _EditProfileState extends State<EditProfile> {
             child: Column(
               children: [
                 SizedBox(height: 0.03 * height),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: outerCircleSize,
-                      height: outerCircleSize,
-                      child: CustomPaint(painter: ArcPainter()),
-                    ),
-                    _isUploading
-                        ? CircularProgressIndicator()
-                        : Builder(builder: (context) {
-                            // Check if there is a selected image or profile image
-                            bool hasImage = _selectedImage != null ||
-                                provider.profileImageUrl != null;
-                            if (hasImage) {
-                              // If there is an image, display it
-                              return CircleAvatar(
-                                radius: avatarRadius,
-                                backgroundImage: _selectedImage != null
-                                    ? FileImage(_selectedImage!)
-                                    : NetworkImage(provider.profileImageUrl!)
-                                        as ImageProvider,
-                              );
-                            } else {
-                              // If there is no image, display the first letter
-                              return CircleAvatar(
-                                radius: avatarRadius,
-                                backgroundColor: Colors.purple,
-                                child: Text(
-                                  provider.currentUser != null &&
-                                          provider.currentUser!.name.isNotEmpty
-                                      ? provider.currentUser!.name[0]
-                                          .toUpperCase()
-                                      : getUser().name.isNotEmpty
-                                          ? getUser().name[0].toUpperCase()
-                                          : '?',
-                                  style: TextStyle(
-                                    fontSize: avatarRadius * 0.8,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                            }
-                          }),
-                    Positioned(
-                      left: width * 0.32,
-                      right: width * 0.12,
-                      bottom: width * 0.01,
-                      child: GestureDetector(
-                        onTap: _selectImage,
-                        child: Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 5,
-                                offset: Offset(0, 2),
-                              )
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            size: 30,
-                            color: Colors.blue,
-                          ),
+                // Display avatar (initial letter only)
+                Consumer<ProfileProvider>(
+                  // Use Consumer to get the latest Provider data
+                  builder: (context, currentProviderState, child) {
+                    String initialLetter = '?';
+                    if (currentProviderState.currentUser != null &&
+                        currentProviderState.currentUser!.name.isNotEmpty) {
+                      initialLetter = currentProviderState.currentUser!.name[0]
+                          .toUpperCase();
+                    }
+                    return CircleAvatar(
+                      radius: avatarRadius,
+                      backgroundColor: Colors.purple, // Avatar background color
+                      child: Text(
+                        initialLetter,
+                        style: TextStyle(
+                          fontSize: avatarRadius * 0.8,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
+                // Removed Stack and Positioned for camera
                 SizedBox(height: 0.01 * height),
                 Consumer<ProfileProvider>(
                   builder: (context, providerData, _) {
-                    final userName = providerData.currentUser != null &&
-                            providerData.currentUser!.name.isNotEmpty
-                        ? providerData.currentUser!.name
-                        : getUser().name;
+                    String userName = providerData.currentUser?.name ?? '';
+                    if (providerData.currentUser == null || userName.isEmpty) {
+                      final firebaseUser = FirebaseAuth.instance.currentUser;
+                      userName = firebaseUser?.displayName ??
+                          firebaseUser?.email?.split('@')[0] ??
+                          "User";
+                    }
+                    if (_nameController.text.isNotEmpty) {
+                      userName = _nameController.text;
+                    }
                     return Text(
-                      userName,
+                      userName.isNotEmpty ? userName : "User",
                       style:
                           TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     );
@@ -224,10 +153,7 @@ class _EditProfileState extends State<EditProfile> {
                 SizedBox(height: 0.01 * height),
                 Consumer<ProfileProvider>(
                   builder: (context, providerData, _) {
-                    final userEmail = providerData.currentUser != null &&
-                            providerData.currentUser!.email.isNotEmpty
-                        ? providerData.currentUser!.email
-                        : getUser().email;
+                    final userEmail = providerData.currentUser?.email ?? "";
                     return Text(
                       userEmail,
                       style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -236,31 +162,32 @@ class _EditProfileState extends State<EditProfile> {
                 ),
                 SizedBox(height: 0.04 * height),
                 CustomTextField(
+                  // Ensure CustomTextField is defined correctly
                   controller: _nameController,
                   textInputType: TextInputType.name,
-                  lable: 'Name',
-                  icon: Assets.nameIcon,
-                  hint: 'Enter your name',
+                  lable: 'Name', // Name field label
+                  icon: Assets.nameIcon, // Ensure Assets.nameIcon is defined
+                  hint: 'Enter your name', // Hint text for name field
+                  // You can add onChanged here if you want to update the Consumer for name immediately
+                  // onChanged: (value) {
+                  //   // setState(() {}); // Simple way to rebuild the Consumer for name
+                  // }
                 ),
                 SizedBox(height: 0.05 * height),
                 ElevatedButton(
-                  style: ButtonStyles.primaryButton,
-                  onPressed: provider.isLoading ? null : _updateProfile,
-                  child: provider.isLoading
+                  style: ButtonStyles
+                      .primaryButton, // Ensure ButtonStyles.primaryButton is defined
+                  onPressed: provider.isLoading ||
+                          provider.status == ProfileStatus.loading
+                      ? null
+                      : _updateProfile, // Disable button during loading
+                  child: provider.isLoading ||
+                          provider.status == ProfileStatus.loading
                       ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Save Changes', style: TextStyles.buttonLabel),
+                      : Text('Save Changes',
+                          style: TextStyles.buttonLabel), // Save button text
                 ),
                 SizedBox(height: 0.02 * height),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, ChangePasswordView.routeName);
-                  },
-                  child: Text(
-                    'Change Password',
-                    style: TextStyle(
-                        color: Colors.blue, fontWeight: FontWeight.bold),
-                  ),
-                ),
               ],
             ),
           ),

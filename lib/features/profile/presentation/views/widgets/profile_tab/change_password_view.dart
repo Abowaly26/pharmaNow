@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
@@ -48,21 +50,26 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
       return;
     }
 
+    log('Attempting to change password', name: 'ChangePasswordView');
     await provider.changePassword(
       _currentPasswordController.text,
       _newPasswordController.text,
     );
 
     if (provider.status == ProfileStatus.error) {
+      log('Password change failed: ${provider.errorMessage}',
+          name: 'ChangePasswordView');
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(provider.errorMessage)));
     } else {
+      log('Password changed successfully', name: 'ChangePasswordView');
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Password changed successfully')));
       Navigator.pop(context);
     }
   }
 
+// ??????????????????????????????????
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context);

@@ -3,15 +3,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../core/helper_functions/get_user.dart';
 import '../../../../notifications/presentation/views/notification_view.dart';
 import '../../../../profile/presentation/providers/profile_provider.dart';
 import '../../ui_model/action_item.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/text_styles.dart';
-import '../../../../../core/utils/app_images.dart';
-import '../../../../../core/utils/app_images.dart';
 
 class HomeAppbar extends StatelessWidget {
   HomeAppbar({super.key});
@@ -55,42 +52,40 @@ class HomeAppbar extends StatelessWidget {
             padding: EdgeInsets.only(left: 8.w),
             child: Consumer<ProfileProvider>(
               builder: (context, provider, child) {
-                return CircleAvatar(
-                  radius: 20.r,
-                  backgroundImage: provider.profileImageUrl != null
-                      ? NetworkImage(provider.profileImageUrl!)
-                      : null,
-                  backgroundColor: Colors.purple,
-                  child: provider.profileImageUrl == null
-                      ? Text(
-                          provider.currentUser != null &&
-                                  provider.currentUser!.name.isNotEmpty
-                              ? provider.currentUser!.name[0].toUpperCase()
-                              : getUser().name.isNotEmpty
-                                  ? getUser().name[0].toUpperCase()
-                                  : '?',
-                          style: TextStyle(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        )
-                      : null,
-                );
+                return Consumer<ProfileProvider>(
+                    // استخدام Consumer للحصول على أحدث بيانات Provider
+                    builder: (context, currentProviderState, child) {
+                  String initialLetter = '?';
+                  if (currentProviderState.currentUser != null &&
+                      currentProviderState.currentUser!.name.isNotEmpty) {
+                    initialLetter =
+                        currentProviderState.currentUser!.name[0].toUpperCase();
+                  }
+                  return CircleAvatar(
+                    radius: 20.r,
+                    backgroundColor: Colors.purple,
+                    child: Text(
+                      initialLetter,
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  );
+                });
               },
             ),
           ),
           titleSpacing: 8.w, // Remove spacing between leading and title
           title: Consumer<ProfileProvider>(
             builder: (context, provider, child) {
-              final userName = provider.currentUser != null &&
-                      provider.currentUser!.name.isNotEmpty
-                  ? provider.currentUser!.name
-                  : getUser().name;
-
-              final displayName = userName.length > 10
-                  ? '${userName.substring(0, 8)}...'
-                  : userName;
+              final userName = provider.currentUser?.name ?? '';
+              final displayName = userName.isEmpty
+                  ? 'Guest'
+                  : userName.length > 10
+                      ? '${userName.substring(0, 8)}...'
+                      : userName;
 
               return Text(
                 'Hello $displayName 👋',
