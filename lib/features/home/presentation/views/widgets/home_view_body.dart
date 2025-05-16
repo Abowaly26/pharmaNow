@@ -46,18 +46,21 @@ class _HomeViewBodyState extends State<HomeViewBody> {
       title: 'Discount',
       discount: '50%',
       buttonText: 'Buy Now',
+      overlayImage: Assets.medicineBro, // Add your overlay image asset here
     ),
     BannerItem(
-      image: Assets.rectangleBanner, // Replace with other banner images
+      image: Assets.rectangleBanner,
       title: 'Special',
       discount: '30%',
       buttonText: 'Shop Now',
+      overlayImage: Assets.publicHealth, // Add your overlay image asset here
     ),
     BannerItem(
-      image: Assets.rectangleBanner, // Replace with other banner images
+      image: Assets.rectangleBanner,
       title: 'New Arrival',
       discount: '20%',
       buttonText: 'Explore',
+      overlayImage: Assets.medicineAmico, // Add your overlay image asset here
     ),
   ];
 
@@ -243,21 +246,39 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   Widget _buildBannerItem(BannerItem banner) {
     return Stack(
       children: [
+        // Background banner
         Container(
           width: double.infinity,
-          height: 1800.h,
+          height: 180.h,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
             child: SvgPicture.asset(
               width: double.infinity,
-              Assets.rectangleBanner,
+              banner.image,
               fit: BoxFit.fill,
             ),
           ),
         ),
+
+        // Overlay image (positioned where you want it)
+        if (banner.overlayImage != null)
+          Positioned(
+            top: 6.h,
+            right: 20.w,
+            child: Container(
+              height: 173.h,
+              width: 173.w,
+              child: SvgPicture.asset(
+                banner.overlayImage!,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+
+        // Text content (already in your code)
         Positioned(
-          top: 30,
-          left: 42,
+          top: 16.h,
+          left: 16.w,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -293,12 +314,14 @@ class BannerItem {
   final String title;
   final String discount;
   final String buttonText;
+  final String? overlayImage; // New field for overlay image
 
   BannerItem({
     required this.image,
     required this.title,
     required this.discount,
     required this.buttonText,
+    this.overlayImage, // Optional overlay image
   });
 }
 

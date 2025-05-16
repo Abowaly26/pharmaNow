@@ -94,10 +94,10 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
           SizedBox(height: 24.h),
           SvgPicture.asset(
             Assets.favState,
-            height: 320.h,
-            width: 320.w,
+            height: 280.h,
+            width: 280.w,
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 2.h),
           Text(
             'Your favorite medicines will appear here',
             style: TextStyles.description.copyWith(color: Colors.grey.shade700),
