@@ -315,7 +315,7 @@ class ProfileViewBody extends StatelessWidget {
                               }
                             },
                             child: Text('Logout',
-                                style: TextStyles.skip
+                                style: TextStyles.buttonLabel
                                     .copyWith(color: ColorManager.redColorF5)),
                           ),
                         ),
@@ -327,7 +327,7 @@ class ProfileViewBody extends StatelessWidget {
                               Navigator.of(context).pop();
                             },
                             child: Text('Cancel',
-                                style: TextStyles.skip.copyWith(
+                                style: TextStyles.buttonLabel.copyWith(
                                     color: ColorManager.primaryColor)),
                           ),
                         ),
