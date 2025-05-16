@@ -1,3 +1,5 @@
+import 'dart:core';
+
 class Assets {
   Assets._();
 
@@ -85,4 +87,11 @@ class Assets {
       "assets/images/vuesax/outline/shopping-cart.svg";
   static const String profileIconOutline =
       "assets/images/vuesax/outline/user.svg";
+  static const String favState = "assets/images/fav_state.svg";
+  static const String rectangleBanner = "assets/images/Rectangle 2.svg";
+
+  static const String medicine = "assets/images/Medicine-amico.svg";
+  static const String publicHealth = "assets/images/Public health-amico.svg";
+  static const String medicineBro = "assets/images/Medicine-bro.svg";
+  // static const String publicHealthBro = "assets/images/Public health-bro.svg";
 }

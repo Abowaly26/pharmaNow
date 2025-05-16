@@ -12,6 +12,8 @@ import 'package:pharma_now/features/profile/presentation/views/widgets/profile_t
 import 'package:provider/provider.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 
+import 'profile_tab/notification_view.dart';
+
 // ArcPainter and SettingItem remain the same
 class ArcPainter extends CustomPainter {
   @override
@@ -220,6 +222,7 @@ class ProfileViewBody extends StatelessWidget {
                 icon: Icons.notifications,
                 title: "Notifications", // Notifications
                 onTap: () {
+                  Navigator.pushNamed(context, Notifications.routeName);
                   // Navigator.pushNamed(context, Notifications.routeName); // Ensure this route exists
                 },
               ),

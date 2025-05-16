@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 
 import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view_bloc_builder.dart';
@@ -41,19 +42,19 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   // Sample banner data - you can replace this with your actual data
   final List<BannerItem> _banners = [
     BannerItem(
-      image: Assets.home_bannner,
+      image: Assets.rectangleBanner,
       title: 'Discount',
       discount: '50%',
       buttonText: 'Buy Now',
     ),
     BannerItem(
-      image: Assets.home_bannner, // Replace with other banner images
+      image: Assets.rectangleBanner, // Replace with other banner images
       title: 'Special',
       discount: '30%',
       buttonText: 'Shop Now',
     ),
     BannerItem(
-      image: Assets.home_bannner, // Replace with other banner images
+      image: Assets.rectangleBanner, // Replace with other banner images
       title: 'New Arrival',
       discount: '20%',
       buttonText: 'Explore',
@@ -247,9 +248,9 @@ class _HomeViewBodyState extends State<HomeViewBody> {
           height: 1800.h,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
-            child: Image.asset(
+            child: SvgPicture.asset(
               width: double.infinity,
-              banner.image,
+              Assets.rectangleBanner,
               fit: BoxFit.fill,
             ),
           ),

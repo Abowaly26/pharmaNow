@@ -91,19 +91,13 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: 60.h),
-          Icon(
-            Icons.favorite_border,
-            size: 70.sp,
-            color: Colors.blue.shade800,
+          SizedBox(height: 24.h),
+          SvgPicture.asset(
+            Assets.favState,
+            height: 320.h,
+            width: 320.w,
           ),
-          SizedBox(height: 16.h),
-          Text(
-            '',
-            style: TextStyles.title
-                .copyWith(fontSize: 18.sp, color: Colors.black87),
-          ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 4.h),
           Text(
             'Your favorite medicines will appear here',
             style: TextStyles.description.copyWith(color: Colors.grey.shade700),
