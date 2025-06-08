@@ -4,8 +4,10 @@ import 'package:pharma_now/Cart/presentation/views/widgets/cart_items_list.dart'
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/widgets/cart_header.dart';
 import 'package:pharma_now/core/widgets/cart_item.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/utils/text_styles.dart';
+import '../../cubits/cart_cubit/cart_cubit.dart';
 
 class CartViewBody extends StatelessWidget {
   const CartViewBody({super.key});
@@ -23,7 +25,8 @@ class CartViewBody extends StatelessWidget {
                 ],
               ),
             ),
-            CartItemsList(cartItems: []),
+            CartItemsList(
+                cartItems: context.read<CartCubit>().cartEntity.cartItems),
             const SliverToBoxAdapter(
               child: SizedBox(height: 20),
             ),
@@ -36,8 +39,8 @@ class CartViewBody extends StatelessWidget {
           child: ElevatedButton(
             style: ButtonStyles.primaryButton,
             onPressed: () {},
-            child: const Text(
-              'Checkout',
+            child: Text(
+              'pay ${context.watch<CartCubit>().cartEntity.calculateTotalPrice()} EGP',
               style: TextStyle(color: Colors.white),
             ),
           ),

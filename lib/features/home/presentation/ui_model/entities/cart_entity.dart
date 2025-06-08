@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 
 import 'cart_item_entity.dart';
 
-class CartEntity {
+class CartEntity extends Equatable {
   final List<CartItemEntity> cartItems;
   CartEntity({required this.cartItems});
 
@@ -10,7 +11,11 @@ class CartEntity {
     cartItems.add(cartItemEntity);
   }
 
-  isExist(MedicineEntity medicineEntity) {
+  deleteCartItemFromCart(CartItemEntity carItem) {
+    cartItems.remove(carItem);
+  }
+
+  bool isExist(MedicineEntity medicineEntity) {
     for (var element in cartItems) {
       if (element.medicineEntity == medicineEntity) {
         return true;
@@ -27,4 +32,15 @@ class CartEntity {
     }
     return CartItemEntity(medicineEntity: medicineEntity, count: 1);
   }
+
+  double calculateTotalPrice() {
+    double totalPrice = 0;
+    for (var element in cartItems) {
+      totalPrice += element.calculateTotalPrice();
+    }
+    return totalPrice;
+  }
+
+  @override
+  List<Object?> get props => [MedicineEntity];
 }

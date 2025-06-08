@@ -4,11 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/cart_item_action_buttons.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
+import 'package:provider/provider.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
+import '../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 class CartItem extends StatelessWidget {
   const CartItem({
@@ -23,7 +25,7 @@ class CartItem extends StatelessWidget {
     return InkWell(
       child: Padding(
         padding: EdgeInsets.only(
-          top: 16.h,
+          top: 10.h,
           left: 16.r,
           right: 16.r,
         ),
@@ -160,12 +162,19 @@ class CartItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(top: 8.r),
-                  child: SvgPicture.asset(
-                    Assets.trash,
-                    width: 25.w,
-                    height: 25.h,
+                GestureDetector(
+                  onTap: () {
+                    context
+                        .read<CartCubit>()
+                        .deleteMedicineFromCart(cartItemEntity);
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 8.r),
+                    child: SvgPicture.asset(
+                      Assets.trash,
+                      width: 25.w,
+                      height: 25.h,
+                    ),
                   ),
                 ),
               ],
@@ -186,7 +195,7 @@ class CartItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  CartItemActionButtons(),
+                  CartItemActionButtons(cartItemEntity: cartItemEntity),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -202,7 +211,9 @@ class CartItem extends StatelessWidget {
                         ),
                       // Show discounted price or regular price
                       Text(
-                        '${cartItemEntity.calculateTotalPrice()} EGP',
+                        cartItemEntity.medicineEntity.discountRating > 0
+                            ? '${_calculateDiscountedPrice(cartItemEntity.calculateTotalPrice().toDouble(), cartItemEntity.medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
+                            : '${cartItemEntity.calculateTotalPrice()} EGP',
                         style: TextStyles.listView_product_name.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 14.sp,

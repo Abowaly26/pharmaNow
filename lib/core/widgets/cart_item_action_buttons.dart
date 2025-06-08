@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:provider/provider.dart';
 
+import '../../features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import '../utils/color_manger.dart';
 import '../utils/text_styles.dart';
 
 class CartItemActionButtons extends StatelessWidget {
-  const CartItemActionButtons({super.key});
+  const CartItemActionButtons({super.key, required this.cartItemEntity});
 
-  // final CartItemEntity cartItemEntity;
+  final CartItemEntity cartItemEntity;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -23,8 +26,7 @@ class CartItemActionButtons extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            // cartItemEntity.quanitty.toString(),
-            '1',
+            cartItemEntity.count.toString(),
             textAlign: TextAlign.center,
             style: TextStyles.inputLabel,
           ),

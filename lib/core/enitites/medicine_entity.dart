@@ -1,6 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:pharma_now/core/enitites/review_entity.dart';
 
-class MedicineEntity {
+class MedicineEntity extends Equatable {
   final String name;
   final String description;
   final String code;
@@ -34,6 +35,10 @@ class MedicineEntity {
     this.avgRating = 0,
     this.ratingCount = 0,
   });
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [code];
 }
 
 // class MedicineEntity {
