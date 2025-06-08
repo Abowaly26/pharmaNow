@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as context;
 
+import '../../../../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
@@ -216,7 +218,9 @@ class OffersListViewItem extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.only(top: 8.r, right: 8.r),
                     child: GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        // context.read<CartCubit>().addMedicineToCart(medicineEntity);
+                      },
                       child: SvgPicture.asset(
                         Assets.cart,
                         width: 32.w,
@@ -248,5 +252,3 @@ class OffersListViewItem extends StatelessWidget {
     return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
   }
 }
-
-// ملاحظة: تم حذف class BouncingDotsAnimation لأنه تم استبداله بمكون ShimmerLoadingPlaceholder الجديد

@@ -25,7 +25,7 @@ class HomeAppbar extends StatelessWidget {
             height: 24,
           )),
       callback: (BuildContext ctx) {
-        Navigator.of(ctx).pushReplacement(
+        Navigator.of(ctx).push(
           MaterialPageRoute(
             builder: (context) => NotificationView(),
           ),

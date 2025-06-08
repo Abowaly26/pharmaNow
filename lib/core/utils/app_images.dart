@@ -94,4 +94,5 @@ class Assets {
   static const String publicHealth = "assets/images/Public health-amico.svg";
   static const String medicineBro = "assets/images/Medicine-bro.svg";
   // static const String publicHealthBro = "assets/images/Public health-bro.svg";
+  static const String trash = "assets/images/trash.svg";
 }

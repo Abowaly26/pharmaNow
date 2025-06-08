@@ -31,7 +31,6 @@ class PharmaNow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      // إضافة مزود المفضلات للتطبيق
       providers: [
         ...FavoritesInjection.getFavoritesProviders(),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),

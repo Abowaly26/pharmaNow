@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/custom_bottom_navigation_bar.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/home_appbar.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/home_view.dart';
+import 'package:pharma_now/features/home/presentation/views/widgets/main_view_body_bloc_consummer.dart';
 
 import '../../../../Cart/presentation/views/cart_view.dart';
 import '../../../../core/utils/color_manger.dart';
 import '../../../favorites/presentation/views/favorites.dart';
 import '../../../profile/presentation/views/profile_view.dart';
+import 'widgets/main_view_body.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -21,30 +25,32 @@ class _MainViewState extends State<MainView> {
   int CurrentViewIndex = 0;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        extendBody: true,
-        backgroundColor: ColorManager.primaryColor,
-        appBar: CurrentViewIndex == 0
-            ? PreferredSize(
-                preferredSize: Size.fromHeight(80.h),
-                child: HomeAppbar(),
-              )
-            : null,
-        bottomNavigationBar: CustomBottomNavigationBar(
-          onItemTapped: (int value) {
-            CurrentViewIndex = value;
-            setState(() {});
-          },
-        ),
-        body: SafeArea(
-            child: IndexedStack(index: CurrentViewIndex, children: [
-          const HomeView(),
-          const CartView(),
-          const FavoriteView(),
-          const ProfileView(),
-        ])));
+    return BlocProvider(
+      create: (context) => CartCubit(),
+      child: Scaffold(
+          extendBody: true,
+          backgroundColor: ColorManager.primaryColor,
+          appBar: CurrentViewIndex == 0
+              ? PreferredSize(
+                  preferredSize: Size.fromHeight(80.h),
+                  child: HomeAppbar(),
+                )
+              : null,
+          bottomNavigationBar: CustomBottomNavigationBar(
+            onItemTapped: (int value) {
+              CurrentViewIndex = value;
+              setState(() {});
+            },
+          ),
+          body: SafeArea(
+              child: MainViewBodyBlocConsummer(
+                  CurrentViewIndex: CurrentViewIndex))),
+    );
   }
 }
+
+
+
 
 
 

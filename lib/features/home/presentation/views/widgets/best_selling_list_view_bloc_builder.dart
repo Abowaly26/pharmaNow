@@ -14,7 +14,6 @@ class BestSellingListViewBlocBuilder extends StatelessWidget {
     return BlocBuilder<BestSellingCubit, BestSellingState>(
       builder: (context, state) {
         if (state is BestSellingSuccess) {
-          // نتحقق إذا كانت القائمة فارغة ونعيد SizedBox() إذا كانت فارغة
           if (state.medicines.isEmpty) {
             return SizedBox();
           }
@@ -22,10 +21,8 @@ class BestSellingListViewBlocBuilder extends StatelessWidget {
             medicines: state.medicines,
           );
         } else if (state is BestSellingFailure) {
-          // في حالة حدوث خطأ، نعيد مساحة فارغة بدلاً من رسالة الخطأ
           return SizedBox();
         } else {
-          // حالة التحميل
           return Skeletonizer(
             enabled: true,
             child: BestSellingListView(
