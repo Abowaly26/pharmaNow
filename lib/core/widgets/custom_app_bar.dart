@@ -31,13 +31,14 @@ import 'package:pharma_now/core/utils/text_styles.dart';
 //   );
 // }
 
-class PharmaAppBar extends StatelessWidget {
+class PharmaAppBar extends StatelessWidget implements PreferredSizeWidget {
   const PharmaAppBar(
       {super.key, required this.title, this.isBack = false, this.onPressed});
   final String title;
   final bool isBack;
   final Function()? onPressed;
 
+  @override
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -68,4 +69,7 @@ class PharmaAppBar extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

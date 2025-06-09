@@ -42,11 +42,11 @@ class MedicineDetailsView extends StatelessWidget {
           ),
         ),
       ),
-      body: medicineEntity != null 
-        ? MedicineDetailsViewBody(
-            medicineEntity: medicineEntity!,
-          )
-        : Center(child: Text('Medicine details not available')),
+      body: medicineEntity != null
+          ? MedicineDetailsViewBody(
+              medicineEntity: medicineEntity!,
+            )
+          : Center(child: Text('Medicine details not available')),
     );
   }
 }

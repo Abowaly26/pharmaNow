@@ -100,7 +100,8 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
           SizedBox(height: 2.h),
           Text(
             'Your favorite medicines will appear here',
-            style: TextStyles.description.copyWith(color: Colors.grey.shade700),
+            style: TextStyles.description
+                .copyWith(color: Colors.grey.shade700, fontSize: 14.sp),
             textAlign: TextAlign.center,
           ),
         ],

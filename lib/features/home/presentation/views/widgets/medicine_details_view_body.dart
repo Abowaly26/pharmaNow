@@ -16,7 +16,6 @@ class MedicineDetailsViewBody extends StatelessWidget {
 
   final MedicineEntity medicineEntity;
 
-  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
@@ -43,8 +42,7 @@ class MedicineDetailsViewBody extends StatelessWidget {
           // Product Card Section
           _buildProductCardSection(context, height, width),
 
-          SizedBox(height: 160.h), // زيادة المسافة بين الكارد والزر
-
+          SizedBox(height: 160.h),
           // Completely Separated Add to Cart Button Section
           _buildAddToCartButton(),
 

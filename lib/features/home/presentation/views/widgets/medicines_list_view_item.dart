@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 
 import '../../../../../core/enitites/medicine_entity.dart';
@@ -47,7 +49,7 @@ class MedicineListViewItem extends StatelessWidget {
         child: Column(
           children: [
             _buildTopContainer(context),
-            _buildBottomContainer(),
+            _buildBottomContainer(context),
           ],
         ),
       ),
@@ -156,7 +158,7 @@ class MedicineListViewItem extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomContainer() {
+  Widget _buildBottomContainer(BuildContext context) {
     return Container(
       width: 161.w,
       height: 90.h,
@@ -233,6 +235,9 @@ class MedicineListViewItem extends StatelessWidget {
                     padding: EdgeInsets.only(top: 8.r, right: 8.r),
                     child: GestureDetector(
                       onTap: () {
+                        context
+                            .read<CartCubit>()
+                            .addMedicineToCart(medicineEntity);
                         // Add to cart functionality
                       },
                       child: SvgPicture.asset(

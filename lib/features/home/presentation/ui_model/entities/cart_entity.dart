@@ -5,14 +5,17 @@ import 'cart_item_entity.dart';
 
 class CartEntity extends Equatable {
   final List<CartItemEntity> cartItems;
-  CartEntity({required this.cartItems});
+  const CartEntity({required this.cartItems});
 
-  addCartItem(CartItemEntity cartItemEntity) {
-    cartItems.add(cartItemEntity);
+  CartEntity addCartItem(CartItemEntity cartItemEntity) {
+    final newCartItems = List<CartItemEntity>.from(cartItems)
+      ..add(cartItemEntity);
+    return CartEntity(cartItems: newCartItems);
   }
 
-  deleteCartItemFromCart(CartItemEntity carItem) {
-    cartItems.remove(carItem);
+  CartEntity deleteCartItemFromCart(CartItemEntity cartItem) {
+    final newCartItems = List<CartItemEntity>.from(cartItems)..remove(cartItem);
+    return CartEntity(cartItems: newCartItems);
   }
 
   bool isExist(MedicineEntity medicineEntity) {
@@ -24,13 +27,13 @@ class CartEntity extends Equatable {
     return false;
   }
 
-  CartItemEntity getCartItem(MedicineEntity medicineEntity) {
+  CartItemEntity? getCartItem(MedicineEntity medicineEntity) {
     for (var element in cartItems) {
       if (element.medicineEntity == medicineEntity) {
         return element;
       }
     }
-    return CartItemEntity(medicineEntity: medicineEntity, count: 1);
+    return null; // Return null if not found, CartCubit will handle creation
   }
 
   double calculateTotalPrice() {
@@ -42,5 +45,25 @@ class CartEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [MedicineEntity];
+  List<Object?> get props => [cartItems];
+
+  CartEntity copyWith({
+    List<CartItemEntity>? cartItems,
+  }) {
+    return CartEntity(
+      cartItems: cartItems ?? this.cartItems,
+    );
+  }
+
+  String formatPrice(double price) {
+    return price.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
+  }
+
+  // Helper method to calculate the discounted price
+  String calculateDiscountedPrice(
+      double originalPrice, double discountPercentage) {
+    double discountAmount = originalPrice * (discountPercentage / 100);
+    double discountedPrice = originalPrice - discountAmount;
+    return formatPrice(discountedPrice);
+  }
 }

@@ -30,7 +30,7 @@ class MainViewBodyBlocConsummer extends StatelessWidget {
             behavior: SnackBarBehavior.floating,
             // This makes it float and allows width customization
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(48),
+              borderRadius: BorderRadius.circular(42),
             ),
             duration: const Duration(seconds: 1),
           ));
@@ -49,7 +49,7 @@ class MainViewBodyBlocConsummer extends StatelessWidget {
             behavior: SnackBarBehavior.floating,
             // This makes it float and allows width customization
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(48),
+              borderRadius: BorderRadius.circular(42),
             ),
             duration: const Duration(seconds: 1),
           ));

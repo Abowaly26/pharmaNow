@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 
-class CartItemEntity {
+class CartItemEntity extends Equatable {
   final MedicineEntity medicineEntity;
-  int count;
+  final int count;
 
   CartItemEntity({
     required this.medicineEntity,
@@ -13,11 +14,16 @@ class CartItemEntity {
     return medicineEntity.price * count;
   }
 
-  increaseCount() {
-    count++;
+  CartItemEntity copyWith({
+    MedicineEntity? medicineEntity,
+    int? count,
+  }) {
+    return CartItemEntity(
+      medicineEntity: medicineEntity ?? this.medicineEntity,
+      count: count ?? this.count,
+    );
   }
 
-  decreaseCount() {
-    count--;
-  }
+  @override
+  List<Object?> get props => [medicineEntity, count];
 }

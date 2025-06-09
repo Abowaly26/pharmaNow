@@ -212,7 +212,7 @@ class CartItem extends StatelessWidget {
                       // Show discounted price or regular price
                       Text(
                         cartItemEntity.medicineEntity.discountRating > 0
-                            ? '${_calculateDiscountedPrice(cartItemEntity.calculateTotalPrice().toDouble(), cartItemEntity.medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
+                            ? '${calculateDiscountedPrice(cartItemEntity.calculateTotalPrice().toDouble(), cartItemEntity.medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
                             : '${cartItemEntity.calculateTotalPrice()} EGP',
                         style: TextStyles.listView_product_name.copyWith(
                           fontWeight: FontWeight.bold,
@@ -240,7 +240,7 @@ class CartItem extends StatelessWidget {
   }
 
   // Helper method to calculate the discounted price
-  String _calculateDiscountedPrice(
+  String calculateDiscountedPrice(
       double originalPrice, double discountPercentage) {
     double discountAmount = originalPrice * (discountPercentage / 100);
     double discountedPrice = originalPrice - discountAmount;
