@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pharma_now/Cart/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
 import 'package:pharma_now/Cart/presentation/views/widgets/cart_items_list.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
-import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/widgets/cart_header.dart';
-import 'package:pharma_now/core/widgets/cart_item.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/utils/text_styles.dart';
 import '../../../../features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import '../../cubits/cart_cubit/cart_cubit.dart';
 import '../../../../features/home/presentation/ui_model/entities/cart_entity.dart';
@@ -132,51 +130,55 @@ class CartViewBody extends StatelessWidget {
                     ],
 
                     // Final checkout button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50.h,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: cartEntity.cartItems.isEmpty
-                              ? Colors.grey.shade400
-                              : ColorManager.secondaryColor,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          disabledBackgroundColor: Colors.grey.shade300,
-                          disabledForegroundColor: Colors.grey.shade600,
-                        ),
-                        onPressed: cartEntity.cartItems.isEmpty ? null : () {},
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Proceed to Checkout',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
+                    BlocListener<CartItemCubit, CartItemState>(
+                      listener: (context, state) {},
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50.h,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: cartEntity.cartItems.isEmpty
+                                ? Colors.grey.shade400
+                                : ColorManager.secondaryColor,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
                             ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8.w,
-                                vertical: 4.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6.r),
-                              ),
-                              child: Text(
-                                '${_formatPrice(finalTotal)} EGP',
+                            disabledBackgroundColor: Colors.grey.shade300,
+                            disabledForegroundColor: Colors.grey.shade600,
+                          ),
+                          onPressed:
+                              cartEntity.cartItems.isEmpty ? null : () {},
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Proceed to Checkout',
                                 style: TextStyle(
                                   fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),
-                          ],
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8.w,
+                                  vertical: 4.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(6.r),
+                                ),
+                                child: Text(
+                                  '${_formatPrice(finalTotal)} EGP',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -264,7 +266,7 @@ class CartViewBody extends StatelessWidget {
     double totalDiscountedPrice = 0.0;
 
     for (var item in cartItems) {
-      num itemOriginalPrice = item.medicineEntity.price;
+      num itemOriginalPrice = item.medicineEntity.price * item.count;
       num itemDiscountedPrice = itemOriginalPrice;
 
       // If the product has a discount
@@ -289,5 +291,14 @@ class CartViewBody extends StatelessWidget {
     if (discountPercentage <= 0) return originalPrice;
 
     return originalPrice * (1 - discountPercentage / 100);
+  }
+}
+
+class CustomButton extends StatelessWidget {
+  const CustomButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }

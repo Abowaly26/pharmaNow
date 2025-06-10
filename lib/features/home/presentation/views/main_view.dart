@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+
 import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/custom_bottom_navigation_bar.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/home_appbar.dart';
-import 'package:pharma_now/features/home/presentation/views/widgets/home_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/main_view_body_bloc_consummer.dart';
 
 import '../../../../Cart/presentation/views/cart_view.dart';
@@ -25,31 +26,34 @@ class _MainViewState extends State<MainView> {
   int CurrentViewIndex = 0;
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => CartCubit(),
+    final cartCubit = GetIt.instance<CartCubit>();
+    
+    return BlocProvider.value(
+      value: cartCubit,
       child: Scaffold(
-          extendBody: true,
-          backgroundColor: ColorManager.primaryColor,
-          appBar: CurrentViewIndex == 0
-              ? PreferredSize(
-                  preferredSize: Size.fromHeight(80.h),
-                  child: HomeAppbar(),
-                )
-              : null,
-          bottomNavigationBar: CustomBottomNavigationBar(
-            onItemTapped: (int value) {
-              CurrentViewIndex = value;
-              setState(() {});
-            },
+        extendBody: true,
+        backgroundColor: ColorManager.primaryColor,
+        appBar: CurrentViewIndex == 0
+            ? PreferredSize(
+                preferredSize: Size.fromHeight(80.h),
+                child: HomeAppbar(),
+              )
+            : null,
+        bottomNavigationBar: CustomBottomNavigationBar(
+          onItemTapped: (int value) {
+            CurrentViewIndex = value;
+            setState(() {});
+          },
+        ),
+        body: SafeArea(
+          child: MainViewBodyBlocConsummer(
+            CurrentViewIndex: CurrentViewIndex,
           ),
-          body: SafeArea(
-              child: MainViewBodyBlocConsummer(
-                  CurrentViewIndex: CurrentViewIndex))),
+        ),
+      ),
     );
   }
 }
-
-
 
 
 

@@ -1,8 +1,12 @@
 import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 
 import 'cart_item_entity.dart';
 
+part 'cart_entity.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class CartEntity extends Equatable {
   final List<CartItemEntity> cartItems;
   const CartEntity({required this.cartItems});
@@ -66,4 +70,11 @@ class CartEntity extends Equatable {
     double discountedPrice = originalPrice - discountAmount;
     return formatPrice(discountedPrice);
   }
+
+  // Convert to JSON for Firestore
+  Map<String, dynamic> toJson() => _$CartEntityToJson(this);
+
+  // Create from JSON from Firestore
+  factory CartEntity.fromJson(Map<String, dynamic> json) => 
+      _$CartEntityFromJson(json);
 }

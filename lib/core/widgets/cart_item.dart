@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pharma_now/Cart/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/cart_item_action_buttons.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import 'package:provider/provider.dart';
-import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
-import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 import '../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 class CartItem extends StatelessWidget {
@@ -22,21 +22,33 @@ class CartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: 10.h,
-          left: 16.r,
-          right: 16.r,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildLeftContainer(),
-            _buildRightContainer(context),
-          ],
-        ),
-      ),
+    return BlocBuilder<CartItemCubit, CartItemState>(
+      buildWhen: (previous, current) {
+        if (current is CartItemUpdated) {
+          if (current.cartItemEntity == cartItemEntity) {
+            return true;
+          }
+        }
+        return false;
+      },
+      builder: (context, state) {
+        return InkWell(
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: 10.h,
+              left: 16.r,
+              right: 16.r,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildLeftContainer(),
+                _buildRightContainer(context),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

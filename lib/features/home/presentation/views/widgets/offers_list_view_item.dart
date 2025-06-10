@@ -219,7 +219,9 @@ class OffersListViewItem extends StatelessWidget {
                     padding: EdgeInsets.only(top: 8.r, right: 8.r),
                     child: GestureDetector(
                       onTap: () {
-                        context.read<CartCubit>().addMedicineToCart(medicineEntity);
+                        context
+                            .read<CartCubit>()
+                            .addMedicineToCart(medicineEntity);
                       },
                       child: SvgPicture.asset(
                         Assets.cart,

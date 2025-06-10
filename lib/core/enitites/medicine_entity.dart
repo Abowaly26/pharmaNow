@@ -1,6 +1,10 @@
 import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:pharma_now/core/enitites/review_entity.dart';
 
+part 'medicine_entity.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class MedicineEntity extends Equatable {
   final String name;
   final String description;
@@ -37,8 +41,14 @@ class MedicineEntity extends Equatable {
   });
 
   @override
-  // TODO: implement props
   List<Object?> get props => [code];
+
+  // Convert to JSON for Firestore
+  Map<String, dynamic> toJson() => _$MedicineEntityToJson(this);
+
+  // Create from JSON from Firestore
+  factory MedicineEntity.fromJson(Map<String, dynamic> json) => 
+      _$MedicineEntityFromJson(json);
 }
 
 // class MedicineEntity {

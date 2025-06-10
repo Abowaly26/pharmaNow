@@ -1,9 +1,23 @@
 import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
+
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 
+part 'cart_item_entity.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class CartItemEntity extends Equatable {
+  @JsonKey(
+    toJson: _medicineToJson,
+    fromJson: _medicineFromJson,
+  )
   final MedicineEntity medicineEntity;
-  final int count;
+  int count;
+
+  static Map<String, dynamic> _medicineToJson(MedicineEntity medicine) =>
+      medicine.toJson();
+  static MedicineEntity _medicineFromJson(Map<String, dynamic> json) =>
+      MedicineEntity.fromJson(json);
 
   CartItemEntity({
     required this.medicineEntity,
@@ -26,4 +40,21 @@ class CartItemEntity extends Equatable {
 
   @override
   List<Object?> get props => [medicineEntity, count];
+
+  // Convert to JSON for Firestore
+  Map<String, dynamic> toJson() => _$CartItemEntityToJson(this);
+
+  // Create from JSON from Firestore
+  factory CartItemEntity.fromJson(Map<String, dynamic> json) =>
+      _$CartItemEntityFromJson(json);
+
+  void increaseQuantity() {
+    count++;
+  }
+
+  void decreaseQuantity() {
+    if (count > 1) {
+      count--;
+    }
+  }
 }

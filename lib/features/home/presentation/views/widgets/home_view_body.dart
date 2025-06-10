@@ -152,7 +152,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
               SectionWidget(
                 sectionTitle: 'Offers',
                 onTap: () {
-                  Navigator.pushReplacementNamed(context, OffersView.routeName);
+                  Navigator.pushNamed(context, OffersView.routeName);
                 },
               ),
               OffersListViewBlocBuilder(),
@@ -162,7 +162,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
               SectionWidget(
                 sectionTitle: 'Medicines',
                 onTap: () {
-                  Navigator.pushReplacementNamed(
+                  Navigator.pushNamed(
                       context, InfoMedicinesView.routeName);
                 },
               ),
@@ -179,7 +179,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                         SectionWidget(
                           sectionTitle: 'Best selling',
                           onTap: () {
-                            Navigator.pushReplacementNamed(
+                            Navigator.pushNamed(
                                 context, OffersView.routeName);
                           },
                         ),
