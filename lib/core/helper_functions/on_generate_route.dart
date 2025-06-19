@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pharma_now/Cart/presentation/views/cart_view.dart';
+import 'package:pharma_now/features/Medical_Assistant/MedicalAssistant%20.dart';
+import 'package:pharma_now/features/Medical_Assistant/chat_bot/chat_bot.dart';
 import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/singn_up_view.dart';
@@ -74,8 +76,14 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case MedicineDetailsView.routeName:
       return MaterialPageRoute(builder: (context) => MedicineDetailsView());
 
+    case MedicalAssistant.routeName:
+      return MaterialPageRoute(builder: (context) => MedicalAssistant());
+
     case CartView.routeName:
       return MaterialPageRoute(builder: (context) => CartView());
+
+    case ChatPage.routeName:
+      return MaterialPageRoute(builder: (context) => ChatPage());
 
     case ForgetPasswordView.routeName:
       return MaterialPageRoute(

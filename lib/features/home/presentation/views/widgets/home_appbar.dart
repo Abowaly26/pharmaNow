@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pharma_now/features/Medical_Assistant/MedicalAssistant%20.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../notifications/presentation/views/notification_view.dart';
@@ -32,6 +33,20 @@ class HomeAppbar extends StatelessWidget {
         );
       },
     ),
+    ActionItem(
+      icon: SvgPicture.asset(
+        Assets.chatText,
+        width: 24,
+        height: 24,
+      ),
+      callback: (BuildContext ctx) {
+        Navigator.of(ctx).push(
+          MaterialPageRoute(
+            builder: (context) => MedicalAssistant(),
+          ),
+        );
+      },
+    ),
   ];
 
   @override
@@ -53,7 +68,6 @@ class HomeAppbar extends StatelessWidget {
             child: Consumer<ProfileProvider>(
               builder: (context, provider, child) {
                 return Consumer<ProfileProvider>(
-                    // استخدام Consumer للحصول على أحدث بيانات Provider
                     builder: (context, currentProviderState, child) {
                   String initialLetter = '?';
                   if (currentProviderState.currentUser != null &&
