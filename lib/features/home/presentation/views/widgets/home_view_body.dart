@@ -67,7 +67,10 @@ class _HomeViewBodyState extends State<HomeViewBody>
   void initState() {
     super.initState();
     _initializeComponents();
-    _startBannerAutoScroll();
+    // Start auto-scroll after the first frame to ensure the PageView is attached
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startBannerAutoScroll();
+    });
   }
 
   void _initializeComponents() {
@@ -157,17 +160,15 @@ class _HomeViewBodyState extends State<HomeViewBody>
   void _startBannerAutoScroll() {
     _bannerTimer?.cancel();
     _bannerTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_bannerController != null &&
-          _banners.isNotEmpty &&
-          mounted &&
-          !_isDisposed) {
-        int nextPage = (_currentBannerIndex + 1) % _banners.length;
-        _bannerController!.animateToPage(
-          nextPage,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-        );
-      }
+      if (!mounted || _isDisposed || _banners.isEmpty) return;
+      if (_bannerController == null || !_bannerController!.hasClients) return;
+
+      final nextPage = (_currentBannerIndex + 1) % _banners.length;
+      _bannerController!.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
     });
   }
 
