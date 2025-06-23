@@ -162,8 +162,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
               SectionWidget(
                 sectionTitle: 'Medicines',
                 onTap: () {
-                  Navigator.pushNamed(
-                      context, InfoMedicinesView.routeName);
+                  Navigator.pushNamed(context, InfoMedicinesView.routeName);
                 },
               ),
               MedicineListViewBlocBuilder(),
@@ -179,8 +178,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                         SectionWidget(
                           sectionTitle: 'Best selling',
                           onTap: () {
-                            Navigator.pushNamed(
-                                context, OffersView.routeName);
+                            Navigator.pushNamed(context, OffersView.routeName);
                           },
                         ),
                         BestSellingListViewBlocBuilder(),
