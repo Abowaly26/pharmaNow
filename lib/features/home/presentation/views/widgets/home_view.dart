@@ -29,9 +29,6 @@ class HomeView extends StatelessWidget {
           create: (context) => MedicinesCubit(getIt.get<MedicineRepo>()),
         ),
         BlocProvider(
-          create: (context) => BestSellingCubit(getIt.get<MedicineRepo>()),
-        ),
-        BlocProvider(
           create: (context) => OffersCubit(getIt.get<MedicineRepo>()),
         ),
       ],

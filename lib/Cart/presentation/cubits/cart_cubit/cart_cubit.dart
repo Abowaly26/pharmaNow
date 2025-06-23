@@ -124,4 +124,37 @@ class CartCubit extends Cubit<CartState> {
       _saveCart(newCartEntity);
     }
   }
+
+  void addMedicineToCartWithCount(MedicineEntity medicineEntity, int count) {
+    if (state is! CartLoaded && state is! CartInitial) return;
+
+    final currentCartEntity = (state as dynamic).cartEntity as CartEntity;
+
+    CartItemEntity? existingCartItem =
+        currentCartEntity.getCartItem(medicineEntity);
+    CartEntity newCartEntity;
+
+    if (existingCartItem != null) {
+      // Medicine exists, update count
+      final updatedItem =
+          existingCartItem.copyWith(count: existingCartItem.count + count);
+      // Replace the old item with the updated one
+      final newCartItems =
+          List<CartItemEntity>.from(currentCartEntity.cartItems);
+      final itemIndex = newCartItems.indexWhere(
+          (item) => item.medicineEntity.code == medicineEntity.code);
+      if (itemIndex != -1) {
+        newCartItems[itemIndex] = updatedItem;
+      }
+      newCartEntity = currentCartEntity.copyWith(
+          cartItems: newCartItems); // Assuming CartEntity has copyWith
+    } else {
+      // Medicine does not exist, add new item with count
+      final newCartItem =
+          CartItemEntity(medicineEntity: medicineEntity, count: count);
+      newCartEntity = currentCartEntity.addCartItem(newCartItem);
+    }
+    emit(CartItemAdded(cartEntity: newCartEntity));
+    _saveCart(newCartEntity);
+  }
 }

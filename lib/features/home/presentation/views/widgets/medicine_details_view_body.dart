@@ -7,8 +7,10 @@ import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 
-class MedicineDetailsViewBody extends StatelessWidget {
+class MedicineDetailsViewBody extends StatefulWidget {
   const MedicineDetailsViewBody({
     super.key,
     required this.medicineEntity,
@@ -16,17 +18,25 @@ class MedicineDetailsViewBody extends StatelessWidget {
 
   final MedicineEntity medicineEntity;
 
+  @override
+  State<MedicineDetailsViewBody> createState() =>
+      _MedicineDetailsViewBodyState();
+}
+
+class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
+  int _counter = 1;
+
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
-      'id': medicineEntity.code,
-      'name': medicineEntity.name,
-      'price': medicineEntity.price,
-      'imageUrl': medicineEntity.subabaseORImageUrl,
-      'pharmacyName': medicineEntity.pharmacyName,
-      'discountRating': medicineEntity.discountRating,
-      'isNewProduct': medicineEntity.isNewProduct,
-      'description': medicineEntity.description,
+      'id': widget.medicineEntity.code,
+      'name': widget.medicineEntity.name,
+      'price': widget.medicineEntity.price,
+      'imageUrl': widget.medicineEntity.subabaseORImageUrl,
+      'pharmacyName': widget.medicineEntity.pharmacyName,
+      'discountRating': widget.medicineEntity.discountRating,
+      'isNewProduct': widget.medicineEntity.isNewProduct,
+      'description': widget.medicineEntity.description,
     };
   }
 
@@ -36,18 +46,40 @@ class MedicineDetailsViewBody extends StatelessWidget {
     final width = size.width;
     final height = size.height;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Product Card Section
-          _buildProductCardSection(context, height, width),
+    return BlocListener<CartCubit, CartState>(
+      listener: (context, state) {
+        if (state is CartItemAdded) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Added to cart',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+              backgroundColor: const Color.fromARGB(255, 109, 193, 111),
+              width: MediaQuery.of(context).size.width * 0.4,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(42),
+              ),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      },
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Product Card Section
+            _buildProductCardSection(context, height, width),
 
-          SizedBox(height: 160.h),
-          // Completely Separated Add to Cart Button Section
-          _buildAddToCartButton(),
+            SizedBox(height: 160.h),
+            // Completely Separated Add to Cart Button Section
+            _buildAddToCartButton(context),
 
-          SizedBox(height: 16.h), // Bottom padding
-        ],
+            SizedBox(height: 16.h), // Bottom padding
+          ],
+        ),
       ),
     );
   }
@@ -100,7 +132,7 @@ class MedicineDetailsViewBody extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            medicineEntity.name,
+                            widget.medicineEntity.name,
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
@@ -111,7 +143,7 @@ class MedicineDetailsViewBody extends StatelessWidget {
                         // زر المفضلة - يستخدم مكون FavoriteButton المشترك لإضافة/إزالة الدواء من المفضلة
                         // Favorite button - uses the shared FavoriteButton component to add/remove medicine from favorites
                         FavoriteButton(
-                          itemId: medicineEntity.code,
+                          itemId: widget.medicineEntity.code,
                           itemData: _convertEntityToModel(),
                           size: 32,
                           activeColor: Colors.red,
@@ -121,10 +153,18 @@ class MedicineDetailsViewBody extends StatelessWidget {
                     ),
                     SizedBox(height: 6.h),
                     Text(
-                      medicineEntity.pharmacyName ?? "pharmacy name",
+                      widget.medicineEntity.pharmacyName ?? "pharmacy name",
                       style: TextStyles.listView_product_name.copyWith(
                         fontSize: 14.sp,
                         color: ColorManager.textInputColor,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      widget.medicineEntity.pharmcyAddress ?? '',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey,
                       ),
                     ),
                     SizedBox(height: 16.h),
@@ -138,7 +178,13 @@ class MedicineDetailsViewBody extends StatelessWidget {
                           child: Row(
                             children: [
                               IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  if (_counter > 1) {
+                                    setState(() {
+                                      _counter--;
+                                    });
+                                  }
+                                },
                                 icon: Icon(
                                   Icons.remove,
                                   size: 24.sp,
@@ -146,7 +192,7 @@ class MedicineDetailsViewBody extends StatelessWidget {
                               ),
                               SizedBox(width: 0.05 * width),
                               Text(
-                                "1",
+                                "$_counter",
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 20.sp,
@@ -154,7 +200,11 @@ class MedicineDetailsViewBody extends StatelessWidget {
                               ),
                               SizedBox(width: 0.05 * width),
                               IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    _counter++;
+                                  });
+                                },
                                 icon: Icon(
                                   Icons.add_circle_outlined,
                                   size: 32.sp,
@@ -167,9 +217,10 @@ class MedicineDetailsViewBody extends StatelessWidget {
                         Spacer(),
                         Column(
                           children: [
-                            if (medicineEntity.discountRating > 0)
+                            if (widget.medicineEntity.discountRating > 0)
                               Text(
-                                '${medicineEntity.price} EGP',
+                                // السعر الأصلي الكلي
+                                '${(widget.medicineEntity.price * _counter).toStringAsFixed(0)} EGP',
                                 style:
                                     TextStyles.listView_product_name.copyWith(
                                   fontSize: 12.sp,
@@ -177,13 +228,11 @@ class MedicineDetailsViewBody extends StatelessWidget {
                                   color: Colors.grey,
                                 ),
                               ),
-
                             // Show discounted price or regular price
-
                             Text(
-                              medicineEntity.discountRating > 0
-                                  ? '${_calculateDiscountedPrice(medicineEntity.price.toDouble(), medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
-                                  : '${medicineEntity.price} EGP',
+                              widget.medicineEntity.discountRating > 0
+                                  ? '${_calculateDiscountedPrice(widget.medicineEntity.price.toDouble(), widget.medicineEntity.discountRating.toDouble(), _counter).toStringAsFixed(0)} EGP'
+                                  : '${(widget.medicineEntity.price * _counter).toStringAsFixed(0)} EGP',
                               style: TextStyle(
                                 color: Color(0xFF375DFB),
                                 fontSize: 22.sp,
@@ -194,7 +243,6 @@ class MedicineDetailsViewBody extends StatelessWidget {
                         )
                       ],
                     ),
-
                     SizedBox(height: 20.h),
                     Text(
                       "Description",
@@ -212,7 +260,7 @@ class MedicineDetailsViewBody extends StatelessWidget {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 4.w, vertical: 4.h),
                             child: Text(
-                              medicineEntity.description ??
+                              widget.medicineEntity.description ??
                                   "Beta Mine is an innovative product that enhances brain health thanks to its rich ingredients, including Vitamin B6, which supports nerve function and maintains heart health.",
                               style: const TextStyle(
                                 color: Color(0xffA7AEB5),
@@ -230,16 +278,16 @@ class MedicineDetailsViewBody extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: medicineEntity.isNewProduct ? 16.h : 48.h,
+            top: widget.medicineEntity.isNewProduct ? 16.h : 48.h,
             left: 18.2.w,
-            child: medicineEntity.isNewProduct
+            child: widget.medicineEntity.isNewProduct
                 ? SvgPicture.asset(
                     Assets.bannerNewProduct,
                     height: 132.h,
                     width: 106.w,
                   )
-                : (medicineEntity.discountRating != null &&
-                        medicineEntity.discountRating > 0)
+                : (widget.medicineEntity.discountRating != null &&
+                        widget.medicineEntity.discountRating > 0)
                     ? Stack(
                         alignment: Alignment.centerLeft,
                         children: [
@@ -254,7 +302,7 @@ class MedicineDetailsViewBody extends StatelessWidget {
                               left: 28.0.h,
                             ),
                             child: Text(
-                              "${medicineEntity.discountRating}%",
+                              "${widget.medicineEntity.discountRating}%",
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 12.sp,
@@ -274,42 +322,48 @@ class MedicineDetailsViewBody extends StatelessWidget {
             top: 0.03 * height,
             left: 0,
             right: 0,
-            child: Center(
-              child: Container(
-                height: 180.h,
-                width: 180.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Builder(
-                  builder: (context) {
-                    final String imageUrl = medicineEntity.subabaseORImageUrl ??
-                        'https://i.postimg.cc/2yLfw0qy/image-20.png';
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    height: 180.h,
+                    width: 180.w,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Builder(
+                      builder: (context) {
+                        final String imageUrl =
+                            widget.medicineEntity.subabaseORImageUrl ??
+                                'https://i.postimg.cc/2yLfw0qy/image-20.png';
 
-                    return Image(
-                      image: NetworkImage(imageUrl),
-                      fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                            color: ColorManager.secondaryColor,
+                        return Image(
+                          image: NetworkImage(imageUrl),
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                color: ColorManager.secondaryColor,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                            Icons.image_not_supported,
+                            size: 80.sp,
+                            color: Colors.grey,
                           ),
                         );
                       },
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.image_not_supported,
-                        size: 80.sp,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
@@ -318,28 +372,20 @@ class MedicineDetailsViewBody extends StatelessWidget {
   }
 
   // Completely Separated Add to Cart Button
-  Widget _buildAddToCartButton() {
+  Widget _buildAddToCartButton(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 24.w),
-      decoration: BoxDecoration(
-          // يمكنك إضافة ظل أو حدود إذا أردت تمييز الزر أكثر
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: ColorManager.secondaryColor.withOpacity(0.1),
-          //     spreadRadius: 1,
-          //     blurRadius: 5,
-          //     offset: Offset(0, -2),
-          //   ),
-          // ],
-          ),
+      decoration: BoxDecoration(),
       child: SizedBox(
         width: double.infinity,
-        height: 50.h, // زيادة حجم الزر قليلاً لجعله أكثر بروزاً
+        height: 50.h,
         child: ElevatedButton(
           style: ButtonStyles.primaryButton,
           onPressed: () {
-            // Add to cart functionality
+            context
+                .read<CartCubit>()
+                .addMedicineToCartWithCount(widget.medicineEntity, _counter);
           },
           child: Text(
             'Add to Cart',
@@ -350,11 +396,12 @@ class MedicineDetailsViewBody extends StatelessWidget {
     );
   }
 
-  String _calculateDiscountedPrice(
-      double originalPrice, double discountPercentage) {
-    double discountAmount = originalPrice * (discountPercentage / 100);
-    double discountedPrice = originalPrice - discountAmount;
-    return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
+  double _calculateDiscountedPrice(
+      double originalPrice, double discountPercentage, int quantity) {
+    double totalOriginal = originalPrice * quantity;
+    double discountAmount = totalOriginal * (discountPercentage / 100);
+    double discountedPrice = totalOriginal - discountAmount;
+    return discountedPrice;
   }
 }
 
@@ -389,11 +436,4 @@ class BottomInnerOvalClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-  // Helper method to calculate the discounted price
-  String _calculateDiscountedPrice(
-      double originalPrice, double discountPercentage) {
-    double discountAmount = originalPrice * (discountPercentage / 100);
-    double discountedPrice = originalPrice - discountAmount;
-    return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
-  }
 }
