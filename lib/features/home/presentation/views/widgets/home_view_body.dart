@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
+import 'dart:async';
 
 import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view_bloc_builder.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_bloc_builder.dart';
@@ -32,6 +33,7 @@ class _HomeViewBodyState extends State<HomeViewBody>
   PageController? _bannerController;
   int _currentBannerIndex = 0;
   bool _isDisposed = false;
+  Timer? _bannerTimer;
 
   // Sample banner data
   final List<BannerItem> _banners = [
@@ -65,6 +67,7 @@ class _HomeViewBodyState extends State<HomeViewBody>
   void initState() {
     super.initState();
     _initializeComponents();
+    _startBannerAutoScroll();
   }
 
   void _initializeComponents() {
@@ -145,9 +148,27 @@ class _HomeViewBodyState extends State<HomeViewBody>
       setState(() {
         _currentBannerIndex = index;
       });
+      _startBannerAutoScroll();
     } catch (e) {
       debugPrint('Error changing banner page: $e');
     }
+  }
+
+  void _startBannerAutoScroll() {
+    _bannerTimer?.cancel();
+    _bannerTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_bannerController != null &&
+          _banners.isNotEmpty &&
+          mounted &&
+          !_isDisposed) {
+        int nextPage = (_currentBannerIndex + 1) % _banners.length;
+        _bannerController!.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
@@ -156,6 +177,7 @@ class _HomeViewBodyState extends State<HomeViewBody>
     try {
       WidgetsBinding.instance.removeObserver(this);
       _bannerController?.dispose();
+      _bannerTimer?.cancel();
     } catch (e) {
       debugPrint('Error disposing: $e');
     }
