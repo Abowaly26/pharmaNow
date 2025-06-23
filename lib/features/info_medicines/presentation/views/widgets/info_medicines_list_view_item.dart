@@ -250,10 +250,7 @@ class InfoMedicinesListViewItem extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // context
-                      //     .read<CartCubit>()
-                      //     .addMedicineToCart(medicineEntity);
-                      // // Add to cart functionality
+                      context.read<CartCubit>().addMedicineToCart(medicineEntity);
                     },
                     child: SvgPicture.asset(
                       Assets.cart,

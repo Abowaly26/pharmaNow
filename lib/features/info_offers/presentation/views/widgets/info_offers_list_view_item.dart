@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../core/utils/color_manger.dart';
@@ -20,8 +22,6 @@ class InfoOffersListViewItem extends StatelessWidget {
     required this.medicineEntity,
   });
 
-  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
-  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
@@ -243,7 +243,7 @@ class InfoOffersListViewItem extends StatelessWidget {
                   // Removed extra padding around cart icon to match InfoMedicinesListViewItem
                   GestureDetector(
                     onTap: () {
-                      // Add to cart functionality
+                      context.read<CartCubit>().addMedicineToCart(medicineEntity);
                     },
                     child: SvgPicture.asset(
                       Assets.cart,

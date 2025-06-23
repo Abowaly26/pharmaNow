@@ -9,6 +9,7 @@ import '../../../../core/repos/medicine_repo/medicine_repo.dart'
 import '../../../../core/services/get_it_service.dart';
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 class InfoMedicinesView extends StatelessWidget {
   const InfoMedicinesView({super.key});
@@ -29,8 +30,15 @@ class InfoMedicinesView extends StatelessWidget {
           },
         ),
       ),
-      body: BlocProvider(
-        create: (context) => MedicinesCubit(getIt.get<MedicineRepo>()),
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider<MedicinesCubit>(
+            create: (context) => MedicinesCubit(getIt.get<MedicineRepo>()),
+          ),
+          BlocProvider<CartCubit>.value(
+            value: getIt<CartCubit>(),
+          ),
+        ],
         child: const InfoMedicinesViewBody(),
       ),
     );

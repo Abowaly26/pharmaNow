@@ -24,12 +24,10 @@ class MedicineListViewItem extends StatelessWidget {
     this.onTap,
   });
 
-  // من أجل تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
-  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
-      'id': medicineEntity.code, // نستخدم الكود كمعرف فريد
+      'id': medicineEntity.code,
       'name': medicineEntity.name,
       'price': medicineEntity.price,
       'imageUrl': medicineEntity.subabaseORImageUrl,
