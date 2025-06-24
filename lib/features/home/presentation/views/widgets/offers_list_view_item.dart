@@ -25,7 +25,6 @@ class OffersListViewItem extends StatelessWidget {
     required this.medicineEntity,
   });
 
-  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
@@ -216,7 +215,9 @@ class OffersListViewItem extends StatelessWidget {
                     ],
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 8.r, right: 8.r),
+                    padding: EdgeInsets.only(
+                      top: 8.r,
+                    ),
                     child: GestureDetector(
                       onTap: () {
                         context

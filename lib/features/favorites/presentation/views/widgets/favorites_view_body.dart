@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/models/medicine_model.dart';
 import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
@@ -179,7 +181,8 @@ class MedicineListViewItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MedicineDetailsView(medicineEntity: medicineEntity),
+            builder: (context) =>
+                MedicineDetailsView(medicineEntity: medicineEntity),
           ),
         );
       },
@@ -409,13 +412,15 @@ class MedicineListViewItem extends StatelessWidget {
                     ],
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 8.r, right: 8.r),
+                    padding: EdgeInsets.only(top: 8.r),
                     child: GestureDetector(
                       onTap: () {
-                        // Add to cart functionality
+                        context
+                            .read<CartCubit>()
+                            .addMedicineToCart(medicineEntity);
                       },
                       child: SvgPicture.asset(
-                        Assets.cart,
+                        'assets/images/cart.svg',
                         width: 32.w,
                         height: 32.h,
                       ),

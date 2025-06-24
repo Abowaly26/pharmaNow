@@ -137,16 +137,14 @@ class MedicineListViewItem extends StatelessWidget {
                           ),
                         ],
                       )
-                    : Container(), // No banner if neither new nor has discount
+                    : Container(),
           ),
 
-          // زر المفضلة - يستخدم مكون FavoriteButton المشترك
-          // Favorite button - uses the shared FavoriteButton component
           Positioned(
             top: 8.h,
             right: 8.w,
             child: FavoriteButton(
-              itemId: medicineEntity.code, // نستخدم الكود كمعرف فريد
+              itemId: medicineEntity.code,
               itemData: _convertEntityToModel(),
               size: 24,
             ),
@@ -230,7 +228,9 @@ class MedicineListViewItem extends StatelessWidget {
                     ],
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 8.r, right: 8.r),
+                    padding: EdgeInsets.only(
+                      top: 8.r,
+                    ),
                     child: GestureDetector(
                       onTap: () {
                         context

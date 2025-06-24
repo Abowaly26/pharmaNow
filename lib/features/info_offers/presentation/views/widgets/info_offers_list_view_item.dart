@@ -209,13 +209,13 @@ class InfoOffersListViewItem extends StatelessWidget {
             ),
             const Spacer(),
             // Updated padding to match InfoMedicinesListViewItem
-            Padding(
-              padding: EdgeInsets.only(bottom: 8.r, right: 8.r),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8.r, right: 8.r),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Show the original price with strikethrough if there's a discount
@@ -240,19 +240,19 @@ class InfoOffersListViewItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Removed extra padding around cart icon to match InfoMedicinesListViewItem
-                  GestureDetector(
-                    onTap: () {
-                      context.read<CartCubit>().addMedicineToCart(medicineEntity);
-                    },
-                    child: SvgPicture.asset(
-                      Assets.cart,
-                      width: 32.w,
-                      height: 32.h,
-                    ),
+                ),
+                // Removed extra padding around cart icon to match InfoMedicinesListViewItem
+                GestureDetector(
+                  onTap: () {
+                    context.read<CartCubit>().addMedicineToCart(medicineEntity);
+                  },
+                  child: SvgPicture.asset(
+                    Assets.cart,
+                    width: 32.w,
+                    height: 32.h,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),

@@ -183,7 +183,6 @@ class InfoMedicinesListViewItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                // زر المفضلة - يستخدم مكون FavoriteButton المشترك لإضافة/إزالة الدواء من المفضلة
                 // Favorite button - uses the shared FavoriteButton component to add/remove medicine from favorites
                 Padding(
                   padding: EdgeInsets.only(right: 8.r, top: 4.r),
@@ -217,13 +216,13 @@ class InfoMedicinesListViewItem extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            Padding(
-              padding: EdgeInsets.only(bottom: 8.r, right: 8.r),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8.r, right: 8.r),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Show the original price with strikethrough if there's a discount
@@ -248,18 +247,18 @@ class InfoMedicinesListViewItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      context.read<CartCubit>().addMedicineToCart(medicineEntity);
-                    },
-                    child: SvgPicture.asset(
-                      Assets.cart,
-                      width: 32.w,
-                      height: 32.h,
-                    ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    context.read<CartCubit>().addMedicineToCart(medicineEntity);
+                  },
+                  child: SvgPicture.asset(
+                    Assets.cart,
+                    width: 32.w,
+                    height: 32.h,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
