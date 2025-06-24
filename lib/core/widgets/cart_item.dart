@@ -6,6 +6,7 @@ import 'package:pharma_now/Cart/presentation/cubits/cart_item_cubit/cart_item_cu
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/cart_item_action_buttons.dart';
+import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/utils/color_manger.dart';
@@ -46,6 +47,15 @@ class CartItem extends StatelessWidget {
       },
       builder: (context, state) {
         return InkWell(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MedicineDetailsView(
+                  medicineEntity: cartItemEntity.medicineEntity,
+                ),
+              ),
+            );
+          },
           child: Padding(
             padding: EdgeInsets.only(
               top: 10.h,
