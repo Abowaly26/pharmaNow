@@ -98,8 +98,12 @@ class CartItem extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
-              child: cartItemEntity.medicineEntity.subabaseORImageUrl == null
-                  ? SizedBox(
+              child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: cartItemEntity.medicineEntity.subabaseORImageUrl == null ||
+                      cartItemEntity.medicineEntity.subabaseORImageUrl!.isEmpty
+                  ? Container(
+                      color: ColorManager.textInputColor.withOpacity(0.2),
                       height: 120.h,
                       width: 100.w,
                     )
@@ -111,6 +115,7 @@ class CartItem extends StatelessWidget {
                       errorWidget: (context, url, error) =>
                           const Center(child: Text('No image')),
                     ),
+            )
             ),
           ),
           Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
