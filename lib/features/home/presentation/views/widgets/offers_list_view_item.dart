@@ -12,7 +12,6 @@ import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
-// استيراد ملف مكون التحميل الجديد
 
 class OffersListViewItem extends StatelessWidget {
   final int index;
@@ -47,7 +46,8 @@ class OffersListViewItem extends StatelessWidget {
       'pharmacyName': medicineEntity.pharmacyName,
       'discountRating': medicineEntity.discountRating,
       'isNewProduct': medicineEntity.isNewProduct,
-      'description': medicineEntity.description,
+      'quantity': medicineEntity.quantity,
+    'description': medicineEntity.description,
     };
   }
 

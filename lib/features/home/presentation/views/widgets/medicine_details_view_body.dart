@@ -50,6 +50,7 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
       'discountRating': widget.medicineEntity.discountRating,
       'isNewProduct': widget.medicineEntity.isNewProduct,
       'description': widget.medicineEntity.description,
+      'quantity': widget.medicineEntity.quantity,
     };
   }
 
@@ -69,6 +70,7 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
     return BlocListener<CartCubit, CartState>(
       listener: (context, state) {
         if (state is CartItemAdded) {
+          final screenWidth = MediaQuery.of(context).size.width;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -77,10 +79,14 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                 style: const TextStyle(color: Colors.white, fontSize: 12),
               ),
               backgroundColor: const Color.fromARGB(255, 109, 193, 111),
-              width: MediaQuery.of(context).size.width * 0.4,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(42),
+              ),
+              margin: EdgeInsets.only(
+                left: screenWidth * 0.3,
+                right: screenWidth * 0.3,
+                bottom: 80.h,
               ),
               duration: const Duration(seconds: 1),
             ),

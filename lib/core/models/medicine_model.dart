@@ -50,7 +50,8 @@ class MedicineModel {
       quantity: json['quantity'] ?? 0,
       isNewProduct: json['isNewProduct'] ?? false,
       price: json['price'] ?? 0,
-      subabaseORImageUrl: json['subabaseImageUrl'],
+      subabaseORImageUrl:
+          json['subabaseImageUrl'] ?? json['subabaseORImageUrl'],
       pharmacyName: json['pharmacyName'] ?? '',
       pharmacyId: json['pharmacyId'] ?? 0,
       pharmcyAddress: json['pharmcyAddress'] ?? '',

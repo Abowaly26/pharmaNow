@@ -355,7 +355,8 @@ class InfoOffersListViewItem extends StatelessWidget {
       'pharmacyName': medicineEntity.pharmacyName,
       'discountRating': medicineEntity.discountRating,
       'isNewProduct': medicineEntity.isNewProduct,
-      'description': medicineEntity.description,
+      'quantity': medicineEntity.quantity,
+    'description': medicineEntity.description,
     };
   }
 }

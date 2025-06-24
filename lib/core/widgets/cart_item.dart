@@ -12,6 +12,7 @@ import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CartItem extends StatelessWidget {
   const CartItem({
@@ -92,15 +93,13 @@ class CartItem extends StatelessWidget {
                       height: 120.h,
                       width: 100.w,
                     )
-                  : Image.network(
-                      cartItemEntity.medicineEntity.subabaseORImageUrl!,
+                  : CachedNetworkImage(
+                      imageUrl:
+                          cartItemEntity.medicineEntity.subabaseORImageUrl!,
                       fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return _buildLoadingAnimation();
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Center(child: Text('No image available')),
+                      placeholder: (context, url) => _buildLoadingAnimation(),
+                      errorWidget: (context, url, error) =>
+                          const Center(child: Text('No image')),
                     ),
             ),
           ),

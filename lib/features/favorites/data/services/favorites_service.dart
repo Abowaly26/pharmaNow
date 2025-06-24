@@ -42,14 +42,14 @@ class FavoritesService {
       throw Exception('You must be logged in to add items to favorites');
     }
     try {
-      // Add additional information to the item
+      // Add additional information to the item, while preserving the original itemData
       final updatedData = {
-        ...itemData,
+        ...itemData, // This correctly includes all fields like 'name', 'price', 'quantity', etc.
         'addedAt': FieldValue.serverTimestamp(),
         'userId': currentUserId,
         'code': itemId, // Ensure the code is saved in the data
       };
-      // Save item to favorites (using the same item ID as document ID prevents duplication)
+      // Save item to favorites
       await userFavoritesCollection.doc(itemId).set(updatedData);
     } catch (e) {
       debugPrint('Error adding item to favorites: $e');

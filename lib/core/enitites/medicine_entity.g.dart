@@ -15,7 +15,6 @@ MedicineEntity _$MedicineEntityFromJson(Map<String, dynamic> json) =>
       pharmacyName: json['pharmacyName'] as String,
       pharmacyId: (json['pharmacyId'] as num).toInt(),
       pharmcyAddress: json['pharmcyAddress'] as String,
-      subabaseORImageUrl: json['subabaseORImageUrl'] as String?,
       name: json['name'] as String,
       description: json['description'] as String,
       code: json['code'] as String,
@@ -25,6 +24,7 @@ MedicineEntity _$MedicineEntityFromJson(Map<String, dynamic> json) =>
       sellingCount: json['sellingCount'] as num,
       avgRating: json['avgRating'] as num? ?? 0,
       ratingCount: (json['ratingCount'] as num?)?.toInt() ?? 0,
+      subabaseORImageUrl: json['subabaseORImageUrl'] as String?,
     );
 
 Map<String, dynamic> _$MedicineEntityToJson(MedicineEntity instance) =>

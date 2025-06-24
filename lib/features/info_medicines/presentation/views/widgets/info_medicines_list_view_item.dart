@@ -45,6 +45,7 @@ class InfoMedicinesListViewItem extends StatelessWidget {
       'discountRating': medicineEntity.discountRating,
       'isNewProduct': medicineEntity.isNewProduct,
       'description': medicineEntity.description,
+      'quantity': medicineEntity.quantity,
     };
   }
 

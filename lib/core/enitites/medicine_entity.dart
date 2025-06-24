@@ -15,7 +15,8 @@ class MedicineEntity extends Equatable {
   final int quantity;
   final bool isNewProduct;
   final num price;
-  String? subabaseORImageUrl;
+  @JsonKey()
+  final String? subabaseORImageUrl;
   final String pharmacyName;
   final int pharmacyId;
   final String pharmcyAddress;
