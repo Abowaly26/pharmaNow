@@ -9,6 +9,8 @@ import '../../../../../core/utils/text_styles.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 
 class MedicineDetailsViewBody extends StatefulWidget {
   const MedicineDetailsViewBody({
@@ -49,6 +51,13 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
       'isNewProduct': widget.medicineEntity.isNewProduct,
       'description': widget.medicineEntity.description,
     };
+  }
+
+  Widget _buildLoadingAnimation() {
+    return ShimmerLoadingPlaceholder(
+      width: 180.w,
+      height: 180.h,
+    );
   }
 
   @override
@@ -350,23 +359,12 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                             widget.medicineEntity.subabaseORImageUrl ??
                                 'https://i.postimg.cc/2yLfw0qy/image-20.png';
 
-                        return Image(
-                          image: NetworkImage(imageUrl),
+                        return CachedNetworkImage(
+                          imageUrl: imageUrl,
                           fit: BoxFit.contain,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
-                                color: ColorManager.secondaryColor,
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) => Icon(
+                          placeholder: (context, url) =>
+                              _buildLoadingAnimation(),
+                          errorWidget: (context, url, error) => Icon(
                             Icons.image_not_supported,
                             size: 80.sp,
                             color: Colors.grey,
@@ -500,5 +498,7 @@ class BottomInnerOvalClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return false;
+  }
 }

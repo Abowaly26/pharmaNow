@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -91,21 +92,22 @@ class MedicineListViewItem extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
-              child: medicineEntity.subabaseORImageUrl == null
+              child: medicineEntity.subabaseORImageUrl == null ||
+                      medicineEntity.subabaseORImageUrl!.isEmpty
                   ? Container(
                       color: ColorManager.textInputColor.withOpacity(0.2),
                       height: 80.h,
                       width: 80.w,
                     )
-                  : Image.network(
-                      medicineEntity.subabaseORImageUrl!,
-                      fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return _buildLoadingAnimation();
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Center(child: Text('No image available')),
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(8.r),
+                      child: CachedNetworkImage(
+                        imageUrl: medicineEntity.subabaseORImageUrl!,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => _buildLoadingAnimation(),
+                        errorWidget: (context, url, error) =>
+                            const Center(child: Text('No image available')),
+                      ),
                     ),
             ),
           ),
