@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/models/medicine_model.dart';
+import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
 import 'package:pharma_now/features/favorites/presentation/providers/favorites_provider.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
@@ -173,13 +174,23 @@ class MedicineListViewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsetsDirectional.only(end: 12.w),
-      child: Column(
-        children: [
-          _buildTopContainer(context),
-          _buildBottomContainer(context),
-        ],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MedicineDetailsView(medicineEntity: medicineEntity),
+          ),
+        );
+      },
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(end: 12.w),
+        child: Column(
+          children: [
+            _buildTopContainer(context),
+            _buildBottomContainer(context),
+          ],
+        ),
       ),
     );
   }

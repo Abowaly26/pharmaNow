@@ -142,6 +142,7 @@ class _HomeViewBodyState extends State<HomeViewBody>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: 4.h),
                 _buildSearchBar(),
                 SizedBox(height: 4.h),
                 const BannerSlider(),
@@ -149,6 +150,7 @@ class _HomeViewBodyState extends State<HomeViewBody>
                 _buildOffersSection(),
                 SizedBox(height: 4.h),
                 const OffersListViewBlocBuilder(),
+                SizedBox(height: 8.h),
                 _buildMedicinesSection(),
                 SizedBox(height: 4.h),
                 const MedicineListViewBlocBuilder(),
