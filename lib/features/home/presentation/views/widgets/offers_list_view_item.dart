@@ -25,6 +25,17 @@ class OffersListViewItem extends StatelessWidget {
     required this.medicineEntity,
   });
 
+  // Getter to determine stock status from medicine quantity
+  StockStatus get stockStatus {
+    if (medicineEntity.quantity <= 0) {
+      return StockStatus.outOfStock;
+    }
+    if (medicineEntity.quantity < 10) {
+      return StockStatus.lowStock;
+    }
+    return StockStatus.inStock;
+  }
+
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
@@ -138,6 +149,7 @@ class OffersListViewItem extends StatelessWidget {
               size: 24,
             ),
           ),
+          Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
         ],
       ),
     );
@@ -167,14 +179,19 @@ class OffersListViewItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 8.h),
-            SizedBox(
-              width: 175.w,
-              child: Text(
-                medicineEntity.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyles.listView_product_name,
-              ),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    medicineEntity.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyles.listView_product_name,
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                _buildQuantityStatus(),
+              ],
             ),
             Text(
               medicineEntity.pharmacyName,
@@ -212,6 +229,7 @@ class OffersListViewItem extends StatelessWidget {
                           color: const Color(0xFF20B83A),
                         ),
                       ),
+                      SizedBox(height: 4.h),
                     ],
                   ),
                   Padding(
@@ -246,6 +264,75 @@ class OffersListViewItem extends StatelessWidget {
         height: 120.h,
         baseColor: Colors.white.withOpacity(0.2),
         highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
+  }
+
+  Widget _buildStockIndicator() {
+    final Color indicatorColor;
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        indicatorColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        indicatorColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        indicatorColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      width: 12.w,
+      height: 12.h,
+      decoration: BoxDecoration(
+        color: indicatorColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2.0),
+        boxShadow: [
+          BoxShadow(
+            color: indicatorColor.withOpacity(0.3),
+            blurRadius: 4.r,
+            spreadRadius: 1.r,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityStatus() {
+    final String statusText;
+    final Color statusColor;
+
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        statusText = 'Out';
+        statusColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        statusText = 'Low Stock';
+        statusColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        statusText = 'Stock';
+        statusColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4.r),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          fontSize: 8.sp,
+          color: statusColor,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 
   String _calculateDiscountedPrice(

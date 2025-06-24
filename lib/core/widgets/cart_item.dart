@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pharma_now/Cart/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
+import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/cart_item_action_buttons.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
@@ -19,6 +20,17 @@ class CartItem extends StatelessWidget {
   });
 
   final CartItemEntity cartItemEntity;
+
+  // Getter to determine stock status from medicine quantity
+  StockStatus get stockStatus {
+    if (cartItemEntity.medicineEntity.quantity <= 0) {
+      return StockStatus.outOfStock;
+    }
+    if (cartItemEntity.medicineEntity.quantity < 10) {
+      return StockStatus.lowStock;
+    }
+    return StockStatus.inStock;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +104,7 @@ class CartItem extends StatelessWidget {
                     ),
             ),
           ),
+          Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
 
           // Banner logic - Show either New banner OR Discount banner
           Positioned(
@@ -161,16 +174,24 @@ class CartItem extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 148.w,
+                Expanded(
                   child: Padding(
                     padding: EdgeInsets.only(top: 8.r),
-                    child: Text(
-                      cartItemEntity.medicineEntity.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyles.listView_product_name,
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            cartItemEntity.medicineEntity.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyles.listView_product_name,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        _buildQuantityStatus(),
+                      ],
                     ),
                   ),
                 ),
@@ -238,6 +259,75 @@ class CartItem extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStockIndicator() {
+    final Color indicatorColor;
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        indicatorColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        indicatorColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        indicatorColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      width: 12.w,
+      height: 12.h,
+      decoration: BoxDecoration(
+        color: indicatorColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2.0),
+        boxShadow: [
+          BoxShadow(
+            color: indicatorColor.withOpacity(0.3),
+            blurRadius: 4.r,
+            spreadRadius: 1.r,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityStatus() {
+    final String statusText;
+    final Color statusColor;
+
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        statusText = 'Out';
+        statusColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        statusText =
+            'Low Stock (${cartItemEntity.medicineEntity.quantity} left)';
+        statusColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        statusText = 'Stock';
+        statusColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4.r),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          fontSize: 8.sp,
+          color: statusColor,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

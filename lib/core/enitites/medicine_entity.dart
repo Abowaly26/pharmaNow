@@ -4,6 +4,9 @@ import 'package:pharma_now/core/enitites/review_entity.dart';
 
 part 'medicine_entity.g.dart';
 
+// Enum to represent the stock status, making the logic cleaner and more readable.
+enum StockStatus { inStock, lowStock, outOfStock }
+
 @JsonSerializable(explicitToJson: true)
 class MedicineEntity extends Equatable {
   final String name;
@@ -47,7 +50,7 @@ class MedicineEntity extends Equatable {
   Map<String, dynamic> toJson() => _$MedicineEntityToJson(this);
 
   // Create from JSON from Firestore
-  factory MedicineEntity.fromJson(Map<String, dynamic> json) => 
+  factory MedicineEntity.fromJson(Map<String, dynamic> json) =>
       _$MedicineEntityFromJson(json);
 }
 

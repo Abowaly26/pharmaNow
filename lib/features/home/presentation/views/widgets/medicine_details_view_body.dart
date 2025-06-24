@@ -26,6 +26,17 @@ class MedicineDetailsViewBody extends StatefulWidget {
 class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
   int _counter = 1;
 
+  // Getter to determine stock status from medicine quantity
+  StockStatus get stockStatus {
+    if (widget.medicineEntity.quantity <= 0) {
+      return StockStatus.outOfStock;
+    }
+    if (widget.medicineEntity.quantity < 10) {
+      return StockStatus.lowStock;
+    }
+    return StockStatus.inStock;
+  }
+
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
@@ -167,6 +178,8 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                         color: Colors.grey,
                       ),
                     ),
+                    SizedBox(height: 16.h),
+                    _buildQuantityStatus(),
                     SizedBox(height: 16.h),
                     Row(
                       children: [
@@ -402,6 +415,58 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
     double discountAmount = totalOriginal * (discountPercentage / 100);
     double discountedPrice = totalOriginal - discountAmount;
     return discountedPrice;
+  }
+
+  Widget _buildQuantityStatus() {
+    final String statusText;
+    final Color statusColor;
+    final IconData iconData;
+
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        statusText = 'Out of Stock';
+        statusColor = Colors.red;
+        iconData = Icons.remove_shopping_cart_outlined;
+        break;
+      case StockStatus.lowStock:
+        statusText = 'Low Stock (${widget.medicineEntity.quantity} left)';
+        statusColor = Colors.orange;
+        iconData = Icons.warning_amber_rounded;
+        break;
+      case StockStatus.inStock:
+        statusText = 'In Stock';
+        statusColor = Colors.green;
+        iconData = Icons.check_circle_outline_rounded;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            iconData,
+            color: statusColor,
+            size: 16.sp,
+          ),
+          SizedBox(width: 8.w),
+          Text(
+            statusText,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: statusColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

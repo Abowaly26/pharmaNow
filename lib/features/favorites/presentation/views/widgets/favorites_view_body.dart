@@ -174,6 +174,17 @@ class MedicineListViewItem extends StatelessWidget {
     this.onFavoriteChanged,
   });
 
+  // Getter to determine stock status from medicine quantity
+  StockStatus get stockStatus {
+    if (medicineEntity.quantity <= 0) {
+      return StockStatus.outOfStock;
+    }
+    if (medicineEntity.quantity < 10) {
+      return StockStatus.lowStock;
+    }
+    return StockStatus.inStock;
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -242,6 +253,7 @@ class MedicineListViewItem extends StatelessWidget {
                     ),
             ),
           ),
+          Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
           // Banner logic - Show either New banner OR Discount banner
           Positioned(
             top: medicineEntity.isNewProduct ? 0 : 8.h,
@@ -362,14 +374,19 @@ class MedicineListViewItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 8.h),
-            SizedBox(
-              width: 175.w,
-              child: Text(
-                medicineEntity.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyles.listView_product_name,
-              ),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    medicineEntity.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyles.listView_product_name,
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                _buildQuantityStatus(),
+              ],
             ),
             Text(
               medicineEntity.pharmacyName,
@@ -437,10 +454,78 @@ class MedicineListViewItem extends StatelessWidget {
 
   Widget _buildLoadingAnimation() {
     return ShimmerLoadingPlaceholder(
-        width: 100.w,
-        height: 120.h,
-        baseColor: Colors.white.withOpacity(0.2),
-        highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
+      width: 80.w,
+      height: 80.h,
+    );
+  }
+
+  Widget _buildStockIndicator() {
+    final Color indicatorColor;
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        indicatorColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        indicatorColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        indicatorColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      width: 12.w,
+      height: 12.h,
+      decoration: BoxDecoration(
+        color: indicatorColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2.0),
+        boxShadow: [
+          BoxShadow(
+            color: indicatorColor.withOpacity(0.3),
+            blurRadius: 4.r,
+            spreadRadius: 1.r,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityStatus() {
+    final String statusText;
+    final Color statusColor;
+
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        statusText = 'Out';
+        statusColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        statusText = 'Low Stock';
+        statusColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        statusText = 'Stock';
+        statusColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4.r),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          fontSize: 8.sp,
+          color: statusColor,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 
   // Helper method to calculate the discounted price

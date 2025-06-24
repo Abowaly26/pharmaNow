@@ -22,18 +22,15 @@ class InfoOffersListViewItem extends StatelessWidget {
     required this.medicineEntity,
   });
 
-  // Convert medicine entity to model for storing in favorites
-  Map<String, dynamic> _convertEntityToModel() {
-    return {
-      'id': medicineEntity.code,
-      'name': medicineEntity.name,
-      'price': medicineEntity.price,
-      'imageUrl': medicineEntity.subabaseORImageUrl,
-      'pharmacyName': medicineEntity.pharmacyName,
-      'discountRating': medicineEntity.discountRating,
-      'isNewProduct': medicineEntity.isNewProduct,
-      'description': medicineEntity.description,
-    };
+  // Getter to determine stock status from medicine quantity
+  StockStatus get stockStatus {
+    if (medicineEntity.quantity <= 0) {
+      return StockStatus.outOfStock;
+    }
+    if (medicineEntity.quantity < 10) {
+      return StockStatus.lowStock;
+    }
+    return StockStatus.inStock;
   }
 
   @override
@@ -99,6 +96,7 @@ class InfoOffersListViewItem extends StatelessWidget {
                     ),
             ),
           ),
+          Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
           // Discount banner - updated positioning to match InfoMedicinesListViewItem
           Positioned(
             top: 8.h,
@@ -158,33 +156,36 @@ class InfoOffersListViewItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: 148.w,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 8.r),
-                    child: Text(
-                      medicineEntity.name,
-                      maxLines:
-                          1, // Added maxLines to match InfoMedicinesListViewItem
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyles.listView_product_name,
+            Padding(
+              padding: EdgeInsets.only(top: 8.r, right: 8.r),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            medicineEntity.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyles.listView_product_name,
+                          ),
+                        ),
+                        SizedBox(width: 16.w),
+                        _buildQuantityStatus(),
+                      ],
                     ),
                   ),
-                ),
-                // زر المفضلة - يستخدم مكون FavoriteButton المشترك لإضافة/إزالة العرض من المفضلة
-                // Favorite button - uses the shared FavoriteButton component to add/remove offer from favorites
-                Padding(
-                  padding: EdgeInsets.only(right: 8.r, top: 4.r),
-                  child: FavoriteButton(
+                  // Favorite button - uses the shared FavoriteButton component to add/remove offer from favorites
+                  FavoriteButton(
                     itemId: medicineEntity.code,
                     itemData: _convertEntityToModel(),
                     size: 24,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Text(
               medicineEntity.pharmacyName,
@@ -238,6 +239,7 @@ class InfoOffersListViewItem extends StatelessWidget {
                           color: const Color(0xFF20B83A),
                         ),
                       ),
+                      SizedBox(height: 4.h),
                     ],
                   ),
                 ),
@@ -261,11 +263,76 @@ class InfoOffersListViewItem extends StatelessWidget {
   }
 
   Widget _buildLoadingAnimation() {
-    return ShimmerLoadingPlaceholder(
-        width: 100.w,
-        height: 120.h,
-        baseColor: Colors.white.withOpacity(0.2),
-        highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
+    return const ShimmerLoadingPlaceholder();
+  }
+
+  Widget _buildStockIndicator() {
+    final Color indicatorColor;
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        indicatorColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        indicatorColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        indicatorColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      width: 12.w,
+      height: 12.h,
+      decoration: BoxDecoration(
+        color: indicatorColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2.0),
+        boxShadow: [
+          BoxShadow(
+            color: indicatorColor.withOpacity(0.3),
+            blurRadius: 4.r,
+            spreadRadius: 1.r,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityStatus() {
+    final String statusText;
+    final Color statusColor;
+
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        statusText = 'Out';
+        statusColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        statusText = 'Low Stock';
+        statusColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        statusText = 'Stock';
+        statusColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4.r),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          fontSize: 8.sp,
+          color: statusColor,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 
   // Helper method to calculate the discounted price
@@ -273,6 +340,20 @@ class InfoOffersListViewItem extends StatelessWidget {
       double originalPrice, double discountPercentage) {
     double discountAmount = originalPrice * (discountPercentage / 100);
     double discountedPrice = originalPrice - discountAmount;
-    return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
+    return discountedPrice.toStringAsFixed(2);
+  }
+
+  // Convert medicine entity to model for storing in favorites
+  Map<String, dynamic> _convertEntityToModel() {
+    return {
+      'id': medicineEntity.code,
+      'name': medicineEntity.name,
+      'price': medicineEntity.price,
+      'imageUrl': medicineEntity.subabaseORImageUrl,
+      'pharmacyName': medicineEntity.pharmacyName,
+      'discountRating': medicineEntity.discountRating,
+      'isNewProduct': medicineEntity.isNewProduct,
+      'description': medicineEntity.description,
+    };
   }
 }

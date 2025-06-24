@@ -22,8 +22,17 @@ class InfoMedicinesListViewItem extends StatelessWidget {
     this.onTap,
   });
 
-  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
-  // تحويل كيان الدواء إلى نموذج للحفظ في المفضلة
+  // Getter to determine stock status from medicine quantity
+  StockStatus get stockStatus {
+    if (medicineEntity.quantity <= 0) {
+      return StockStatus.outOfStock;
+    }
+    if (medicineEntity.quantity < 10) {
+      return StockStatus.lowStock;
+    }
+    return StockStatus.inStock;
+  }
+
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
@@ -101,6 +110,7 @@ class InfoMedicinesListViewItem extends StatelessWidget {
                     ),
             ),
           ),
+          Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
 
           // Banner logic - Show either New banner OR Discount banner
           Positioned(
@@ -168,31 +178,36 @@ class InfoMedicinesListViewItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: 148.w,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 8.r),
-                    child: Text(
-                      medicineEntity.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyles.listView_product_name,
+            Padding(
+              padding: EdgeInsets.only(top: 8.r, right: 8.r),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            medicineEntity.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyles.listView_product_name,
+                          ),
+                        ),
+                        SizedBox(width: 16.w),
+                        _buildQuantityStatus(),
+                      ],
                     ),
                   ),
-                ),
-                // Favorite button - uses the shared FavoriteButton component to add/remove medicine from favorites
-                Padding(
-                  padding: EdgeInsets.only(right: 8.r, top: 4.r),
-                  child: FavoriteButton(
+                  // Favorite button - uses the shared FavoriteButton component to add/remove medicine from favorites
+                  FavoriteButton(
                     itemId: medicineEntity.code,
                     itemData: _convertEntityToModel(),
                     size: 24,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Text(
               medicineEntity.pharmacyName,
@@ -245,6 +260,7 @@ class InfoMedicinesListViewItem extends StatelessWidget {
                           color: const Color(0xFF20B83A),
                         ),
                       ),
+                      SizedBox(height: 4.h),
                     ],
                   ),
                 ),
@@ -274,11 +290,78 @@ class InfoMedicinesListViewItem extends StatelessWidget {
         highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
   }
 
-  // Helper method to calculate the discounted price
-  String _calculateDiscountedPrice(
-      double originalPrice, double discountPercentage) {
-    double discountAmount = originalPrice * (discountPercentage / 100);
-    double discountedPrice = originalPrice - discountAmount;
-    return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
+  Widget _buildStockIndicator() {
+    final Color indicatorColor;
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        indicatorColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        indicatorColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        indicatorColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      width: 12.w,
+      height: 12.h,
+      decoration: BoxDecoration(
+        color: indicatorColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2.0),
+        boxShadow: [
+          BoxShadow(
+            color: indicatorColor.withOpacity(0.3),
+            blurRadius: 4.r,
+            spreadRadius: 1.r,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityStatus() {
+    final String statusText;
+    final Color statusColor;
+
+    switch (stockStatus) {
+      case StockStatus.outOfStock:
+        statusText = 'Out';
+        statusColor = Colors.red;
+        break;
+      case StockStatus.lowStock:
+        statusText = 'Low Stock';
+        statusColor = Colors.orange;
+        break;
+      case StockStatus.inStock:
+        statusText = 'Stock';
+        statusColor = Colors.green;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4.r),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          fontSize: 8.sp,
+          color: statusColor,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  String _calculateDiscountedPrice(double price, double discount) {
+    if (discount <= 0) return price.toStringAsFixed(2);
+    double discounted = price - (price * (discount / 100));
+    return discounted.toStringAsFixed(2);
   }
 }
