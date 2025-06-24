@@ -64,7 +64,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     } else {
       log('Password changed successfully', name: 'ChangePasswordView');
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password changed successfully')));
+          const SnackBar(content: Text('Password changed successfully'), backgroundColor: Colors.green,));
       Navigator.pop(context);
     }
   }

@@ -73,7 +73,7 @@ class _EditProfileState extends State<EditProfile> {
             .showSnackBar(SnackBar(content: Text(provider.errorMessage)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile updated successfully')));
+            const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green));
         Navigator.pop(context);
       }
     }
