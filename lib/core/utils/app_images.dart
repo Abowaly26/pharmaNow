@@ -98,4 +98,5 @@ class Assets {
   static const String addToCart = "assets/images/add_to_cart.svg";
   static const String chatText = "assets/images/chat-text.svg";
   static const String chatImage = "assets/images/chatImage.svg";
+  static const String emptyNotific = "assets/images/empty_notific.svg";
 }
