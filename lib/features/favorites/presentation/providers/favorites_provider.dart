@@ -168,6 +168,28 @@ class FavoritesProvider extends ChangeNotifier {
     }
   }
 
+  // Clear all favorites
+  Future<void> clearAllFavorites() async {
+    _setLoading(true);
+
+    try {
+      // Clear local favorites immediately
+      _favorites.clear();
+      _favoriteIds.clear();
+      notifyListeners();
+
+      // Call the service to clear favorites from Firebase
+      await _favoritesService.clearAllFavorites();
+    } catch (e) {
+      debugPrint('Error clearing all favorites: $e');
+      // If an error occurs, reload the data
+      _listenToFavorites();
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // Set loading state
   void _setLoading(bool loading) {
     _isLoading = loading;

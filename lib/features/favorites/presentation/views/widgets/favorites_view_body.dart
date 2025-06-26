@@ -45,6 +45,43 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
         padding: EdgeInsets.all(16.r),
         child: Column(
           children: [
+            Consumer<FavoritesProvider>(
+              builder: (context, favoritesProvider, child) {
+                if (favoritesProvider.favorites.isEmpty) {
+                  return const SizedBox
+                      .shrink(); // Return empty space if no favorites
+                }
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => _showClearConfirmationDialog(context),
+                    icon: Icon(
+                      Icons.delete_sweep_outlined,
+                      color: ColorManager.redColorF5,
+                    ),
+                    label: Text(
+                      'Clear All',
+                      style: TextStyles.sectionTitle.copyWith(
+                        color: ColorManager.redColorF5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        side: BorderSide(
+                          color: ColorManager.redColorF5.withOpacity(0.5),
+                          width: 1.w,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+
             // Favorites content
             Expanded(
               child: Consumer<FavoritesProvider>(
@@ -87,6 +124,41 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showClearConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          title: const Text('Clear All Favorites'),
+          content:
+              const Text('Are you sure you want to delete all your favorites?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Clear',
+                style: TextStyle(color: ColorManager.redColorF5),
+              ),
+              onPressed: () {
+                Provider.of<FavoritesProvider>(context, listen: false)
+                    .clearAllFavorites();
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

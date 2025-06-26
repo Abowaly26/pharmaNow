@@ -17,7 +17,7 @@ class FavoriteView extends StatelessWidget {
         preferredSize: Size.fromHeight(48.sp),
         child: PharmaAppBar(title: 'My Favorite'),
       ),
-      body: FavoriteViewBody(),
+      body: const FavoriteViewBody(),
     );
   }
 }
