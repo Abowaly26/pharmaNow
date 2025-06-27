@@ -1,9 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pharma_now/features/checkout/presentation/views/widgets/active_item.dart';
-import 'package:pharma_now/features/checkout/presentation/views/widgets/inactive_item.dart';
-import 'package:pharma_now/features/checkout/presentation/views/widgets/step_item.dart';
-import 'package:pharma_now/features/home/presentation/ui_model/in_active_item.dart';
+
 
 import '../../../../../core/utils/color_manger.dart';
 
