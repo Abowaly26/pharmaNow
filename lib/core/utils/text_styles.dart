@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 
 class TextStyles {
@@ -120,6 +121,10 @@ class TextStyles {
     fontWeight: FontWeight.w600,
     fontSize: 11,
   );
+  static const TextStyle semiBold13 = TextStyle(
+    fontWeight: FontWeight.w600,
+    fontSize: 13,
+  );
 
   static final TextStyle settingItemTitle = TextStyle(
     fontSize: 14.sp,
@@ -132,4 +137,96 @@ class TextStyles {
     fontWeight: FontWeight.w400,
     color: Colors.grey[600],
   );
+}
+
+class AppStyles {
+  static TextStyle regular(double fontSize, {Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: 'CustomFont',
+      fontSize: fontSize,
+      fontWeight: FontWeight.normal,
+      color: color,
+    );
+  }
+
+  static TextStyle bold(double fontSize, {Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: 'CustomFont',
+      fontSize: fontSize,
+      fontWeight: FontWeight.bold,
+      color: color,
+    );
+  }
+
+  static TextStyle italic(double fontSize, {Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: 'CustomFont',
+      fontSize: fontSize,
+      fontStyle: FontStyle.italic,
+      color: color,
+    );
+  }
+
+  // خط مائل وعريض
+  static TextStyle boldItalic(double fontSize, {Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: 'CustomFont',
+      fontSize: fontSize,
+      fontWeight: FontWeight.bold,
+      fontStyle: FontStyle.italic,
+      color: color,
+    );
+  }
+
+  // خط الحجم الكبير
+  static TextStyle large(double fontSize, {Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: 'CustomFont',
+      fontSize: fontSize,
+      fontWeight: FontWeight.normal,
+      color: color,
+    );
+  }
+
+  static TextStyle regular12Text = GoogleFonts.poppins(
+      fontSize: 12, fontWeight: FontWeight.w400, color: AppColor.primarycolor);
+  static TextStyle regular11SalePrice = GoogleFonts.poppins(
+      fontSize: 12, fontWeight: FontWeight.w400, color: AppColor.primarycolor);
+  static TextStyle regular14Text = GoogleFonts.poppins(
+      fontSize: 14, fontWeight: FontWeight.w400, color: AppColor.primarycolor);
+  static TextStyle regular18White = GoogleFonts.poppins(
+      fontSize: 18, fontWeight: FontWeight.w400, color: AppColor.whitecolor);
+  static TextStyle light14SearchHint = GoogleFonts.poppins(
+      fontSize: 14, fontWeight: FontWeight.w300, color: AppColor.primarycolor);
+  static TextStyle light16White = GoogleFonts.poppins(
+      fontSize: 16, fontWeight: FontWeight.w300, color: AppColor.whitecolor);
+  static TextStyle light18HintText = GoogleFonts.poppins(
+      fontSize: 18, fontWeight: FontWeight.w300, color: AppColor.whitecolor);
+  static TextStyle semi16TextWhite = GoogleFonts.poppins(
+      fontSize: 16, fontWeight: FontWeight.w600, color: AppColor.whitecolor);
+  static TextStyle semi20Primary = GoogleFonts.poppins(
+      fontSize: 20, fontWeight: FontWeight.w600, color: AppColor.primarycolor);
+  static TextStyle semi24White = GoogleFonts.poppins(
+      fontSize: 24, fontWeight: FontWeight.w600, color: AppColor.whitecolor);
+  static TextStyle medium14Category = GoogleFonts.poppins(
+      fontSize: 14, fontWeight: FontWeight.w500, color: AppColor.primarycolor);
+  static TextStyle medium14LightPrimary = GoogleFonts.poppins(
+      fontSize: 14, fontWeight: FontWeight.w500, color: AppColor.primarycolor);
+  static TextStyle medium14PrimaryDark = GoogleFonts.poppins(
+      fontSize: 14, fontWeight: FontWeight.w500, color: AppColor.primarycolor);
+  static TextStyle medium18Header = GoogleFonts.poppins(
+      fontSize: 18.sp,
+      fontWeight: FontWeight.w500,
+      color: AppColor.primarycolor);
+  static TextStyle medium18White = GoogleFonts.poppins(
+      fontSize: 18, fontWeight: FontWeight.w500, color: AppColor.whitecolor);
+  static TextStyle medium20White = GoogleFonts.poppins(
+      fontSize: 20, fontWeight: FontWeight.w500, color: AppColor.whitecolor);
+}
+
+class AppColor {
+  static const Color primarycolor = Color(0xff004182);
+  static const Color secondcolor = Color(0xffF2FEFF);
+  static const Color whitecolor = Color(0xffFFFFFF);
+  static const Color blackColor = Color(0xff000000);
 }

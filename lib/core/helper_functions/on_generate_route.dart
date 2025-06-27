@@ -9,6 +9,7 @@ import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 
 import '../../features/auth/presentation/views/forget_password_view.dart';
 import '../../features/auth/presentation/views/verification_view_signup.dart';
+import '../../features/checkout/presentation/views/checkout_view.dart';
 import '../../features/favorites/presentation/views/favorites.dart';
 import '../../features/home/presentation/views/main_view.dart';
 import '../../features/home/presentation/views/medicine_details_view.dart';
@@ -27,6 +28,9 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
   switch (setting.name) {
     case SplashView.routeName:
       return MaterialPageRoute(builder: (context) => const SplashView());
+
+    case CheckoutView.routeName:
+      return MaterialPageRoute(builder: (context) => const CheckoutView());
 
     case OnboardingView.routeName:
       return MaterialPageRoute(builder: (context) => const OnboardingView());

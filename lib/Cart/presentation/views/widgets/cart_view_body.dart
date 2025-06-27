@@ -8,6 +8,7 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/widgets/cart_header.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../features/checkout/presentation/views/checkout_view.dart';
 import '../../../../features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import '../../cubits/cart_cubit/cart_cubit.dart';
 import '../../../../features/home/presentation/ui_model/entities/cart_entity.dart';
@@ -148,8 +149,10 @@ class CartViewBody extends StatelessWidget {
                             disabledBackgroundColor: Colors.grey.shade300,
                             disabledForegroundColor: Colors.grey.shade600,
                           ),
-                          onPressed:
-                              cartEntity.cartItems.isEmpty ? null : () {},
+                          onPressed: () {
+                            Navigator.pushNamed(
+                                context, CheckoutView.routeName);
+                          },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
