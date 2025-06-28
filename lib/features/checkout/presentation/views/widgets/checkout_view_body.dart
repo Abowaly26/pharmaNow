@@ -31,6 +31,14 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   int selectedPayment = -1;
   int currentPage = 0;
 
+  // Text Controllers for address fields
+  late TextEditingController fullNameController;
+  late TextEditingController emailController;
+  late TextEditingController addressController;
+  late TextEditingController cityController;
+  late TextEditingController apartmentController;
+  late TextEditingController phoneController;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +47,14 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       duration: Duration(milliseconds: 300),
       vsync: this,
     );
+
+    // Initialize text controllers
+    fullNameController = TextEditingController();
+    emailController = TextEditingController();
+    addressController = TextEditingController();
+    cityController = TextEditingController();
+    apartmentController = TextEditingController();
+    phoneController = TextEditingController();
 
     pageController.addListener(() {
       setState(() {
@@ -51,6 +67,15 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   void dispose() {
     pageController.dispose();
     _animationController.dispose();
+
+    // Dispose text controllers
+    fullNameController.dispose();
+    emailController.dispose();
+    addressController.dispose();
+    cityController.dispose();
+    apartmentController.dispose();
+    phoneController.dispose();
+
     super.dispose();
   }
 
@@ -248,21 +273,33 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                     'Full Name',
                     Icons.person_outline,
                     TextInputType.text,
-                    (v) => fullName = v,
+                    fullNameController,
+                    (v) {
+                      fullName = v;
+                      setState(() {});
+                    },
                   ),
                   SizedBox(height: 16),
                   _buildModernTextField(
                     'Email Address',
                     Icons.email_outlined,
                     TextInputType.emailAddress,
-                    (v) => email = v,
+                    emailController,
+                    (v) {
+                      email = v;
+                      setState(() {});
+                    },
                   ),
                   SizedBox(height: 16),
                   _buildModernTextField(
                     'Street Address',
                     Icons.location_on_outlined,
                     TextInputType.text,
-                    (v) => address = v,
+                    addressController,
+                    (v) {
+                      address = v;
+                      setState(() {});
+                    },
                   ),
                   SizedBox(height: 16),
                   Row(
@@ -272,7 +309,11 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                           'City',
                           Icons.location_city_outlined,
                           TextInputType.text,
-                          (v) => city = v,
+                          cityController,
+                          (v) {
+                            city = v;
+                            setState(() {});
+                          },
                         ),
                       ),
                       SizedBox(width: 16),
@@ -281,7 +322,11 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                           'Apartment',
                           Icons.home_outlined,
                           TextInputType.text,
-                          (v) => apartment = v,
+                          apartmentController,
+                          (v) {
+                            apartment = v;
+                            setState(() {});
+                          },
                         ),
                       ),
                     ],
@@ -291,7 +336,11 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                     'Phone Number',
                     Icons.phone_outlined,
                     TextInputType.phone,
-                    (v) => phone = v,
+                    phoneController,
+                    (v) {
+                      phone = v;
+                      setState(() {});
+                    },
                   ),
                 ],
               ),
@@ -421,6 +470,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     String hint,
     IconData icon,
     TextInputType inputType,
+    TextEditingController controller,
     Function(String) onChanged,
   ) {
     return Container(
@@ -430,6 +480,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         border: Border.all(color: Colors.grey[300]!),
       ),
       child: TextFormField(
+        controller: controller,
         keyboardType: inputType,
         onChanged: onChanged,
         validator: (v) =>
@@ -725,6 +776,15 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     );
   }
 
+  void _updateAddressFields() {
+    fullNameController.text = fullName;
+    emailController.text = email;
+    addressController.text = address;
+    cityController.text = city;
+    apartmentController.text = apartment;
+    phoneController.text = phone;
+  }
+
   void _showOrderSummaryBottomSheet(
       double subtotal, double delivery, double total) {
     showModalBottomSheet(
@@ -760,6 +820,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                   TextButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
+                      _updateAddressFields();
                       pageController.animateToPage(
                         1,
                         duration: Duration(milliseconds: 300),
