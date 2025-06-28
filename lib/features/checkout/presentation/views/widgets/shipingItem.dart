@@ -7,12 +7,16 @@ import 'UnSelectedItem.dart';
 import 'isSelecteditem.dart';
 
 class ShipingItem extends StatelessWidget {
-  const ShipingItem({super.key, required this.title, required this.subtitle,
-    required this.price,
-   required this.isSelected, required this.onTap});
- final String title,subtitle,price;
- final isSelected;
- final VoidCallback onTap;
+  const ShipingItem(
+      {super.key,
+      required this.title,
+      required this.subtitle,
+      required this.price,
+      required this.isSelected,
+      required this.onTap});
+  final String title, subtitle, price;
+  final isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -21,50 +25,58 @@ class ShipingItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
         padding: EdgeInsets.only(
-          top:16 ,
+          top: 16,
           left: 13,
           right: 28,
           bottom: 16,
         ),
         clipBehavior: Clip.antiAlias,
         decoration: ShapeDecoration(
-          color: Color(0x33D9D9D9),
+            color: Color(0x33D9D9D9),
             shape: RoundedRectangleBorder(
-              side: BorderSide(
-                   color: isSelected? ColorManager.secondaryColor
-                  :  Colors.transparent
-              ),
-                borderRadius:BorderRadius.circular(4)
-            )
-        ),
+                side: BorderSide(
+                    color: isSelected
+                        ? ColorManager.secondaryColor
+                        : Colors.transparent),
+                borderRadius: BorderRadius.circular(4))),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              isSelected? Isselecteditem():
-              Unselecteditem(),
-              SizedBox(width: 10,),
-              Column(crossAxisAlignment: CrossAxisAlignment.start,
+              isSelected ? Isselecteditem() : Unselecteditem(),
+              SizedBox(
+                width: 10,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                  style: TextStyles.semiBold13,
+                  Text(
+                    title,
+                    style: TextStyles.semiBold13,
                   ),
-                  SizedBox(height: 6,),
-                  Text(subtitle,
-                  style: AppStyles.regular12Text.copyWith(color: Colors.black.withOpacity(.5)),
+                  SizedBox(
+                    height: 6,
+                  ),
+                  Text(
+                    subtitle,
+                    style: AppStyles.regular12Text
+                        .copyWith(color: Colors.black.withOpacity(.5)),
                   ),
                 ],
               ),
               Spacer(),
               Center(
-                child: Text("$price EGP",
-                  style:AppStyles.bold(13).copyWith(color:ColorManager.secondaryColor ) ,),
+                child: Text(
+                  "$price EGP",
+                  style: AppStyles.bold(13)
+                      .copyWith(color: ColorManager.secondaryColor),
+                ),
               )
             ],
           ),
         ),
       ),
-    ) ;
+    );
   }
 }
 

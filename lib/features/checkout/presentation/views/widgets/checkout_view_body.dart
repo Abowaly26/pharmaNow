@@ -31,6 +31,21 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   int selectedPayment = -1;
   int currentPage = 0;
 
+  // Dynamic shipping options
+  final List<String> shippingTitles = [
+    'Express Delivery',
+    'Standard Delivery',
+  ];
+  final List<String> shippingSubtitles = [
+    'Receive your order within 2 days',
+    'Receive your order within 3-5 days',
+  ];
+  final List<double> shippingPrices = [50, 30];
+  final List<IconData> shippingIcons = [
+    Icons.local_shipping,
+    Icons.local_shipping_outlined,
+  ];
+
   // Text Controllers for address fields
   late TextEditingController fullNameController;
   late TextEditingController emailController;
@@ -85,7 +100,8 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       builder: (context, state) {
         final cartEntity = (state as dynamic).cartEntity as CartEntity;
         double subtotal = cartEntity.calculateTotalPrice();
-        double delivery = 30;
+        double delivery =
+            selectedShipping >= 0 ? shippingPrices[selectedShipping] : 0;
         double total = subtotal + delivery;
         return Container(
           decoration: BoxDecoration(
@@ -222,21 +238,20 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
             ),
           ),
           SizedBox(height: 32),
-          _buildModernShippingOption(
-            'Cash on Delivery',
-            'Pay when your order arrives at your door',
-            '40',
-            Icons.local_shipping,
-            0,
-          ),
-          SizedBox(height: 16),
-          _buildModernShippingOption(
-            'Online Payment',
-            'Pay now and get faster processing',
-            '40',
-            Icons.payment,
-            1,
-          ),
+          ...List.generate(
+              shippingTitles.length,
+              (i) => Column(
+                    children: [
+                      _buildModernShippingOption(
+                        shippingTitles[i],
+                        shippingSubtitles[i],
+                        shippingPrices[i].toStringAsFixed(0),
+                        shippingIcons[i],
+                        i,
+                      ),
+                      if (i != shippingTitles.length - 1) SizedBox(height: 16),
+                    ],
+                  )),
         ],
       ),
     );
@@ -732,7 +747,8 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     final cartState = context.read<CartCubit>().state;
     final cartEntity = (cartState as dynamic).cartEntity as CartEntity;
     double subtotal = cartEntity.calculateTotalPrice();
-    double delivery = 30;
+    double delivery =
+        selectedShipping >= 0 ? shippingPrices[selectedShipping] : 0;
     double total = subtotal + delivery;
     if (currentPage == 0) {
       if (selectedShipping == -1) {

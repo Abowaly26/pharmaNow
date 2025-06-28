@@ -39,25 +39,29 @@ class CheckoutSteps extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      if (index > 0)
-                        Expanded(
-                          child: Container(
-                            height: 2,
-                            color: index <= currentPage
-                                ? ColorManager.secondaryColor
-                                : Colors.grey[300],
-                          ),
+                      // Left connector (transparent for the first step)
+                      Expanded(
+                        child: Container(
+                          height: 2,
+                          color: index == 0
+                              ? Colors.transparent
+                              : (index <= currentPage
+                                  ? ColorManager.secondaryColor
+                                  : Colors.grey[300]),
                         ),
+                      ),
                       _buildStepCircle(index),
-                      if (index < namedSteps.length - 1)
-                        Expanded(
-                          child: Container(
-                            height: 2,
-                            color: index < currentPage
-                                ? ColorManager.secondaryColor
-                                : Colors.grey[300],
-                          ),
+                      // Right connector (transparent for the last step)
+                      Expanded(
+                        child: Container(
+                          height: 2,
+                          color: index == namedSteps.length - 1
+                              ? Colors.transparent
+                              : (index < currentPage
+                                  ? ColorManager.secondaryColor
+                                  : Colors.grey[300]),
                         ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 8),
