@@ -157,4 +157,26 @@ class CartCubit extends Cubit<CartState> {
     emit(CartItemAdded(cartEntity: newCartEntity));
     _saveCart(newCartEntity);
   }
+
+  /// Clear the entire cart
+  Future<void> clearCart() async {
+    try {
+      emit(CartLoading(cartEntity: state.cartEntity));
+      final result = await _cartRepository.clearCart();
+      result.fold(
+        (failure) => emit(CartError(
+          message: failure is ServerFailure
+              ? 'Failed to clear cart'
+              : 'An error occurred',
+          cartEntity: state.cartEntity,
+        )),
+        (_) => emit(CartLoaded(cartEntity: const CartEntity(cartItems: []))),
+      );
+    } catch (e) {
+      emit(CartError(
+        message: 'Failed to clear cart',
+        cartEntity: state.cartEntity,
+      ));
+    }
+  }
 }

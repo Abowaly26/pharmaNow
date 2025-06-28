@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
+import 'package:pharma_now/features/checkout/data/services/order_service.dart';
+import 'package:pharma_now/features/checkout/domain/entites/shipingadressentity.dart';
 import 'package:pharma_now/features/checkout/presentation/views/widgets/checkout_steps.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
+import 'package:get_it/get_it.dart';
 
 class CheckoutViewBody extends StatefulWidget {
   const CheckoutViewBody({super.key});
@@ -933,9 +937,11 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     );
   }
 
-  void _completeOrder() {
+  void _completeOrder() async {
+    // Show loading dialog
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -945,53 +951,16 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green[100],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.check,
-                  color: Colors.green[600],
-                  size: 48,
-                ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                'Order Successful!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
+              CircularProgressIndicator(
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(ColorManager.secondaryColor),
               ),
               SizedBox(height: 16),
               Text(
-                'Thank you for your order. We\'ll send you a confirmation email shortly.',
-                textAlign: TextAlign.center,
+                'Creating your order...',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-              SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.secondaryColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text('Continue Shopping'),
+                  color: Colors.grey[800],
                 ),
               ),
             ],
@@ -999,5 +968,194 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         ),
       ),
     );
+
+    try {
+      // Get cart data
+      final cartState = context.read<CartCubit>().state;
+      final cartEntity = (cartState as dynamic).cartEntity as CartEntity;
+
+      // Calculate totals
+      double subtotal = cartEntity.calculateTotalPrice();
+      double delivery =
+          selectedShipping >= 0 ? shippingPrices[selectedShipping] : 0;
+      double total = subtotal + delivery;
+
+      // Create shipping address entity
+      final shippingAddress = ShippingAddressEntity(
+        namee: fullName,
+        email: email,
+        address: address,
+        city: city,
+        apartmentNumber: apartment,
+        phoneNumber: phone,
+      );
+
+      // Get order service
+      final orderService = GetIt.I<OrderService>();
+
+      // Create order in Firebase
+      final orderId = await orderService.createOrderFromCart(
+        cartItems: cartEntity.cartItems,
+        payWithCash: selectedPayment == 0, // Assuming 0 is cash payment
+        shippingAddress: shippingAddress,
+        subtotal: subtotal,
+        deliveryFee: delivery,
+        totalAmount: total,
+      );
+
+      // Clear the cart cubit
+      context.read<CartCubit>().clearCart();
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.green[600],
+                    size: 48,
+                  ),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  'Order Successful!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Order ID: $orderId',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Thank you for your order. We\'ll send you a confirmation email shortly.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        'MyHomePage',
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorManager.secondaryColor,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text('Continue Shopping'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.error,
+                    color: Colors.red[600],
+                    size: 48,
+                  ),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  'Order Failed',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'There was an error creating your order. Please try again.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorManager.secondaryColor,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text('OK'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
   }
 }
