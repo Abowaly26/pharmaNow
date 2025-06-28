@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/features/checkout/presentation/views/widgets/checkout_steps.dart';
-import '../../../../../core/widgets/custom_buttom.dart';
-import '../../../../../core/widgets/custom_text_field.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
@@ -148,7 +146,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (currentPage == 2)
-                          _buildOrderSummary(subtotal, delivery, total),
+                          _buildPaymentSummary(subtotal, delivery, total),
                         SizedBox(height: 16),
                         _buildActionButton(),
                       ],
@@ -326,13 +324,11 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
             ),
           ),
           SizedBox(height: 32),
-          _buildModernPaymentOption(
-              'Apple Pay', 'assets/icons/apple_pay.svg', 0),
+          _buildModernPaymentOption('Apple Pay', 'assets/images/Apple pay.svg', 0),
           SizedBox(height: 16),
-          _buildModernPaymentOption(
-              'MasterCard', 'assets/icons/credit_card.svg', 1),
+          _buildModernPaymentOption('MasterCard', 'assets/images/MasterCard.svg', 1),
           SizedBox(height: 16),
-          _buildModernPaymentOption('PayPal', 'assets/icons/paypal.svg', 2),
+          _buildModernPaymentOption('PayPal', 'assets/images/paypal.svg', 2),
         ],
       ),
     );
@@ -486,8 +482,6 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                 assetPath,
                 width: 24,
                 height: 24,
-                colorFilter:
-                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
               ),
             ),
             SizedBox(width: 16),
@@ -540,6 +534,8 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
           ),
           SizedBox(height: 16),
           _buildSummaryRow('Subtotal', '${subtotal.toStringAsFixed(2)} EGP'),
+          SizedBox(height: 8),
+          _buildSummaryRow('Delivery', '${delivery.toStringAsFixed(2)} EGP'),
           SizedBox(height: 16),
           Divider(),
           SizedBox(height: 16),
@@ -547,6 +543,58 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
               isTotal: true),
         ],
       ),
+    );
+  }
+
+  Widget _buildPaymentSummary(double subtotal, double delivery, double total) {
+    return Container(
+      padding: EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Payment Summary',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          SizedBox(height: 4),
+          _buildSmallSummaryRow('Subtotal', '${subtotal.toStringAsFixed(2)} EGP'),
+          _buildSmallSummaryRow('Delivery', '${delivery.toStringAsFixed(2)} EGP'),
+          Divider(),
+          _buildSmallSummaryRow('Total', '${total.toStringAsFixed(2)} EGP', isTotal: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSmallSummaryRow(String label, String value, {bool isTotal = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: isTotal ? 16 : 14,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            color: Colors.grey[800],
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isTotal ? 16 : 14,
+            fontWeight: FontWeight.bold,
+            color: isTotal ? ColorManager.secondaryColor : Colors.grey[800],
+          ),
+        ),
+      ],
     );
   }
 
@@ -574,125 +622,12 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     );
   }
 
-  Widget _buildAddressSummary(double subtotal, double delivery, double total) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Address Summary',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Full Name: $fullName',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Email Address: $email',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Street Address: $address',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'City: $city',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Apartment: $apartment',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Phone Number: $phone',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showConfirmationSheet(double subtotal, double delivery, double total) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildOrderSummary(subtotal, delivery, total),
-              SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _completeOrder();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.secondaryColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text('Confirm Order'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildActionButton() {
     return Container(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: () => _handleNextStep(),
+        onPressed: _handleNextStep,
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorManager.secondaryColor,
           foregroundColor: Colors.white,
