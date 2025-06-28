@@ -324,9 +324,11 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
             ),
           ),
           SizedBox(height: 32),
-          _buildModernPaymentOption('Apple Pay', 'assets/images/Apple pay.svg', 0),
+          _buildModernPaymentOption(
+              'Apple Pay', 'assets/images/Apple pay.svg', 0),
           SizedBox(height: 16),
-          _buildModernPaymentOption('MasterCard', 'assets/images/MasterCard.svg', 1),
+          _buildModernPaymentOption(
+              'MasterCard', 'assets/images/MasterCard.svg', 1),
           SizedBox(height: 16),
           _buildModernPaymentOption('PayPal', 'assets/images/paypal.svg', 2),
         ],
@@ -474,8 +476,9 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color:
-                    isSelected ? ColorManager.secondaryColor : Colors.grey[400],
+                color: isSelected
+                    ? ColorManager.secondaryColor.withOpacity(0.2)
+                    : Colors.grey[400],
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SvgPicture.asset(
@@ -565,16 +568,20 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
             ),
           ),
           SizedBox(height: 4),
-          _buildSmallSummaryRow('Subtotal', '${subtotal.toStringAsFixed(2)} EGP'),
-          _buildSmallSummaryRow('Delivery', '${delivery.toStringAsFixed(2)} EGP'),
+          _buildSmallSummaryRow(
+              'Subtotal', '${subtotal.toStringAsFixed(2)} EGP'),
+          _buildSmallSummaryRow(
+              'Delivery', '${delivery.toStringAsFixed(2)} EGP'),
           Divider(),
-          _buildSmallSummaryRow('Total', '${total.toStringAsFixed(2)} EGP', isTotal: true),
+          _buildSmallSummaryRow('Total', '${total.toStringAsFixed(2)} EGP',
+              isTotal: true),
         ],
       ),
     );
   }
 
-  Widget _buildSmallSummaryRow(String label, String value, {bool isTotal = false}) {
+  Widget _buildSmallSummaryRow(String label, String value,
+      {bool isTotal = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -670,6 +677,12 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   }
 
   void _handleNextStep() {
+    // Calculate totals for potential bottom sheet usage
+    final cartState = context.read<CartCubit>().state;
+    final cartEntity = (cartState as dynamic).cartEntity as CartEntity;
+    double subtotal = cartEntity.calculateTotalPrice();
+    double delivery = 30;
+    double total = subtotal + delivery;
     if (currentPage == 0) {
       if (selectedShipping == -1) {
         _showErrorSnackBar('Please select a delivery method');
@@ -686,7 +699,8 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         _showErrorSnackBar('Please select a payment method');
         return;
       }
-      _completeOrder();
+      // Show order summary bottom sheet before completing the order
+      _showOrderSummaryBottomSheet(subtotal, delivery, total);
     }
   }
 
@@ -707,6 +721,137 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
+      ),
+    );
+  }
+
+  void _showOrderSummaryBottomSheet(
+      double subtotal, double delivery, double total) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Address details header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Delivery Details',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      pageController.animateToPage(
+                        1,
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    icon: Icon(Icons.edit, size: 16),
+                    label: Text('Edit'),
+                  )
+                ],
+              ),
+              SizedBox(height: 12),
+              _buildDetailsCard(),
+              SizedBox(height: 24),
+              _buildOrderSummary(subtotal, delivery, total),
+              SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorManager.secondaryColor,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _completeOrder();
+                  },
+                  child: Text('Confirm Order'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            Flexible(
+              child: Text(
+                value.isEmpty ? '-' : value,
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        Divider(height: 1),
+        SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildDetailsCard() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildDetailRow('Name', fullName),
+          SizedBox(height: 8),
+          _buildDetailRow('Email', email),
+          SizedBox(height: 8),
+          _buildDetailRow('Address', '$address, $city, $apartment'),
+          SizedBox(height: 8),
+          _buildDetailRow('Phone', phone),
+        ],
       ),
     );
   }
