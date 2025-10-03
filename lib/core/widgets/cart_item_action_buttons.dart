@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import '../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import '../../features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import '../utils/color_manger.dart';
 import '../utils/text_styles.dart';
@@ -23,9 +23,9 @@ class CartItemActionButtons extends StatelessWidget {
               color: ColorManager.secondaryColor,
               onPressed: () {
                 context.read<CartCubit>().updateCartItemQuantity(
-                  cartItemEntity,
-                  cartItemEntity.count + 1,
-                );
+                      cartItemEntity,
+                      cartItemEntity.count + 1,
+                    );
               },
             ),
             Padding(
@@ -43,12 +43,14 @@ class CartItemActionButtons extends StatelessWidget {
               onPressed: () {
                 if (cartItemEntity.count > 1) {
                   context.read<CartCubit>().updateCartItemQuantity(
-                    cartItemEntity,
-                    cartItemEntity.count - 1,
-                  );
+                        cartItemEntity,
+                        cartItemEntity.count - 1,
+                      );
                 } else {
                   // If count would be 0, remove the item
-                  context.read<CartCubit>().deleteMedicineFromCart(cartItemEntity);
+                  context
+                      .read<CartCubit>()
+                      .deleteMedicineFromCart(cartItemEntity);
                 }
               },
             )

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pharma_now/features/favorites/presentation/views/favorites.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/home_view.dart';
 
-import '../../../../../Cart/presentation/views/cart_view.dart';
+import '../../../../../order/presentation/views/cart_view.dart';
 import '../../../../profile/presentation/views/profile_view.dart';
 
 class MainViewbody extends StatelessWidget {

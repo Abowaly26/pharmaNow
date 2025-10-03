@@ -48,29 +48,56 @@ class _OnboardingViewState extends State<OnboardingView> {
     super.dispose();
   }
 
+  // دالة لحساب ارتفاع الـ card حسب حجم الشاشة
+  double _getCardHeight(double screenHeight, double screenWidth) {
+    final aspectRatio = screenHeight / screenWidth;
+
+    // للشاشات الطويلة جداً (narrow phones)
+    if (aspectRatio > 2.2) {
+      return screenHeight * 0.42;
+    }
+    // للشاشات الطويلة
+    else if (aspectRatio > 1.9) {
+      return screenHeight * 0.45;
+    }
+    // للشاشات المتوسطة
+    else if (aspectRatio > 1.6) {
+      return screenHeight * 0.47;
+    }
+    // للشاشات العريضة (tablets)
+    else {
+      return screenHeight * 0.50;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.primaryColor,
       body: SafeArea(
         child: LayoutBuilder(builder: (context, constraints) {
-          // Get responsive dimensions based on screen constraints
           final height = constraints.maxHeight;
           final width = constraints.maxWidth;
 
           return Stack(
             children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _buildCard(),
-                      ],
-                    ),
-                  )
-                ],
+              // Fixed curved card at the bottom - Responsive
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: SizedBox(
+                  height: _getCardHeight(height, width),
+                  width: width,
+                  child: SvgPicture.asset(
+                    Assets.informationCard,
+                    fit: BoxFit.fill,
+                    alignment: Alignment.bottomCenter,
+                  ),
+                ),
               ),
+
+              // PageView content on top
               PageView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 controller: _pageController,
@@ -85,7 +112,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                   height,
                   width,
                 ),
-              )
+              ),
             ],
           );
         }),
@@ -95,28 +122,34 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   Widget _buildPage(
       OnboardingData onboardingData, double height, double width) {
-    // Use proportional spacing for consistent appearance across screen sizes
-    final verticalSpacing = height * 0.03;
-    final imageHeight = height * 0.35;
+    final verticalSpacing = height * 0.02;
+    final imageHeight = height * 0.30;
 
-    return Column(
-      children: [
-        _topBar(width),
-        SizedBox(height: verticalSpacing * 2),
-        SvgPicture.asset(
-          onboardingData.imagePath,
-          height: imageHeight,
-          width: width * 0.8,
-          fit: BoxFit.contain,
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: SizedBox(
+        height: height,
+        child: Column(
+          children: [
+            _topBar(width),
+            SizedBox(height: verticalSpacing),
+            SvgPicture.asset(
+              onboardingData.imagePath,
+              height: imageHeight,
+              width: width * 0.8,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(height: verticalSpacing * 8),
+            Expanded(
+              child: _buildInfoWidget(onboardingData, height, width),
+            ),
+          ],
         ),
-        SizedBox(height: verticalSpacing * 3),
-        _buildInfoWidget(onboardingData, height, width)
-      ],
+      ),
     );
   }
 
   Widget _topBar(double width) {
-    // Use fractional values for consistent spacing
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: width * 0.04,
@@ -157,94 +190,76 @@ class _OnboardingViewState extends State<OnboardingView> {
     );
   }
 
-  Widget _buildCard() {
-    return Expanded(
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: SvgPicture.asset(
-              Assets.informationCard,
-              fit: BoxFit.fill,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildInfoWidget(
       OnboardingData onboardingData, double height, double width) {
-    // Calculate spacing based on screen height for consistent proportions
-    final verticalSpacing = height * 0.03;
+    final verticalSpacing = height * 0.025;
 
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: width * 0.05,
-        vertical: verticalSpacing,
       ),
-      child: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              onboardingData.title,
-              style: TextStyles.title,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            onboardingData.title,
+            style: TextStyles.title,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: verticalSpacing),
+          Container(
+            constraints: BoxConstraints(
+              maxWidth: width * 0.85,
+            ),
+            child: Text(
+              onboardingData.description,
+              style: TextStyles.description,
               textAlign: TextAlign.center,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: verticalSpacing),
-            Container(
-              constraints: BoxConstraints(
-                maxWidth: width * 0.9,
-              ),
-              child: Text(
-                onboardingData.description,
-                style: TextStyles.description,
-                textAlign: TextAlign.center,
-              ),
-            ),
-            SizedBox(height: verticalSpacing),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: _onboardingData
-                  .map(
-                    (e) => Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeIn,
-                        height: 10,
-                        width: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: e == onboardingData
-                              ? ColorManager.primaryColor
-                              : ColorManager.primaryColor.withAlpha(80),
-                        ),
+          ),
+          SizedBox(height: verticalSpacing * 1.5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _onboardingData
+                .map(
+                  (e) => Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeIn,
+                      height: 10,
+                      width: 10,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: e == onboardingData
+                            ? ColorManager.primaryColor
+                            : ColorManager.primaryColor.withAlpha(80),
                       ),
                     ),
-                  )
-                  .toList(),
-            ),
-            SizedBox(height: verticalSpacing),
-            GestureDetector(
-              child: SvgPicture.asset(Assets.onboardingButton),
-              onTap: () {
-                if (_currentPage == _onboardingData.length - 1) {
-                  prefs.setBool(kIsOnBoardingViewSeen, true);
-                  Navigator.pushReplacementNamed(context, SignInView.routeName);
-                } else {
-                  _pageController.animateToPage(
-                    ++_currentPage,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeIn,
-                  );
-                }
-              },
-            )
-          ],
-        ),
+                  ),
+                )
+                .toList(),
+          ),
+          SizedBox(height: verticalSpacing * 1.5),
+          GestureDetector(
+            child: SvgPicture.asset(Assets.onboardingButton),
+            onTap: () {
+              if (_currentPage == _onboardingData.length - 1) {
+                prefs.setBool(kIsOnBoardingViewSeen, true);
+                Navigator.pushReplacementNamed(context, SignInView.routeName);
+              } else {
+                _pageController.animateToPage(
+                  ++_currentPage,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeIn,
+                );
+              }
+            },
+          ),
+          SizedBox(height: verticalSpacing),
+        ],
       ),
     );
   }

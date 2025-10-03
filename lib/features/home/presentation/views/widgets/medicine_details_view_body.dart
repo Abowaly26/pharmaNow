@@ -8,7 +8,7 @@ import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 
@@ -186,12 +186,22 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                       ),
                     ),
                     SizedBox(height: 2.h),
-                    Text(
-                      widget.medicineEntity.pharmcyAddress ?? '',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.grey,
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: 14.sp,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          widget.medicineEntity.pharmcyAddress ?? '',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 16.h),
                     _buildQuantityStatus(),

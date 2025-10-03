@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/core/cubits/offers_cubit/offers_cubit.dart';
-import '../../../../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import '../../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/info_offers/presentation/views/widgets/Info_offers_list_view_bloc_builder.dart';
 
 class InfoOffersListViewBody extends StatefulWidget {

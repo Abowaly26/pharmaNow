@@ -7,7 +7,7 @@ import 'package:pharma_now/features/checkout/data/services/order_service.dart';
 import 'package:pharma_now/features/checkout/domain/entites/shipingadressentity.dart';
 import 'package:pharma_now/features/checkout/presentation/views/widgets/checkout_steps.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
 import 'package:get_it/get_it.dart';
 

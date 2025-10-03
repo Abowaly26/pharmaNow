@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pharma_now/Cart/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
+import 'package:pharma_now/order/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/cart_item_action_buttons.dart';
@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
-import '../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import '../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class CartItem extends StatelessWidget {
@@ -98,7 +98,7 @@ class CartItem extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
-              child: ClipRRect(
+                child: ClipRRect(
               borderRadius: BorderRadius.circular(8.r),
               child: cartItemEntity.medicineEntity.subabaseORImageUrl == null ||
                       cartItemEntity.medicineEntity.subabaseORImageUrl!.isEmpty
@@ -115,8 +115,7 @@ class CartItem extends StatelessWidget {
                       errorWidget: (context, url, error) =>
                           const Center(child: Text('No image')),
                     ),
-            )
-            ),
+            )),
           ),
           Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
 

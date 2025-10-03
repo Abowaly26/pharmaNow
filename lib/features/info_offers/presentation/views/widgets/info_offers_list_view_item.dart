@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import '../../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../core/utils/color_manger.dart';
@@ -356,7 +356,7 @@ class InfoOffersListViewItem extends StatelessWidget {
       'discountRating': medicineEntity.discountRating,
       'isNewProduct': medicineEntity.isNewProduct,
       'quantity': medicineEntity.quantity,
-    'description': medicineEntity.description,
+      'description': medicineEntity.description,
     };
   }
 }

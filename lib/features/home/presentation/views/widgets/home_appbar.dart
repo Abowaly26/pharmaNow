@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/features/Medical_Assistant/MedicalAssistant%20.dart';
+
 import 'package:provider/provider.dart';
 
 import '../../../../notifications/presentation/views/notification_view.dart';
@@ -18,7 +18,7 @@ class HomeAppbar extends StatelessWidget {
     ActionItem(
       icon: Badge(
           backgroundColor: ColorManager.greenColor,
-          label: Text('5'),
+          label: Text('0'),
           textColor: ColorManager.primaryColor,
           child: SvgPicture.asset(
             Assets.notificationsIcon,
@@ -40,11 +40,7 @@ class HomeAppbar extends StatelessWidget {
         height: 24,
       ),
       callback: (BuildContext ctx) {
-        Navigator.of(ctx).push(
-          MaterialPageRoute(
-            builder: (context) => MedicalAssistant(),
-          ),
-        );
+        
       },
     ),
   ];

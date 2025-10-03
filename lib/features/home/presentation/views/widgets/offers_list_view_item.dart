@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../../Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import '../../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
@@ -47,7 +47,7 @@ class OffersListViewItem extends StatelessWidget {
       'discountRating': medicineEntity.discountRating,
       'isNewProduct': medicineEntity.isNewProduct,
       'quantity': medicineEntity.quantity,
-    'description': medicineEntity.description,
+      'description': medicineEntity.description,
     };
   }
 

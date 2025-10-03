@@ -4,7 +4,7 @@ import 'package:get_it/get_it.dart';
 
 import 'package:pharma_now/features/cart/data/repositories/cart_repository_impl.dart';
 import 'package:pharma_now/features/cart/domain/repositories/cart_repository.dart';
-import 'package:pharma_now/Cart/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -12,7 +12,8 @@ final getIt = GetIt.instance;
 void initCartDependencies() {
   // Register Firebase services
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-  getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+  getIt.registerLazySingleton<FirebaseFirestore>(
+      () => FirebaseFirestore.instance);
 
   // Register repositories
   getIt.registerLazySingleton<CartRepository>(

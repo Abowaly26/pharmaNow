@@ -13,7 +13,6 @@ import 'package:pharma_now/features/home/presentation/views/widgets/section_widg
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_item.dart';
 import 'package:pharma_now/features/info_medicines/presentation/views/info_medicines_view.dart';
 
-import '../../../../../core/cubits/best_selling_cubit/best_selling_cubit.dart';
 import '../../../../../core/cubits/offers_cubit/offers_cubit.dart';
 import '../../../../../core/services/get_it_service.dart';
 import '../../../../../core/utils/button_style.dart';
