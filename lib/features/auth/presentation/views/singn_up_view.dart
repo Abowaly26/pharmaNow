@@ -7,7 +7,7 @@ import 'package:pharma_now/core/widgets/custom_app_bar.dart';
 import 'package:pharma_now/core/widgets/custom_progress_hud.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
 import 'package:pharma_now/features/auth/presentation/cubits/sinup_cubit/signup_cubit.dart';
-import 'package:pharma_now/features/auth/presentation/views/widget/sinup_view_body_bloc_consumer.dart';
+import 'package:pharma_now/features/auth/presentation/views/widget/sign_up_view_body_bloc_consumer.dart';
 
 class SingnUpView extends StatelessWidget {
   const SingnUpView({super.key});

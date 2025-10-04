@@ -48,24 +48,16 @@ class _OnboardingViewState extends State<OnboardingView> {
     super.dispose();
   }
 
-  // دالة لحساب ارتفاع الـ card حسب حجم الشاشة
   double _getCardHeight(double screenHeight, double screenWidth) {
     final aspectRatio = screenHeight / screenWidth;
 
-    // للشاشات الطويلة جداً (narrow phones)
     if (aspectRatio > 2.2) {
       return screenHeight * 0.42;
-    }
-    // للشاشات الطويلة
-    else if (aspectRatio > 1.9) {
+    } else if (aspectRatio > 1.9) {
       return screenHeight * 0.45;
-    }
-    // للشاشات المتوسطة
-    else if (aspectRatio > 1.6) {
+    } else if (aspectRatio > 1.6) {
       return screenHeight * 0.47;
-    }
-    // للشاشات العريضة (tablets)
-    else {
+    } else {
       return screenHeight * 0.50;
     }
   }

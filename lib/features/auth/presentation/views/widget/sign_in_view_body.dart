@@ -9,7 +9,6 @@ import 'package:pharma_now/core/widgets/password_field.dart';
 import 'package:pharma_now/features/auth/presentation/views/forget_password_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/singn_up_view.dart';
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
-import 'package:pharma_now/features/home/presentation/views/main_view.dart';
 
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
@@ -45,7 +44,7 @@ class _SiginViewBodyState extends State<SiginViewBody> {
                 icon: Assets.emailIcon,
                 hint: 'Enter your email'),
             SizedBox(
-              height: 16,
+              height: 16.h,
             ),
             PasswordFiled(
               onSaved: (p0) {
@@ -111,13 +110,13 @@ class _SiginViewBodyState extends State<SiginViewBody> {
             SizedBox(
               height: 15.h,
             ),
-            AnotherStepLogin(
-              onPressed: () {
-                // context.read<SigninCubit>().signinWithFacbook();
-              },
-              text: 'Continue with Facebook',
-              icon: Assets.facebook_Icon,
-            ),
+            // AnotherStepLogin(
+            //   onPressed: () {
+            //     // context.read<SigninCubit>().signinWithFacbook();
+            //   },
+            //   text: 'Continue with Facebook',
+            //   icon: Assets.facebook_Icon,
+            // ),
             SizedBox(
               height: 190.h,
             ),
@@ -154,7 +153,7 @@ class _SiginViewBodyState extends State<SiginViewBody> {
                           style: TextStyles.callToActionSignUP),
                     ),
                     SizedBox(
-                      height: 8,
+                      height: 8.h,
                     )
                   ],
                 )

@@ -1,14 +1,10 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
-import 'package:pharma_now/core/widgets/anotherStepLogin.dart';
-import 'package:pharma_now/core/widgets/or_divider.dart';
 import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
-import 'package:pharma_now/features/auth/presentation/views/verification_view_signup.dart';
 
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
 
@@ -102,7 +98,7 @@ class _SingnUpBodyState extends State<SingnUpBody> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 32.h),
         child: Form(
           key: formKey,
           autovalidateMode: autovalidateMode,
@@ -130,7 +126,7 @@ class _SingnUpBodyState extends State<SingnUpBody> {
                 icon: Assets.emailIcon,
                 hint: 'Enter your email'),
             SizedBox(
-              height: 16,
+              height: 16.h,
             ),
             PasswordFiled(
               onSaved: (p0) {

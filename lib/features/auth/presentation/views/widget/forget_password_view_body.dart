@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/features/auth/presentation/views/verification_view_forget_password.dart';
-import 'package:pharma_now/features/auth/presentation/views/verification_view_signup.dart';
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
-import 'package:pharma_now/features/auth/presentation/views/widget/verification_view_body_forgetPassword.dart';
 
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/text_styles.dart';
-import '../../../../../core/widgets/bottom_pop_up.dart';
 
 class ForgetPasswordViewBody extends StatelessWidget {
   const ForgetPasswordViewBody({super.key});

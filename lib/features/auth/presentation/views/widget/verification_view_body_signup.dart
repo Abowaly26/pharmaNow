@@ -5,13 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
-import 'package:pharma_now/features/auth/presentation/views/reset_password_view.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/widgets/bottom_pop_up.dart';
 import '../singn_in_view.dart';
 
 class VerificationViewBody extends StatefulWidget {
