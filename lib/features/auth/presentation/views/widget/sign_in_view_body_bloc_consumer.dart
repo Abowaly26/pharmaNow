@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart'
+    show showCustomBar;
 import 'package:pharma_now/core/widgets/bottom_pop_up.dart';
 import 'package:pharma_now/features/auth/presentation/views/widget/sign_in_view_body.dart';
 import 'package:pharma_now/features/home/presentation/views/main_view.dart';
@@ -21,7 +22,7 @@ class SigninViewBodyBlocConsumer extends StatelessWidget {
           });
         }
         if (state is SigninFailure) {
-          buildErrorBar(context, state.message);
+          showCustomBar(context, state.message);
         }
       },
       builder: (context, state) {

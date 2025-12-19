@@ -57,6 +57,25 @@ class AuthRepoImpl extends AuthRepo {
     }
   }
 
+  @override
+  Future<Either<Failures, bool>> checkEmailExists(String email) async {
+    try {
+      final exists = await firebaseAuthService.checkUserExists(email);
+      return right(exists);
+    } on CustomException catch (e) {
+      return left(ServerFailure(e.message));
+    } catch (e) {
+      log('Exception in AuthRepoImpl.checkEmailExists: ${e.toString()}');
+      return left(ServerFailure(
+          'An error occurred on the server. Please try again later.'));
+    }
+  }
+
+  @override
+  Future<Either<Failures, bool>> checkEmailAlreadyExists(String email) async {
+    return checkEmailExists(email);
+  }
+
   Future<void> deleteUser(User? user) async {
     if (user != null) {
       await firebaseAuthService.deleteUser();

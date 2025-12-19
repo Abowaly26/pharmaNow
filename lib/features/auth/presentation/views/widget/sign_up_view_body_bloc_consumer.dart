@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart'
+    show showCustomBar;
 import 'package:pharma_now/core/widgets/bottom_pop_up.dart';
 import 'package:pharma_now/features/auth/presentation/views/widget/sign_up_view_body.dart';
 import 'package:pharma_now/features/auth/presentation/cubits/sinup_cubit/signup_cubit.dart';
@@ -18,7 +19,7 @@ class SignupViewBodyBlocConsumer extends StatelessWidget {
         if (state is SignupSuccess) {
           showSuccessBottomSheet(
             context,
-            'Your account has been created. Please check your email to verify your account.',
+            'Your account has been created. We sent a verification email. Please check your Inbox or Spam folder, then verify your account.',
             () {
               Navigator.pushReplacementNamed(
                   context, VerificationView.routeName);
@@ -26,7 +27,7 @@ class SignupViewBodyBlocConsumer extends StatelessWidget {
           );
         }
         if (state is SignupFailure) {
-          buildErrorBar(context, state.message);
+          showCustomBar(context, state.message);
         }
       },
       builder: (context, state) {

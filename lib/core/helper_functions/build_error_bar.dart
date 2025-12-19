@@ -1,9 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_now/core/utils/color_manger.dart';
+
+typedef ShowCustomBar = void Function(
+  BuildContext context,
+  String message, {
+  MessageType type,
+  Color? backgroundColor,
+  Color? borderColor,
+  Color? accentColor,
+  Color? iconBackgroundColor,
+  IconData? icon,
+  Duration? duration,
+});
+
+enum MessageType {
+  error,
+  success,
+  warning,
+  info,
+}
+
+Map<MessageType, Map<String, dynamic>> _getMessageTypeStyles() {
+  return {
+    MessageType.error: {
+      'backgroundColor': ColorManager.redColor.withValues(alpha: 0.85),
+      'borderColor': const Color(0xFFFCA5A5).withOpacity(0.70),
+      'accentColor': const Color(0xFFFCA5A5),
+      'iconBackgroundColor': const Color(0xFFFCA5A5).withOpacity(0.20),
+      'icon': Icons.error_outline,
+    },
+    MessageType.success: {
+      'backgroundColor': const Color.fromARGB(255, 42, 205, 42),
+      'borderColor': const Color(0xFFA5FCA5).withOpacity(0.70),
+      'accentColor': const Color(0xFFA5FCA5),
+      'iconBackgroundColor':
+          const Color.fromARGB(255, 89, 234, 89).withOpacity(0.55),
+      'icon': Icons.check_circle_outline,
+    },
+    MessageType.warning: {
+      'backgroundColor': const Color(0x1AF59E0B),
+      'borderColor': const Color(0xFFFCD34D).withOpacity(0.70),
+      'accentColor': const Color(0xFFF59E0B),
+      'iconBackgroundColor': const Color(0xFFFCD34D).withOpacity(0.20),
+      'icon': Icons.warning_amber_rounded,
+    },
+    MessageType.info: {
+      'backgroundColor': const Color(0x1A3B82F6),
+      'borderColor': const Color(0xFF60A5FA).withOpacity(0.70),
+      'accentColor': const Color(0xFF3B82F6),
+      'iconBackgroundColor': const Color(0xFF60A5FA).withOpacity(0.20),
+      'icon': Icons.info_outline,
+    },
+  };
+}
 
 OverlayEntry? _currentErrorEntry;
 AnimationController? _currentErrorController;
 
-void buildErrorBar(BuildContext context, String message) {
+void showCustomBar(
+  BuildContext context,
+  String message, {
+  MessageType type = MessageType.error,
+  Color? backgroundColor,
+  Color? borderColor,
+  Color? accentColor,
+  Color? iconBackgroundColor,
+  IconData? icon,
+  Duration? duration = const Duration(seconds: 3),
+}) {
   final overlay = Overlay.of(context, rootOverlay: true);
 
   final navigator = Navigator.of(context);
@@ -19,6 +83,22 @@ void buildErrorBar(BuildContext context, String message) {
   final safeMessage = message.trim().isEmpty
       ? 'Something went wrong. Please try again.'
       : message.trim();
+
+  // Get default styles based on message type
+  final messageTypeStyles = _getMessageTypeStyles();
+  final defaultStyle =
+      messageTypeStyles[type] ?? messageTypeStyles[MessageType.error]!;
+
+  // Resolve colors with fallback to type defaults and then hardcoded defaults
+  final resolvedBackgroundColor =
+      backgroundColor ?? defaultStyle['backgroundColor'] as Color;
+  final resolvedBorderColor =
+      borderColor ?? defaultStyle['borderColor'] as Color;
+  final resolvedAccentColor =
+      accentColor ?? defaultStyle['accentColor'] as Color;
+  final resolvedIconBg =
+      iconBackgroundColor ?? defaultStyle['iconBackgroundColor'] as Color;
+  final resolvedIcon = icon ?? defaultStyle['icon'] as IconData;
 
   final controller = AnimationController(
     vsync: navigator,
@@ -51,9 +131,9 @@ void buildErrorBar(BuildContext context, String message) {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 205, 42, 42),
+                    color: resolvedBackgroundColor,
                     border: Border.all(
-                      color: const Color(0xFFFCA5A5).withOpacity(0.70),
+                      color: resolvedBorderColor,
                       width: 1,
                     ),
                     borderRadius: BorderRadius.circular(14),
@@ -76,7 +156,7 @@ void buildErrorBar(BuildContext context, String message) {
                           width: 4,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFCA5A5),
+                            color: resolvedAccentColor,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -85,11 +165,11 @@ void buildErrorBar(BuildContext context, String message) {
                           width: 34,
                           height: 34,
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 234, 89, 89).withOpacity(0.55),
+                            color: resolvedIconBg,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.error_outline,
-                              color: Colors.white, size: 20),
+                          child:
+                              Icon(resolvedIcon, color: Colors.white, size: 20),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -119,7 +199,7 @@ void buildErrorBar(BuildContext context, String message) {
   controller.forward();
 
   Future<void>(() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(duration ?? const Duration(seconds: 3));
     if (_currentErrorController != controller) return;
     await controller.reverse();
     if (_currentErrorEntry == entry) {

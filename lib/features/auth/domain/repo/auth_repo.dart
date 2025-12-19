@@ -7,6 +7,8 @@ abstract class AuthRepo {
   Future<Either<Failures, UserEntity>> createUserWithEmailAndPassword(
       String email, String password, String name);
 
+  Future<Either<Failures, bool>> checkEmailExists(String email);
+
   Future<Either<Failures, UserEntity>> signInWithEmailAndPassword(
       String email, String password);
 
@@ -15,6 +17,8 @@ abstract class AuthRepo {
   Future addUserData({required UserEntity user});
   Future saveUserData({required UserEntity user});
   Future<UserEntity> getUserData({required String uid});
+
+  Future<Either<Failures, bool>> checkEmailAlreadyExists(String email);
 
   // Future<Either<Failures, UserEntity>> signinWithFacebook();
 

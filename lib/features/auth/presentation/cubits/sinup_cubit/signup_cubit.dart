@@ -13,14 +13,33 @@ class SignupCubit extends Cubit<SignupState> {
   Future<void> createUserWithEmailAndPassword(
       String email, String password, String name) async {
     emit(SignupLoading());
+
+    final existsResult = await authRepo.checkEmailExists(email);
+    final exists = existsResult.fold(
+      (failure) {
+        emit(SignupFailure(message: failure.message));
+        return null;
+      },
+      (value) => value,
+    );
+    if (exists == null) return;
+    if (exists) {
+      emit(SignupFailure(
+          message: 'An account already exists with this email address.'));
+      return;
+    }
+
     final result =
         await authRepo.createUserWithEmailAndPassword(email, password, name);
     result.fold(
       (failure) => emit(SignupFailure(message: failure.message)),
       (userEntity) async {
         // Send verification email after successful signup
-        await authRepo.sendEmailVerification();
-        emit(SignupSuccess(userEntity: userEntity));
+        final verifyResult = await authRepo.sendEmailVerification();
+        verifyResult.fold(
+          (failure) => emit(SignupFailure(message: failure.message)),
+          (_) => emit(SignupSuccess(userEntity: userEntity)),
+        );
       },
     );
   }

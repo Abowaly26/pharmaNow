@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart'
+    show showCustomBar;
 import 'package:pharma_now/core/utils/app_validation.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
@@ -42,7 +43,7 @@ class _ForgetPasswordViewBodyState extends State<ForgetPasswordViewBody> {
 
       result.fold(
         (failure) {
-          buildErrorBar(context, failure.message);
+          showCustomBar(context, failure.message);
         },
         (_) {
           showSuccessBottomSheet(

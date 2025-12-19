@@ -18,10 +18,7 @@ class VerificationView extends StatelessWidget {
         preferredSize: Size.fromHeight(48.sp),
         child: PharmaAppBar(
           title: 'Verification',
-          isBack: true,
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, SingnUpView.routeName);
-          },
+        
         ),
       ),
       body: VerificationViewBody(),
