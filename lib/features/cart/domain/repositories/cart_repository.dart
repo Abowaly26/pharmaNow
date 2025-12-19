@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:pharma_now/core/error/failures.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
+
+import '../../../../core/errors/error_handling.dart';
 
 /// Abstract class defining the contract for cart-related data operations.
 /// This should be implemented by data layer classes that handle cart operations.

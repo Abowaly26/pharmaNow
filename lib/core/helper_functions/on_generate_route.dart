@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pharma_now/order/presentation/views/cart_view.dart';
+import 'package:pharma_now/features/order/presentation/views/cart_view.dart';
 
 import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_up_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_up_view.dart';
 import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 
 import '../../features/auth/presentation/views/forget_password_view.dart';
@@ -44,7 +44,9 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
       return MaterialPageRoute(builder: (context) => const VerificationView());
 
     case ResetPasswordView.routeName:
-      return MaterialPageRoute(builder: (context) => const ResetPasswordView());
+      final code = setting.arguments as String?;
+      return MaterialPageRoute(
+          builder: (context) => ResetPasswordView(oobCode: code));
 
     case MainView.routeName:
       return MaterialPageRoute(builder: (context) => const MainView());
@@ -79,12 +81,8 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case MedicineDetailsView.routeName:
       return MaterialPageRoute(builder: (context) => MedicineDetailsView());
 
-   
-
     case CartView.routeName:
       return MaterialPageRoute(builder: (context) => CartView());
-
-
 
     case ForgetPasswordView.routeName:
       return MaterialPageRoute(

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:pharma_now/core/error/failures.dart';
+import 'package:pharma_now/core/errors/error_handling.dart';
+
 import 'package:pharma_now/features/checkout/domain/entites/orderentity.dart';
 
 abstract class OrderRepository {

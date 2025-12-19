@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/features/checkout/presentation/views/widgets/checkout_view_body.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pharma_now/order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/cart/di/cart_injection.dart';
 
 class CheckoutView extends StatelessWidget {

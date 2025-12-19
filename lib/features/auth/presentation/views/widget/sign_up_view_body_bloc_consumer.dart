@@ -4,7 +4,7 @@ import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
 import 'package:pharma_now/core/widgets/bottom_pop_up.dart';
 import 'package:pharma_now/features/auth/presentation/views/widget/sign_up_view_body.dart';
 import 'package:pharma_now/features/auth/presentation/cubits/sinup_cubit/signup_cubit.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/verification_view_signup.dart';
 
 class SignupViewBodyBlocConsumer extends StatelessWidget {
   const SignupViewBodyBlocConsumer({
@@ -17,9 +17,13 @@ class SignupViewBodyBlocConsumer extends StatelessWidget {
       listener: (context, state) {
         if (state is SignupSuccess) {
           showSuccessBottomSheet(
-              context, 'Your account has been successfully registered', () {
-            Navigator.pushReplacementNamed(context, SignInView.routeName);
-          });
+            context,
+            'Your account has been created. Please check your email to verify your account.',
+            () {
+              Navigator.pushReplacementNamed(
+                  context, VerificationView.routeName);
+            },
+          );
         }
         if (state is SignupFailure) {
           buildErrorBar(context, state.message);

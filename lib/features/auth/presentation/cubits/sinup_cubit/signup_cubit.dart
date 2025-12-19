@@ -17,7 +17,11 @@ class SignupCubit extends Cubit<SignupState> {
         await authRepo.createUserWithEmailAndPassword(email, password, name);
     result.fold(
       (failure) => emit(SignupFailure(message: failure.message)),
-      (userEntity) => emit(SignupSuccess(userEntity: userEntity)),
+      (userEntity) async {
+        // Send verification email after successful signup
+        await authRepo.sendEmailVerification();
+        emit(SignupSuccess(userEntity: userEntity));
+      },
     );
   }
 }

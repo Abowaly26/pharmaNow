@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
-import 'package:pharma_now/core/error/failures.dart';
+import 'package:pharma_now/core/errors/exceptions.dart';
 import 'package:pharma_now/features/cart/domain/repositories/cart_repository.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';

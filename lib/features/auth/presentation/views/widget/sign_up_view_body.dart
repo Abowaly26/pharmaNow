@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
+import 'package:pharma_now/core/utils/app_validation.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
 
@@ -34,66 +35,6 @@ class _SingnUpBodyState extends State<SingnUpBody> {
     super.dispose();
   }
 
-  String? validateUserName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your name';
-    }
-    if (value.length < 3) {
-      return 'Name must be at least 3 characters';
-    }
-    return null;
-  }
-
-  // Email validation
-  String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your email';
-    }
-
-    // Regular expression for email validation
-    final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-
-    if (!emailRegExp.hasMatch(value)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  // Password validation
-  String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your password';
-    }
-
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-
-    // Check for uppercase, lowercase, and number
-    bool hasUppercase = value.contains(RegExp(r'[A-Z]'));
-    bool hasLowercase = value.contains(RegExp(r'[a-z]'));
-    bool hasDigits = value.contains(RegExp(r'[0-9]'));
-
-    if (!hasUppercase || !hasLowercase || !hasDigits) {
-      return 'Password must contain uppercase, lowercase, and number';
-    }
-
-    return null;
-  }
-
-  // Confirm password validation
-  String? validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-
-    if (value != passwordController.text) {
-      return 'Passwords do not match';
-    }
-
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -107,7 +48,7 @@ class _SingnUpBodyState extends State<SingnUpBody> {
               onSaved: (p0) {
                 userName = p0!;
               },
-              validator: validateUserName,
+              validator: AppValidation.validateUserName,
               lable: 'Name',
               icon: Assets.nameIcon,
               hint: 'Enter your name',
@@ -121,7 +62,7 @@ class _SingnUpBodyState extends State<SingnUpBody> {
                 onSaved: (p0) {
                   email = p0!;
                 },
-                validator: validateEmail,
+                validator: AppValidation.validateEmail,
                 lable: 'Email',
                 icon: Assets.emailIcon,
                 hint: 'Enter your email'),
@@ -137,7 +78,7 @@ class _SingnUpBodyState extends State<SingnUpBody> {
               hint: 'Enter your password',
               textInputType: TextInputType.visiblePassword,
               controller: passwordController,
-              validator: validatePassword,
+              validator: AppValidation.validatePassword,
             ),
             SizedBox(
               height: 16.h,
@@ -151,7 +92,10 @@ class _SingnUpBodyState extends State<SingnUpBody> {
               hint: 'Enter your password',
               textInputType: TextInputType.visiblePassword,
               controller: confirmPasswordController,
-              validator: validateConfirmPassword,
+              validator: (value) => AppValidation.validateConfirmPassword(
+                value,
+                passwordController.text,
+              ),
             ),
             SizedBox(
               height: 24.h,

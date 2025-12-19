@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:pharma_now/core/error/failures.dart';
 import 'package:pharma_now/features/checkout/domain/entites/orderentity.dart';
 import 'package:pharma_now/features/checkout/domain/repositories/order_repository.dart';
+
+import '../../../../core/errors/error_handling.dart';
 
 /// Implementation of [OrderRepository] that uses Firestore as the data source.
 class OrderRepositoryImpl implements OrderRepository {

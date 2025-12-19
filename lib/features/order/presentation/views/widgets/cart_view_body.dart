@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/order/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
-import 'package:pharma_now/order/presentation/views/widgets/cart_items_list.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/widgets/cart_header.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pharma_now/features/checkout/presentation/views/checkout_view.dart';
+import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
+import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
 
-import '../../../../features/checkout/presentation/views/checkout_view.dart';
-import '../../../../features/home/presentation/ui_model/entities/cart_item_entity.dart';
+import 'package:pharma_now/features/order/presentation/views/widgets/cart_items_list.dart';
+
 import '../../cubits/cart_cubit/cart_cubit.dart';
-import '../../../../features/home/presentation/ui_model/entities/cart_entity.dart';
 
 class CartViewBody extends StatelessWidget {
   const CartViewBody({super.key});

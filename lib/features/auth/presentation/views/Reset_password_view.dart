@@ -8,8 +8,9 @@ import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 
 class ResetPasswordView extends StatelessWidget {
-  const ResetPasswordView({super.key});
+  const ResetPasswordView({super.key, this.oobCode});
   static const routeName = 'ResetPassword';
+  final String? oobCode;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class ResetPasswordView extends StatelessWidget {
               context, ForgetPasswordView.routeName),
         ),
       ),
-      body: ResetPasswordViewBody(),
+      body: ResetPasswordViewBody(oobCode: oobCode),
     );
   }
 }

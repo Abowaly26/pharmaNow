@@ -8,7 +8,7 @@ import '../../../../core/repos/medicine_repo/medicine_repo.dart';
 import '../../../../core/services/get_it_service.dart';
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import 'package:pharma_now/order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import '../../../home/presentation/views/main_view.dart';
 
 class OffersView extends StatelessWidget {

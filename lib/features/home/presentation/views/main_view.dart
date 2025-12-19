@@ -3,12 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 
-import 'package:pharma_now/order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/custom_bottom_navigation_bar.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/home_appbar.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/main_view_body_bloc_consummer.dart';
 
-import '../../../../order/presentation/views/cart_view.dart';
+import '../../../order/presentation/views/cart_view.dart';
 import '../../../../core/utils/color_manger.dart';
 import '../../../favorites/presentation/views/favorites.dart';
 import '../../../profile/presentation/views/profile_view.dart';

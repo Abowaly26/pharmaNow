@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
-import 'package:pharma_now/core/errors/failures.dart';
 import 'package:pharma_now/core/models/medicine_model.dart';
 import 'package:pharma_now/core/repos/medicine_repo/medicine_repo.dart';
 import 'package:pharma_now/core/services/database_service.dart';

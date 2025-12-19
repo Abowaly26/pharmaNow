@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/core/cubits/medicines_cubit/medicine_cubit.dart';
 import 'package:pharma_now/features/info_medicines/presentation/views/widgets/info_medicines_list_view_bloc_builder.dart';
-import '../../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import '../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 class InfoMedicinesViewBody extends StatefulWidget {
   const InfoMedicinesViewBody({super.key});

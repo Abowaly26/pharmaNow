@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/widget/forget_password_view_body.dart';
 
 import '../../../../core/utils/color_manger.dart';

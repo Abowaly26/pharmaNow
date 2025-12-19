@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/constants.dart';
 import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 
 import '../../../../core/utils/color_manger.dart';
 import '../../../../core/utils/text_styles.dart';

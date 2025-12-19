@@ -8,7 +8,7 @@ import 'package:pharma_now/features/home/presentation/views/main_view.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/medicine_details_view_body.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pharma_now/order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 import '../../../../core/utils/app_images.dart';
 

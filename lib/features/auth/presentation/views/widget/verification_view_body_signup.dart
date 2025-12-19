@@ -1,16 +1,14 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
+import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
 
 import '../../../../../core/utils/app_images.dart';
-import '../../../../../core/utils/color_manger.dart';
-import '../singn_in_view.dart';
+import '../sign_in_view.dart';
 
 class VerificationViewBody extends StatefulWidget {
   const VerificationViewBody({super.key});
@@ -20,104 +18,71 @@ class VerificationViewBody extends StatefulWidget {
 }
 
 class _VerificationViewBodyState extends State<VerificationViewBody> {
-  final int _codeLength = 6;
-  late List<TextEditingController> _controllers;
-  late List<FocusNode> _focusNodes;
-  bool isCodeComplete = false;
-  final String _expectedCode = '123456'; // Example of expected code
+  bool _sending = false;
+  bool _checking = false;
+  Timer? _pollTimer;
 
-  // Timer variables
-  int _timeLeft = 120; // Two minutes in seconds
-  Timer? _timer; // Use nullable Timer
+  Future<void> _resendVerificationEmail() async {
+    setState(() => _sending = true);
+    final repo = getIt<AuthRepo>();
+    final result = await repo.sendEmailVerification();
+    result.fold(
+      (failure) => ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(failure.message))),
+      (_) => ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Verification email sent again.'))),
+    );
+    setState(() => _sending = false);
+  }
 
-  String get _formattedTime {
-    final minutes = (_timeLeft ~/ 60).toString().padLeft(2, '0');
-    final seconds = (_timeLeft % 60).toString().padLeft(2, '0');
-    return '($minutes:$seconds)';
+  Future<void> _checkVerified() async {
+    setState(() => _checking = true);
+    final repo = getIt<AuthRepo>();
+    final result = await repo.reloadAndCheckEmailVerified();
+    result.fold(
+      (failure) => ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(failure.message))),
+      (isVerified) {
+        if (isVerified) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => SignInView()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content:
+                  Text('Email not verified yet. Please check your inbox')));
+        }
+      },
+    );
+    setState(() => _checking = false);
   }
 
   @override
   void initState() {
     super.initState();
-    _controllers =
-        List.generate(_codeLength, (index) => TextEditingController());
-    _focusNodes = List.generate(_codeLength, (index) => FocusNode());
-    _startTimer();
-  }
-
-  void _startTimer() {
-    // Cancel existing timer if it's active
-    _timer?.cancel();
-
-    // Start a new timer
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_timeLeft > 0) {
-          _timeLeft--;
-        } else {
-          timer.cancel();
-        }
-      });
+    // Auto-check every 5 seconds
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      final repo = getIt<AuthRepo>();
+      final result = await repo.reloadAndCheckEmailVerified();
+      result.fold(
+        (_) {},
+        (isVerified) {
+          if (isVerified && mounted) {
+            _pollTimer?.cancel();
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => SignInView()),
+            );
+          }
+        },
+      );
     });
   }
 
   @override
   void dispose() {
-    // Release resources
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    for (var focusNode in _focusNodes) {
-      focusNode.dispose();
-    }
-    _timer?.cancel(); // Safely cancel timer
+    _pollTimer?.cancel();
     super.dispose();
-  }
-
-  void _verifyCode() {
-    String enteredCode =
-        _controllers.map((controller) => controller.text).join();
-    if (enteredCode == _expectedCode) {
-      // SuccessBottomSheet(text: 'Account created successfully!');
-      // Navigate after successful verification
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => SignInView(),
-        ));
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid code. Please try again.')),
-      );
-      // Reset fields
-      for (var controller in _controllers) {
-        controller.clear();
-      }
-      _focusNodes[0].requestFocus();
-      setState(() => isCodeComplete = false);
-    }
-  }
-
-  void _resendCode() {
-    // Reset timer
-    setState(() {
-      _timeLeft = 120;
-    });
-
-    // Start a new timer
-    _startTimer();
-
-    // Clear current fields
-    for (var controller in _controllers) {
-      controller.clear();
-    }
-    _focusNodes[0].requestFocus();
-    setState(() => isCodeComplete = false);
-
-    // Show message to user
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Verification code has been resent')),
-    );
   }
 
   @override
@@ -135,10 +100,8 @@ class _VerificationViewBodyState extends State<VerificationViewBody> {
             ),
           ),
           SizedBox(height: 24.h),
-
-          // Verification title
           Text(
-            'Verification Code',
+            'Verify your email',
             style: TextStyle(
               fontSize: 24.sp,
               fontWeight: FontWeight.bold,
@@ -146,137 +109,45 @@ class _VerificationViewBodyState extends State<VerificationViewBody> {
             ),
           ),
           SizedBox(height: 12.h),
-
-          // Instructions text - changed to refer to email instead of phone
           Text(
-            'Please enter the 6-digit verification code sent to your email',
+            'A verification link has been sent to your email. Please click the link to verify your account.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16.sp,
               color: Colors.black54,
             ),
           ),
-
           SizedBox(height: 32.h),
-
-          // Verification code input fields - simplified
-          _buildVerificationFields(),
-
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: _sending ? null : _resendVerificationEmail,
+                child: _sending
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Text('Resend Email'),
+              ),
+            ],
+          ),
           SizedBox(height: 24.h),
-
-          // Timer and resend section
-          _buildTimerAndResendSection(),
-
-          SizedBox(height: 32.h),
-
-          // Confirm button
           ElevatedButton(
             style: ButtonStyles.primaryButton,
-            onPressed: isCodeComplete ? _verifyCode : null,
-            child: Text(
-              'Confirm',
-              style: TextStyles.buttonLabel,
-            ),
+            onPressed: _checking ? null : _checkVerified,
+            child: _checking
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : Text(
+                    'I Verified, Continue',
+                    style: TextStyles.buttonLabel,
+                  ),
           ),
         ]),
       ),
-    );
-  }
-
-  // Extract verification fields building logic to a separate method for simplification
-  Widget _buildVerificationFields() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(
-        _codeLength,
-        (index) => Container(
-          width: 40.w,
-          height: 45.h,
-          margin: EdgeInsets.symmetric(horizontal: 2.w),
-          child: TextField(
-            controller: _controllers[index],
-            focusNode: _focusNodes[index],
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(1),
-            ],
-            onChanged: (value) {
-              _handleFieldChange(value, index);
-            },
-            decoration: InputDecoration(
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 0.h, horizontal: 0.w),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.r),
-                borderSide: const BorderSide(
-                  color: ColorManager.secondaryColor,
-                  width: 1.5,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.r),
-                borderSide: const BorderSide(color: Colors.grey, width: 1),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Extract field change handling logic to a separate method
-  void _handleFieldChange(String value, int index) {
-    if (value.isNotEmpty && index < _codeLength - 1) {
-      FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
-    } else if (value.isEmpty && index > 0) {
-      FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
-    }
-
-    // Check if all fields are filled
-    setState(() {
-      isCodeComplete = _controllers.every((c) => c.text.isNotEmpty);
-    });
-  }
-
-  // Extract timer and resend section building logic to a separate method
-  Widget _buildTimerAndResendSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          _formattedTime,
-          style: const TextStyle(
-            color: ColorManager.secondaryColor,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        SizedBox(width: 6.w),
-        const Text(
-          "Didn't receive the code?",
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
-        TextButton(
-          onPressed: _timeLeft > 0 ? null : _resendCode,
-          child: Text(
-            'Resend',
-            style: TextStyle(
-              color: _timeLeft > 0 ? Colors.grey : ColorManager.secondaryColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

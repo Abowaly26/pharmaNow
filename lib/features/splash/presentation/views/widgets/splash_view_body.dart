@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/constants.dart';
 import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_in_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 import 'package:pharma_now/features/home/presentation/views/main_view.dart';
 
 import '../../../../../core/services/firebase_auth_service.dart';
@@ -52,6 +52,7 @@ class _SplashViewBodyState extends State<SplashViewBody> {
 
   void excuteNavigation() {
     bool isOnBoardingViewSeen = prefs.getBool(kIsOnBoardingViewSeen);
+
     Future.delayed(const Duration(seconds: 3), () {
       if (isOnBoardingViewSeen) {
         var isLoggedIn = FirebaseAuthService().isLoggedIn();

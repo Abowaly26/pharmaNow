@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import '../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';

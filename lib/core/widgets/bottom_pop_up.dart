@@ -73,7 +73,14 @@ void showSuccessBottomSheet(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: ElevatedButton(
                           style: ButtonStyles.primaryButton,
-                          onPressed: onPressed,
+                          onPressed: () {
+                            // Close the bottom sheet first
+                            Navigator.of(context).pop();
+                            // Then execute the provided action (e.g., navigation)
+                            if (onPressed != null) {
+                              onPressed();
+                            }
+                          },
                           child: Text(
                             'Ok',
                             style: TextStyles.buttonLabel,

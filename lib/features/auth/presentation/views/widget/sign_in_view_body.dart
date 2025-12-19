@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pharma_now/core/utils/app_validation.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/widgets/or_divider.dart';
 import 'package:pharma_now/core/widgets/anotherStepLogin.dart';
 import 'package:pharma_now/core/widgets/password_field.dart';
 import 'package:pharma_now/features/auth/presentation/views/forget_password_view.dart';
-import 'package:pharma_now/features/auth/presentation/views/singn_up_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_up_view.dart';
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
 
 import '../../../../../core/utils/app_images.dart';
@@ -39,6 +40,7 @@ class _SiginViewBodyState extends State<SiginViewBody> {
                 onSaved: (p0) {
                   email = p0!;
                 },
+                validator: AppValidation.validateEmailRequired,
                 textInputType: TextInputType.emailAddress,
                 lable: 'Email',
                 icon: Assets.emailIcon,
@@ -50,6 +52,7 @@ class _SiginViewBodyState extends State<SiginViewBody> {
               onSaved: (p0) {
                 password = p0!;
               },
+              validator: AppValidation.validatePasswordRequired,
               textInputType: TextInputType.visiblePassword,
               lable: 'Password',
               icon: Assets.passwordIcon,
@@ -78,13 +81,15 @@ class _SiginViewBodyState extends State<SiginViewBody> {
             ElevatedButton(
               style: ButtonStyles.primaryButton,
               onPressed: () {
+                FocusScope.of(context).unfocus();
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
 
                   context.read<SigninCubit>().signin(email, password);
                 } else {
-                  autovalidateMode = AutovalidateMode.always;
-                  setState(() {});
+                  setState(() {
+                    autovalidateMode = AutovalidateMode.always;
+                  });
                 }
                 // Navigator.pushReplacementNamed(context, HomeView.routeName);
               },
