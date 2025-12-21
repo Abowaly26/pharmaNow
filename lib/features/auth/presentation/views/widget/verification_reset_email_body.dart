@@ -7,6 +7,10 @@ import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart'
+    show showCustomBar, MessageType;
+import 'package:pharma_now/core/utils/color_manger.dart';
 
 import '../../../../../core/utils/app_images.dart';
 
@@ -15,10 +19,12 @@ class VerificationResetEmailBody extends StatefulWidget {
   final String email;
 
   @override
-  State<VerificationResetEmailBody> createState() => _VerificationResetEmailBodyState();
+  State<VerificationResetEmailBody> createState() =>
+      _VerificationResetEmailBodyState();
 }
 
-class _VerificationResetEmailBodyState extends State<VerificationResetEmailBody> {
+class _VerificationResetEmailBodyState
+    extends State<VerificationResetEmailBody> {
   bool _resending = false;
   int _cooldown = 0; // seconds
   Timer? _timer;
@@ -29,7 +35,7 @@ class _VerificationResetEmailBodyState extends State<VerificationResetEmailBody>
     super.dispose();
   }
 
-  void _startCooldown([int seconds = 30]) {
+  void _startCooldown([int seconds = 60]) {
     _timer?.cancel();
     setState(() => _cooldown = seconds);
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
@@ -48,13 +54,18 @@ class _VerificationResetEmailBodyState extends State<VerificationResetEmailBody>
     final repo = getIt<AuthRepo>();
     final result = await repo.sendPasswordResetEmail(widget.email.trim());
     result.fold(
-      (failure) => ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(failure.message))),
+      (failure) => showCustomBar(
+        context,
+        failure.message,
+        type: MessageType.error,
+      ),
       (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Link sent again. Please check your email.')),
+        showCustomBar(
+          context,
+          'Password reset link sent successfully! Please check your email.',
+          type: MessageType.success,
         );
-        _startCooldown(30);
+        _startCooldown(60);
       },
     );
     if (mounted) setState(() => _resending = false);
@@ -77,31 +88,138 @@ class _VerificationResetEmailBodyState extends State<VerificationResetEmailBody>
             ),
             SizedBox(height: 24.h),
             Text(
-              'Check your email',
-              style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+              'Check Your Email',
+              style: TextStyle(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 16.h),
             Text(
-              'We have sent a password reset link to:\n${widget.email}\n\nPlease open your email and tap the reset link. You will be redirected back to the app to create a new password.',
+              'We have sent a password reset link to:',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16.sp, color: Colors.black54, height: 1.4),
-            ),
-            SizedBox(height: 32.h),
-            ElevatedButton(
-              style: ButtonStyles.primaryButton,
-              onPressed: (_cooldown > 0 || _resending) ? null : _resend,
-              child: _resending
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(
-                      _cooldown > 0 ? 'Resend in $_cooldown s' : 'Resend Email',
-                      style: TextStyles.buttonLabel,
-                    ),
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: Colors.black54,
+              ),
             ),
             SizedBox(height: 8.h),
             Text(
-              'After clicking the link, you will be redirected to reset your password.',
+              widget.email,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.sp, color: Colors.black45),
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                color: ColorManager.buttom_info,
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: ColorManager.colorLines),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Didn't receive the email?",
+                              style: TextStyles.sectionTitle,
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              _cooldown > 0
+                                  ? ''
+                                  : 'Request a new password reset link',
+                              style: TextStyles.callToActionText,
+                            ),
+                            if (_cooldown > 0)
+                              RichText(
+                                text: TextSpan(
+                                  style: TextStyles.callToActionText,
+                                  children: [
+                                    const TextSpan(
+                                        text: 'Resend available in   '),
+                                    TextSpan(
+                                      text:
+                                          '${(_cooldown ~/ 60).toString().padLeft(2, '0')}:${(_cooldown % 60).toString().padLeft(2, '0')}',
+                                      style:
+                                          TextStyles.callToActionText.copyWith(
+                                        color: ColorManager.secondaryColor,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      SizedBox(
+                        width: 110.w,
+                        height: 36.h,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorManager.secondaryColor,
+                            disabledBackgroundColor:
+                                ColorManager.lightPurpleColorF5,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16.r)),
+                          ),
+                          onPressed:
+                              (_cooldown > 0 || _resending) ? null : _resend,
+                          child: _resending
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(
+                                  'Resend',
+                                  style: TextStyles.buttonLabel,
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_cooldown > 0) ...[
+                    SizedBox(height: 10.h),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(100.r),
+                      child: LinearProgressIndicator(
+                        minHeight: 6.h,
+                        value: _cooldown == 0 ? 0 : 1 - (_cooldown / 60),
+                        backgroundColor: Colors.white,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            ColorManager.secondaryColor),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            SizedBox(height: 24.h),
+            ElevatedButton(
+              style: ButtonStyles.primaryButton,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, SignInView.routeName);
+              },
+              child: Text(
+                'Back to Login',
+                style: TextStyles.buttonLabel,
+              ),
             ),
           ],
         ),

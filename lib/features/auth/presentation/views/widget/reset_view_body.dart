@@ -6,6 +6,8 @@ import 'package:pharma_now/core/widgets/bottom_pop_up.dart';
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart'
+    show showCustomBar, MessageType;
 
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
@@ -24,6 +26,8 @@ class _ResetPasswordViewBodyState extends State<ResetPasswordViewBody> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   bool _submitting = false;
+  bool _passwordVisible = false;
+  bool _confirmVisible = false;
   String? _emailForReset; // Retrieved from verifyPasswordResetCode
 
   @override
@@ -38,8 +42,19 @@ class _ResetPasswordViewBodyState extends State<ResetPasswordViewBody> {
     final repo = getIt<AuthRepo>();
     final result = await repo.verifyPasswordResetCode(code);
     result.fold(
-      (failure) => ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(failure.message))),
+      (failure) {
+        showCustomBar(
+          context,
+          failure.message,
+          type: MessageType.error,
+        );
+        // Navigate back to forgot password screen after a delay
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, SignInView.routeName);
+          }
+        });
+      },
       (email) => setState(() => _emailForReset = email),
     );
   }
@@ -48,8 +63,11 @@ class _ResetPasswordViewBodyState extends State<ResetPasswordViewBody> {
     if (!_formKey.currentState!.validate()) return;
     final code = widget.oobCode;
     if (code == null || code.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid or missing reset link.')));
+      showCustomBar(
+        context,
+        'Invalid or missing reset link.',
+        type: MessageType.error,
+      );
       return;
     }
     setState(() => _submitting = true);
@@ -57,12 +75,17 @@ class _ResetPasswordViewBodyState extends State<ResetPasswordViewBody> {
     final result = await repo.confirmPasswordReset(
         oobCode: code, newPassword: _passwordController.text.trim());
     result.fold(
-      (failure) => ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(failure.message))),
+      (failure) {
+        showCustomBar(
+          context,
+          failure.message,
+          type: MessageType.error,
+        );
+      },
       (_) {
         showSuccessBottomSheet(
           context,
-          'Your password has been changed successfully. You can now sign in.',
+          'Your password has been changed successfully. You can now sign in with your new password.',
           () {
             Navigator.pushReplacementNamed(context, SignInView.routeName);
           },
@@ -86,36 +109,94 @@ class _ResetPasswordViewBodyState extends State<ResetPasswordViewBody> {
       child: Form(
         key: _formKey,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Reset Your Password',
+              style: TextStyle(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Create a new password for your account',
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: Colors.black54,
+              ),
+            ),
+            SizedBox(height: 32.h),
             if (_emailForReset != null) ...[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Reset for: $_emailForReset',
-                    style: TextStyles.inputLabel16),
+              Text(
+                'Account: $_emailForReset',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.black54,
+                ),
               ),
               SizedBox(height: 16.h),
             ],
             CustomTextField(
               controller: _passwordController,
               textInputType: TextInputType.visiblePassword,
-              lable: 'Password',
+              lable: 'New Password',
               icon: Assets.passwordIcon,
-              hint: 'Enter your password',
+              hint: 'Enter your new password',
               validator: AppValidation.validatePassword,
-              obscureText: true,
+              obscureText: !_passwordVisible,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _passwordVisible = !_passwordVisible;
+                  });
+                },
+              ),
             ),
             SizedBox(height: 16.h),
             CustomTextField(
               controller: _confirmController,
               textInputType: TextInputType.visiblePassword,
-              lable: 'Confirm Password',
+              lable: 'Confirm New Password',
               icon: Assets.passwordIcon,
-              hint: 'Re-enter your password',
+              hint: 'Re-enter your new password',
               validator: (value) => AppValidation.validateConfirmPassword(
                 value,
                 _passwordController.text,
               ),
-              obscureText: true,
+              obscureText: !_confirmVisible,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _confirmVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _confirmVisible = !_confirmVisible;
+                  });
+                },
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                'Password must be at least 6 characters and contain uppercase, lowercase, and number',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: const Color(0xFF1E40AF),
+                ),
+              ),
             ),
             SizedBox(height: 32.h),
             ElevatedButton(
@@ -125,9 +206,12 @@ class _ResetPasswordViewBodyState extends State<ResetPasswordViewBody> {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2))
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ))
                   : Text(
-                      'Reset',
+                      'Reset Password',
                       style: TextStyles.buttonLabel,
                     ),
             ),

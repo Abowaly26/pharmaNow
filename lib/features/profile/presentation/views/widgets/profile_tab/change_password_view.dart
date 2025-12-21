@@ -10,6 +10,7 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
+import 'package:pharma_now/core/utils/app_validation.dart';
 
 class ChangePasswordView extends StatefulWidget {
   static const String routeName = "ChangePasswordView";
@@ -44,12 +45,6 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
 
     final provider = Provider.of<ProfileProvider>(context, listen: false);
 
-    if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('New password and confirmation do not match')));
-      return;
-    }
-
     log('Attempting to change password', name: 'ChangePasswordView');
     await provider.changePassword(
       _currentPasswordController.text,
@@ -69,7 +64,6 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     }
   }
 
-// ??????????????????????????????????
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ProfileProvider>(context);
@@ -120,15 +114,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
               ),
               SizedBox(height: 20),
               CustomTextField(
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a new password';
-                  }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
+                validator: AppValidation.validatePassword,
                 lable: 'New Password',
                 icon: Assets.passwordIcon,
                 hint: 'Enter your new password',
@@ -151,15 +137,10 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
               ),
               SizedBox(height: 20),
               CustomTextField(
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please confirm the new password';
-                  }
-                  if (value != _newPasswordController.text) {
-                    return 'Password and confirmation do not match';
-                  }
-                  return null;
-                },
+                validator: (value) => AppValidation.validateConfirmPassword(
+                  value,
+                  _newPasswordController.text,
+                ),
                 controller: _confirmPasswordController,
                 obscureText: _obscureConfirmPassword,
                 lable: 'Confirm New Password',
@@ -180,7 +161,23 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   },
                 ),
               ),
-              SizedBox(height: 40),
+              SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  'Password must be at least 6 characters and contain uppercase, lowercase, and number',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: const Color(0xFF1E40AF),
+                  ),
+                ),
+              ),
+              SizedBox(height: 32),
               ElevatedButton(
                 style: ButtonStyles.primaryButton,
                 onPressed: provider.isLoading ? null : _changePassword,

@@ -213,40 +213,62 @@ class AuthRepoImpl extends AuthRepo {
         return left(ServerFailure('Please enter your email address'));
       }
 
+      // Validate email format
+      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+        return left(ServerFailure('Please enter a valid email address'));
+      }
+
       final sanitized = _sanitizeEmail(email);
+      
+      log('Attempting to send password reset email to: $sanitized');
 
       // Check the authentication provider for this email
       final provider = await firebaseAuthService.getProviderForEmail(sanitized);
 
       // Email is not associated with any account
       if (provider == null) {
-        return left(ServerFailure('Account not found'));
+        log('No account found for email: $sanitized');
+        // For security reasons, we don't reveal whether an email exists in the system
+        // We'll still return success to prevent email enumeration attacks
+        return right(null);
       }
 
       // Email is associated with a Google account
       if (provider == 'google.com') {
+        log('Email $sanitized is associated with Google account');
         return left(ServerFailure(
             'This email is associated with a Google account. Please sign in with Google.'));
       }
 
       // Email is associated with a password account -> Send reset email
       if (provider == 'password') {
+        log('Sending password reset email to: $sanitized');
         await firebaseAuthService.sendPasswordResetEmail(sanitized);
+        log('Password reset email sent successfully to: $sanitized');
         return right(null);
       }
 
       // Any other provider (e.g., Facebook)
-      return left(ServerFailure('Cannot reset password for this account type'));
+      log('Email $sanitized is associated with unsupported provider: $provider');
+      // For security reasons, we don't reveal whether an email exists in the system
+      // We'll still return success to prevent email enumeration attacks
+      return right(null);
     } on FirebaseAuthException catch (e) {
+      log('FirebaseAuthException while sending password reset email: ${e.code} - ${e.message}');
+      // For security reasons, we don't reveal whether an email exists in the system
+      // We'll still return success to prevent email enumeration attacks
       if (e.code == 'user-not-found') {
-        return left(ServerFailure('Account not found'));
+        log('User not found for email, returning success for security');
+        return right(null);
       } else if (e.code == 'invalid-email') {
-        return left(ServerFailure('Invalid email address'));
+        return left(ServerFailure('Please enter a valid email address'));
       } else {
+        log('Unexpected FirebaseAuthException: ${e.code}');
         return left(ServerFailure(
             'Failed to send reset link. Please try again later.'));
       }
     } catch (e) {
+      log('Unexpected error while sending password reset email: ${e.toString()}');
       return left(
           ServerFailure('An unexpected error occurred. Please try again.'));
     }

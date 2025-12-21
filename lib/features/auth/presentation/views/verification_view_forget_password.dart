@@ -19,11 +19,6 @@ class VerifiViewForgetpassword extends StatelessWidget {
         preferredSize: Size.fromHeight(48.sp),
         child: PharmaAppBar(
           title: 'Verification',
-          isBack: true,
-          onPressed: () {
-            Navigator.pushReplacementNamed(
-                context, ForgetPasswordView.routeName);
-          },
         ),
       ),
       body: VerificationResetEmailBody(email: email),

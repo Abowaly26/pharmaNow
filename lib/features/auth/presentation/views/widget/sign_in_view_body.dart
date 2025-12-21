@@ -66,8 +66,7 @@ class _SiginViewBodyState extends State<SiginViewBody> {
               child: InkWell(
                 splashColor: ColorManager.colorLines,
                 onTap: () {
-                  Navigator.pushReplacementNamed(
-                      context, ForgetPasswordView.routeName);
+                  Navigator.pushNamed(context, ForgetPasswordView.routeName);
                 },
                 child: Text(
                   'Forgot Password?',

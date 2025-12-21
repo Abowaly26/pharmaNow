@@ -236,7 +236,14 @@ class FirebaseAuthService {
 
   /// Sends a password reset email to the specified email address.
   Future<void> sendPasswordResetEmail(String email) async {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    try {
+      log('Firebase: Sending password reset email to $email');
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      log('Firebase: Password reset email sent successfully to $email');
+    } catch (e) {
+      log('Firebase: Error sending password reset email to $email: $e');
+      rethrow;
+    }
   }
 
   /// Reloads the current user and returns whether their email is verified.

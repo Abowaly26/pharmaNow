@@ -42,9 +42,12 @@ class PharmaAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      shadowColor: ColorManager.primaryColor,
-      foregroundColor: ColorManager.primaryColor,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      shadowColor: Colors.transparent,
+      backgroundColor: ColorManager.primaryColor,
       surfaceTintColor: ColorManager.primaryColor,
+      foregroundColor: ColorManager.primaryColor,
       automaticallyImplyLeading: isBack,
       leading: isBack
           ? IconButton(
@@ -54,9 +57,9 @@ class PharmaAppBar extends StatelessWidget implements PreferredSizeWidget {
                 height: 24,
                 color: ColorManager.colorOfArrows,
               ),
-              onPressed: onPressed)
+              onPressed: onPressed,
+            )
           : null,
-      backgroundColor: ColorManager.primaryColor,
       centerTitle: true,
       title: Text(title),
       titleTextStyle: TextStyles.appBarTitle18,
