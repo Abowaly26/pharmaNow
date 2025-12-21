@@ -23,10 +23,10 @@ enum MessageType {
 Map<MessageType, Map<String, dynamic>> _getMessageTypeStyles() {
   return {
     MessageType.error: {
-      'backgroundColor': ColorManager.redColor.withValues(alpha: 0.85),
-      'borderColor': const Color(0xFFFCA5A5).withOpacity(0.70),
+      'backgroundColor': ColorManager.redColor,
+      'borderColor': const Color(0xFFFCA5A5).withOpacity(0.80),
       'accentColor': const Color(0xFFFCA5A5),
-      'iconBackgroundColor': const Color(0xFFFCA5A5).withOpacity(0.20),
+      'iconBackgroundColor': const Color(0xFFFCA5A5).withOpacity(0.45),
       'icon': Icons.error_outline,
     },
     MessageType.success: {

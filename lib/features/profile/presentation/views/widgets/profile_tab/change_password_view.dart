@@ -11,6 +11,8 @@ import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 import 'package:pharma_now/core/utils/app_validation.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart'
+    show showCustomBar, MessageType;
 
 class ChangePasswordView extends StatefulWidget {
   static const String routeName = "ChangePasswordView";
@@ -54,12 +56,18 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     if (provider.status == ProfileStatus.error) {
       log('Password change failed: ${provider.errorMessage}',
           name: 'ChangePasswordView');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(provider.errorMessage)));
+      showCustomBar(
+        context,
+        provider.errorMessage,
+        type: MessageType.error,
+      );
     } else {
       log('Password changed successfully', name: 'ChangePasswordView');
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password changed successfully'), backgroundColor: Colors.green,));
+      showCustomBar(
+        context,
+        'Password changed successfully',
+        type: MessageType.success,
+      );
       Navigator.pop(context);
     }
   }
