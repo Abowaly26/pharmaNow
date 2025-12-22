@@ -3,6 +3,7 @@ import 'dart:io'; // Can be removed if no longer used in this file
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 // import 'package:image_picker/image_picker.dart'; // Removed
 import 'package:provider/provider.dart';
@@ -59,8 +60,7 @@ class _EditProfileState extends State<EditProfile> {
   Future<void> _updateProfile() async {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
     if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter a valid name')));
+      showCustomBar(context, 'Please enter a valid name');
       return;
     }
 
@@ -69,12 +69,10 @@ class _EditProfileState extends State<EditProfile> {
     );
     if (mounted) {
       if (provider.status == ProfileStatus.error) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(provider.errorMessage)));
+        showCustomBar(context, provider.errorMessage);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Profile updated successfully'),
-            backgroundColor: Colors.green));
+        showCustomBar(
+            type: MessageType.success, context, 'Profile updated successfully');
         Navigator.pop(context);
       }
     }

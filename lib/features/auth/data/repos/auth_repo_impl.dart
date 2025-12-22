@@ -101,9 +101,8 @@ class AuthRepoImpl extends AuthRepo {
       var user = await firebaseAuthService.signInWithEmailAndPassword(
           email: email, password: password);
 
-      // Block unverified accounts from signing in
       if (!(user.emailVerified)) {
-        await FirebaseAuth.instance.signOut();
+        // Do not sign out here. We keep the user signed in to allow the Verification screen to access the current user and resend the email.
         return left(ServerFailure(
             'Please verify your email from the verification link we sent, then try signing in.'));
       }

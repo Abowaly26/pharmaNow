@@ -6,6 +6,7 @@ import 'package:pharma_now/core/widgets/bottom_pop_up.dart';
 import 'package:pharma_now/features/auth/presentation/views/widget/sign_in_view_body.dart';
 import 'package:pharma_now/features/home/presentation/views/main_view.dart';
 import 'package:pharma_now/features/auth/presentation/cubits/signin_cubit/signin_cubit.dart';
+import 'package:pharma_now/features/auth/presentation/views/verification_view_signup.dart';
 
 class SigninViewBodyBlocConsumer extends StatelessWidget {
   const SigninViewBodyBlocConsumer({
@@ -29,7 +30,14 @@ class SigninViewBodyBlocConsumer extends StatelessWidget {
           );
         }
         if (state is SigninFailure) {
-          showCustomBar(context, state.message);
+          if (state.message.contains('verify your email')) {
+            // Instead of showing a snackbar (which causes the overlay glitch),
+            // navigate to verification screen directly.
+            showCustomBar(context, state.message);
+            Navigator.pushReplacementNamed(context, VerificationView.routeName);
+          } else {
+            showCustomBar(context, state.message);
+          }
         }
       },
       builder: (context, state) {
