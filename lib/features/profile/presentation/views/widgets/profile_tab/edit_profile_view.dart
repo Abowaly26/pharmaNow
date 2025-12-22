@@ -72,8 +72,9 @@ class _EditProfileState extends State<EditProfile> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(provider.errorMessage)));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Profile updated successfully'),
+            backgroundColor: Colors.green));
         Navigator.pop(context);
       }
     }
@@ -138,13 +139,13 @@ class _EditProfileState extends State<EditProfile> {
                       final firebaseUser = FirebaseAuth.instance.currentUser;
                       userName = firebaseUser?.displayName ??
                           firebaseUser?.email?.split('@')[0] ??
-                          "User";
+                          "Guest";
                     }
                     if (_nameController.text.isNotEmpty) {
                       userName = _nameController.text;
                     }
                     return Text(
-                      userName.isNotEmpty ? userName : "User",
+                      userName.isNotEmpty ? userName : "Guest",
                       style:
                           TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     );

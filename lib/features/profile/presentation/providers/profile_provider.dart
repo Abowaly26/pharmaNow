@@ -57,37 +57,76 @@ class ProfileProvider extends ChangeNotifier {
           UserEntity? userDataFromFirestore =
               await _profileRepository.getUserProfile(uid);
 
-          String authoritativeName =
-              firebaseUser.displayName ?? firebaseUser.email!.split('@')[0];
+          // Determine the authoritative name
+          // 1. Prefer Firebase Auth displayName if available
+          // 2. Fallback to Firestore name if Auth displayName is missing
+          // 3. Last resort: Email prefix
+
+          String? authDisplayName = firebaseUser.displayName;
           String authoritativeEmail = firebaseUser.email ?? '';
 
-          log('Authoritative Name: $authoritativeName, Email: $authoritativeEmail',
-              name: 'ProfileProvider');
-
           if (userDataFromFirestore != null) {
-            bool needsUpdate = false;
+            // User exists in Firestore
             String currentNameInFirestore = userDataFromFirestore.name;
             String currentEmailInFirestore = userDataFromFirestore.email;
 
-            if (currentNameInFirestore != authoritativeName ||
-                currentEmailInFirestore != authoritativeEmail) {
-              needsUpdate = true;
+            bool needsFirestoreUpdate = false;
+            String finalName = currentNameInFirestore;
+
+            if (authDisplayName != null && authDisplayName.isNotEmpty) {
+              // Case A: Auth has a name.
+              // If it differs from Firestore, we assume Auth (e.g. Google or fresh Login) is the source of truth,
+              // OR we could assume Firestore is source of truth if we think Auth might possess stale data?
+              // Usually for Google Sign In, Auth is truth. For Profile Edit, Firestore is updated then Auth.
+              // Let's assume if they differ, we sync Auth -> Firestore, UNLESS Auth name is just email prefix?
+              // No, we trust a non-empty displayName.
+
+              if (currentNameInFirestore != authDisplayName) {
+                finalName = authDisplayName;
+                needsFirestoreUpdate = true;
+              }
+            } else {
+              // Case B: Auth has NO name (e.g. legacy email/pass user).
+              // Do NOT overwrite Firestore. Instead, backfill Auth.
+              if (currentNameInFirestore.isNotEmpty) {
+                try {
+                  await firebaseUser.updateDisplayName(currentNameInFirestore);
+                  await firebaseUser.reload();
+                } catch (e) {
+                  log('Failed to backfill displayName: $e',
+                      name: 'ProfileProvider');
+                }
+              } else {
+                // Both are empty? unlikely, but use email suffix
+                finalName = authoritativeEmail.split('@')[0];
+                needsFirestoreUpdate = true;
+              }
             }
 
-            if (needsUpdate) {
+            // Check email sync
+            if (currentEmailInFirestore != authoritativeEmail) {
+              needsFirestoreUpdate = true;
+            }
+
+            if (needsFirestoreUpdate) {
               _currentUser = UserModel(
                 uId: userDataFromFirestore.uId,
-                name: authoritativeName,
+                name: finalName,
                 email: authoritativeEmail,
               );
               await _profileRepository.updateUserProfile(_currentUser!);
-              log('Updated user profile in Firestore', name: 'ProfileProvider');
+              log('Updated user profile in Firestore to match Auth/Rules',
+                  name: 'ProfileProvider');
             } else {
               _currentUser = userDataFromFirestore;
             }
           } else {
+            // User does NOT exist in Firestore (New User or broken state)
+            String nameToUse =
+                authDisplayName ?? authoritativeEmail.split('@')[0];
+
             _currentUser = UserModel(
-              name: authoritativeName,
+              name: nameToUse,
               email: authoritativeEmail,
               uId: firebaseUser.uid,
             );
@@ -98,7 +137,7 @@ class ProfileProvider extends ChangeNotifier {
           _status = ProfileStatus.success;
           break; // Exit loop on success
         } else {
-          log('No valid Firebase user found, during retry $retryCount',
+          log('No valid Firebase user found during retry $retryCount',
               name: 'ProfileProvider');
           await clearUserData();
           return;

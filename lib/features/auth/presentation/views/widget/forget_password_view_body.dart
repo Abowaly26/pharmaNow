@@ -137,40 +137,11 @@ class _ForgetPasswordViewBodyState extends State<ForgetPasswordViewBody> {
                         ),
                       )
                     : Text(
-                        'Send Reset Link',
+                        'Continue',
                         style: TextStyles.buttonLabel,
                       ),
               ),
               SizedBox(height: 20.h),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: const Color(0xFFBFDBFE)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: const Color(0xFF3B82F6),
-                      size: 24.sp,
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Text(
-                        'Check your email for a password reset link. If you don\'t see it, check your spam folder.',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: const Color(0xFF1E40AF),
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),

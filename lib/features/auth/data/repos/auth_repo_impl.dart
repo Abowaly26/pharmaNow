@@ -29,10 +29,18 @@ class AuthRepoImpl extends AuthRepo {
       user = await firebaseAuthService.createUserWithEmailAndPassword(
           email: email, password: password);
 
+      // Implement the fix: Update the Firebase User's displayName immediately
+      if (user != null) {
+        await user.updateDisplayName(name);
+        // Refresh the user to ensure local state is updated (though updateDisplayName usually updates the object)
+        await user.reload();
+        user = FirebaseAuth.instance.currentUser;
+      }
+
       var userEntity = UserEntity(
         name: name,
         email: email,
-        uId: user.uid,
+        uId: user!.uid,
       );
 
       var isUserExist = await databaseService.checkIfDataExist(

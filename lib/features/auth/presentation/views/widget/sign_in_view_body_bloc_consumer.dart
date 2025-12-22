@@ -17,9 +17,16 @@ class SigninViewBodyBlocConsumer extends StatelessWidget {
     return BlocConsumer<SigninCubit, SigninState>(
       listener: (context, state) {
         if (state is SigninSuccess) {
-          showSuccessBottomSheet(context, 'Signed in successfully', () {
-            Navigator.pushReplacementNamed(context, MainView.routeName);
-          });
+          showSuccessBottomSheet(
+            context,
+            'Signed in successfully',
+            () {
+              Navigator.pushReplacementNamed(context, MainView.routeName);
+            },
+            isDismissible: false,
+            enableDrag: false,
+            buttonText: 'Go to Home',
+          );
         }
         if (state is SigninFailure) {
           showCustomBar(context, state.message);
