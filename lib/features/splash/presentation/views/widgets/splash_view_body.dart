@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pharma_now/constants.dart';
 import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
@@ -57,7 +58,15 @@ class _SplashViewBodyState extends State<SplashViewBody> {
       if (isOnBoardingViewSeen) {
         var isLoggedIn = FirebaseAuthService().isLoggedIn();
         if (isLoggedIn) {
-          Navigator.pushReplacementNamed(context, MainView.routeName);
+          // Check verification status to prevent unverified users from accessing Home
+          final user = FirebaseAuth.instance.currentUser;
+          if (user != null && user.emailVerified) {
+            Navigator.pushReplacementNamed(context, MainView.routeName);
+          } else {
+            // If logged in but not verified, go to login (user can request resend there)
+            // or ideally to verification view, but Login is safer fallback
+            Navigator.pushReplacementNamed(context, SignInView.routeName);
+          }
         } else {
           Navigator.pushReplacementNamed(context, SignInView.routeName);
         }

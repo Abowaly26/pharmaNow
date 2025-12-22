@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,9 @@ import 'package:pharma_now/features/profile/presentation/providers/profile_provi
 import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 import 'package:pharma_now/firebase_options.dart';
 import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart'; // Import SignInView for the route name
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
+import 'package:pharma_now/core/services/auth_navigation_observer.dart'; // Import AuthNavigationObserver
 
 import 'core/services/custom_bloc_observer.dart';
 
@@ -32,6 +36,7 @@ void main() async {
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final AuthNavigationObserver authNavigationObserver = AuthNavigationObserver();
 
 Future<void> _initDynamicLinks() async {
   // Handle the initial dynamic link if the app is opened from a terminated state
@@ -61,8 +66,63 @@ void _handleDynamicLink(PendingDynamicLinkData data) {
   }
 }
 
-class PharmaNow extends StatelessWidget {
+class PharmaNow extends StatefulWidget {
   const PharmaNow({super.key});
+
+  @override
+  State<PharmaNow> createState() => _PharmaNowState();
+}
+
+class _PharmaNowState extends State<PharmaNow> {
+  Timer? _userCheckTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenToAuthChanges();
+    _startUserCheckTimer();
+  }
+
+  @override
+  void dispose() {
+    _userCheckTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startUserCheckTimer() {
+    _userCheckTimer =
+        Timer.periodic(const Duration(seconds: 10), (timer) async {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          await user.reload();
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'user-not-found' || e.code == 'user-disabled') {
+            await FirebaseAuth.instance.signOut();
+          }
+        } catch (e) {
+          // Flatten any other errors to avoid crashing the app on network issues
+          debugPrint('Error reloading user: $e');
+        }
+      }
+    });
+  }
+
+  void _listenToAuthChanges() {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user == null) {
+        // User is signed out or account deleted
+        // Check if we are on a protected route
+        if (!authNavigationObserver.isCurrentRoutePublic) {
+          // Navigate to Sign In and remove all previous routes
+          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            SignInView.routeName,
+            (route) => false,
+          );
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +138,7 @@ class PharmaNow extends StatelessWidget {
           builder: (context, child) => MaterialApp(
                 debugShowCheckedModeBanner: false,
                 navigatorKey: navigatorKey,
+                navigatorObservers: [authNavigationObserver],
                 onGenerateRoute: onGenerateRoute,
                 initialRoute: SplashView.routeName,
               )),

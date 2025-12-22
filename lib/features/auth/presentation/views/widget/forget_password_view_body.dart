@@ -51,14 +51,12 @@ class _ForgetPasswordViewBodyState extends State<ForgetPasswordViewBody> {
           );
         },
         (_) {
-          // Always navigate to verification screen regardless of whether email was sent
-          // This prevents email enumeration attacks while providing consistent UX
           showCustomBar(
             context,
             'Password reset link sent! Check your email or spam folder.',
             type: MessageType.success,
           );
-          
+
           // Small delay to let the user see the success message
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
@@ -134,7 +132,8 @@ class _ForgetPasswordViewBodyState extends State<ForgetPasswordViewBody> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : Text(

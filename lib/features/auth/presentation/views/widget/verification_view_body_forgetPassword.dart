@@ -78,7 +78,7 @@ class _VerifiBodyForgetPassState extends State<VerifiBodyForgetPass> {
   Future<void> _resendCode() async {
     // In a real implementation, you would call your backend to resend the code
     // For now, we'll just reset the timer and clear the fields
-    
+
     setState(() {
       _timeLeft = 120;
       _startTimer(); // This will check if timer is active internally
@@ -97,19 +97,19 @@ class _VerifiBodyForgetPassState extends State<VerifiBodyForgetPass> {
       'Password reset link resent! Check your email or spam folder.',
       type: MessageType.success,
     );
-    
+
     setState(() => _isResending = false);
   }
 
   void _verifyCode() {
     String enteredCode =
         _controllers.map((controller) => controller.text).join();
-    
+
     // In a real app, you would verify this code with your backend
     // For demo purposes, we'll accept any 6-digit code
     if (enteredCode.length == 6 && RegExp(r'^[0-9]+$').hasMatch(enteredCode)) {
       setState(() => _isVerifying = true);
-      
+
       // Simulate verification process
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
@@ -125,7 +125,7 @@ class _VerifiBodyForgetPassState extends State<VerifiBodyForgetPass> {
         'Please enter a valid 6-digit code',
         type: MessageType.error,
       );
-      
+
       // Reset fields
       for (var controller in _controllers) {
         controller.clear();
@@ -289,9 +289,7 @@ class _VerifiBodyForgetPassState extends State<VerifiBodyForgetPass> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      _timeLeft > 0
-                          ? ''
-                          : 'Request a new password reset link',
+                      _timeLeft > 0 ? '' : 'Request a new password reset link',
                       style: TextStyles.callToActionText,
                     ),
                     if (_timeLeft > 0)
@@ -320,20 +318,17 @@ class _VerifiBodyForgetPassState extends State<VerifiBodyForgetPass> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorManager.secondaryColor,
-                    disabledBackgroundColor:
-                        ColorManager.lightPurpleColorF5,
+                    disabledBackgroundColor: ColorManager.lightPurpleColorF5,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16.r)),
                   ),
-                  onPressed: (_isResending || _timeLeft > 0)
-                      ? null
-                      : _resendCode,
+                  onPressed:
+                      (_isResending || _timeLeft > 0) ? null : _resendCode,
                   child: _isResending
                       ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child:
-                              CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Text(
                           'Resend',
@@ -349,11 +344,7 @@ class _VerifiBodyForgetPassState extends State<VerifiBodyForgetPass> {
               borderRadius: BorderRadius.circular(100.r),
               child: LinearProgressIndicator(
                 minHeight: 6.h,
-                value: 120 == 0
-                    ? 0
-                    : 1 -
-                        (_timeLeft /
-                            120),
+                value: 120 == 0 ? 0 : 1 - (_timeLeft / 120),
                 backgroundColor: Colors.white,
                 valueColor: const AlwaysStoppedAnimation<Color>(
                     ColorManager.secondaryColor),

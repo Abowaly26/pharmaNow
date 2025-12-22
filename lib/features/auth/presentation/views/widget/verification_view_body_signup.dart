@@ -12,6 +12,7 @@ import '../../../../../../core/helper_functions/build_error_bar.dart'
     show showCustomBar, MessageType;
 import '../../../../../core/utils/app_images.dart';
 import '../sign_in_view.dart';
+import 'package:pharma_now/core/services/firebase_auth_service.dart';
 
 class VerificationViewBody extends StatefulWidget {
   const VerificationViewBody({super.key});
@@ -22,7 +23,7 @@ class VerificationViewBody extends StatefulWidget {
 
 class _VerificationViewBodyState extends State<VerificationViewBody> {
   bool _sending = false;
-  bool _checking = false;
+
   Timer? _pollTimer;
   Timer? _resendCooldownTimer;
   int _resendCooldownSeconds = 60;
@@ -70,48 +71,39 @@ class _VerificationViewBodyState extends State<VerificationViewBody> {
     setState(() => _sending = false);
   }
 
-  Future<void> _checkVerified() async {
-    setState(() => _checking = true);
-    final repo = getIt<AuthRepo>();
-    final result = await repo.reloadAndCheckEmailVerified();
-    result.fold(
-      (failure) => ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(failure.message))),
-      (isVerified) {
-        if (isVerified) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => SignInView()),
-          );
-        } else {
-          showCustomBar(context,
-              'Email not verified yet. Please check your inbox or spam');
-        }
-      },
-    );
-    setState(() => _checking = false);
+  Future<void> _navigateToLogin() async {
+    try {
+      final repo = getIt<AuthRepo>();
+      // Reload user data to check latest verification status
+      final isVerifiedEither = await repo.reloadAndCheckEmailVerified();
+
+      isVerifiedEither.fold(
+        (failure) => showCustomBar(context, failure.message),
+        (isVerified) async {
+          if (isVerified) {
+            // Sign out explicitly before navigating to login (clean slate)
+            await FirebaseAuthService().signOut();
+            if (!mounted) return;
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => SignInView()),
+            );
+          } else {
+            showCustomBar(context,
+                'Please verify your email address first by clicking the link sent to your inbox.',
+                type: MessageType.error);
+          }
+        },
+      );
+    } catch (e) {
+      showCustomBar(context, 'An error occurred. Please try again.');
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _startResendCooldown();
-    // Auto-check every 5 seconds
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      final repo = getIt<AuthRepo>();
-      final result = await repo.reloadAndCheckEmailVerified();
-      result.fold(
-        (_) {},
-        (isVerified) {
-          if (isVerified && mounted) {
-            _pollTimer?.cancel();
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => SignInView()),
-            );
-          }
-        },
-      );
-    });
+    // No auto-check loop because user is signed out.
   }
 
   @override
@@ -256,16 +248,11 @@ class _VerificationViewBodyState extends State<VerificationViewBody> {
           SizedBox(height: 24.h),
           ElevatedButton(
             style: ButtonStyles.primaryButton,
-            onPressed: _checking ? null : _checkVerified,
-            child: _checking
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2))
-                : Text(
-                    'I Verified, Continue',
-                    style: TextStyles.buttonLabel,
-                  ),
+            onPressed: _navigateToLogin,
+            child: Text(
+              'Return to Login',
+              style: TextStyles.buttonLabel,
+            ),
           ),
         ]),
       ),

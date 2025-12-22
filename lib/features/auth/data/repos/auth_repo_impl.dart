@@ -45,6 +45,10 @@ class AuthRepoImpl extends AuthRepo {
 
       // await addUserData(user: userEntity);
 
+      // CRITICAL: Sign out immediately so the user is not automatically logged in
+      // Do not sign out here. We keep the user signed in to check verification status.
+      // await firebaseAuthService.signOut();
+
       return right(userEntity);
     } on CustomException catch (e) {
       await deleteUser(user);
@@ -219,7 +223,7 @@ class AuthRepoImpl extends AuthRepo {
       }
 
       final sanitized = _sanitizeEmail(email);
-      
+
       log('Attempting to send password reset email to: $sanitized');
 
       // Check the authentication provider for this email
@@ -228,9 +232,7 @@ class AuthRepoImpl extends AuthRepo {
       // Email is not associated with any account
       if (provider == null) {
         log('No account found for email: $sanitized');
-        // For security reasons, we don't reveal whether an email exists in the system
-        // We'll still return success to prevent email enumeration attacks
-        return right(null);
+        return left(ServerFailure('No account found with this email.'));
       }
 
       // Email is associated with a Google account
@@ -250,16 +252,14 @@ class AuthRepoImpl extends AuthRepo {
 
       // Any other provider (e.g., Facebook)
       log('Email $sanitized is associated with unsupported provider: $provider');
-      // For security reasons, we don't reveal whether an email exists in the system
-      // We'll still return success to prevent email enumeration attacks
-      return right(null);
+      return left(ServerFailure(
+          'This email is associated with $provider. Please sign in with that provider.'));
     } on FirebaseAuthException catch (e) {
       log('FirebaseAuthException while sending password reset email: ${e.code} - ${e.message}');
       // For security reasons, we don't reveal whether an email exists in the system
       // We'll still return success to prevent email enumeration attacks
       if (e.code == 'user-not-found') {
-        log('User not found for email, returning success for security');
-        return right(null);
+        return left(ServerFailure('No account found with this email.'));
       } else if (e.code == 'invalid-email') {
         return left(ServerFailure('Please enter a valid email address'));
       } else {

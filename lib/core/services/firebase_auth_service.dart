@@ -10,6 +10,10 @@ class FirebaseAuthService {
     await FirebaseAuth.instance.currentUser!.delete();
   }
 
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
   /// Returns the provider ID for the given email (e.g., 'password' or 'google.com')
   /// Returns null if no account exists with the given email
   Future<String?> getProviderForEmail(String email) async {
