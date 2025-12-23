@@ -19,7 +19,6 @@ class SplashViewBody extends StatefulWidget {
 }
 
 class _SplashViewBodyState extends State<SplashViewBody> {
-  static const routName = 'SplashView';
   double _opacity = 0.0;
 
   @override

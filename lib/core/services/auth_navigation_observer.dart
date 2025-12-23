@@ -45,6 +45,9 @@ class AuthNavigationObserver extends NavigatorObserver {
   }
 
   bool get isCurrentRoutePublic {
-    return currentRoute != null && publicRoutes.contains(currentRoute);
+    // If currentRoute is null, we assume we are at the very beginning of app launch
+    // (e.g., SplashView is being pushed but not yet recorded).
+    // This prevents the auth listener in main.dart from redirecting too early.
+    return currentRoute == null || publicRoutes.contains(currentRoute);
   }
 }
