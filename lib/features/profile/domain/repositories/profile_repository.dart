@@ -110,20 +110,17 @@ class FirebaseProfileRepository implements ProfileRepository {
     try {
       // Clear local state
       await _firebaseAuth.signOut();
-      
+
       // Clear any local storage or cache if needed
       // This would depend on your app's specific requirements
-      
+
       // Clear any other providers or streams
       // For example, if you have a user provider:
       // final userProvider = Provider.of<UserProvider>(context, listen: false);
       // userProvider.clearUser();
-      
     } catch (e) {
       log('Logout error: $e', name: 'FirebaseProfileRepository');
-      throw CustomException(
-        message: 'Failed to log out: ${e.toString()}'
-      );
+      throw CustomException(message: 'Failed to log out: ${e.toString()}');
     }
   }
 
@@ -151,6 +148,12 @@ class FirebaseProfileRepository implements ProfileRepository {
 
       // Delete user from Authentication
       await currentUser.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        throw RequiresRecentLoginException(
+            'This sensitive operation requires you to re-authenticate.');
+      }
+      throw Exception('Failed to delete account: ${e.message}');
     } catch (e) {
       throw Exception('Failed to delete account: ${e.toString()}');
     }

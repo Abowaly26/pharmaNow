@@ -6,12 +6,25 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
 
 class FirebaseAuthService {
+  static bool _isNormalLogout = false;
+
+  bool get isNormalLogout => _isNormalLogout;
+
+  void setNormalLogout(bool value) {
+    _isNormalLogout = value;
+  }
+
   Future deleteUser() async {
     await FirebaseAuth.instance.currentUser!.delete();
   }
 
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
+  }
+
+  Future<void> normalLogout() async {
+    _isNormalLogout = true;
+    await signOut();
   }
 
   /// Returns the provider ID for the given email (e.g., 'password' or 'google.com')

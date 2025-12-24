@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:pharma_now/features/auth/data/models/user_model.dart';
 import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 import 'package:pharma_now/features/profile/domain/repositories/profile_repository.dart';
+import 'package:pharma_now/core/services/firebase_auth_service.dart';
+import 'package:pharma_now/core/errors/exceptions.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
 
 enum ProfileStatus {
@@ -224,11 +226,49 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> reauthenticateAndDelete(String? password) async {
+    _isLoading = true;
+    _status = ProfileStatus.loading;
+    notifyListeners();
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('No user found');
+
+      AuthCredential? credential;
+      if (password != null) {
+        credential = EmailAuthProvider.credential(
+            email: user.email!, password: password);
+      } else {
+        // For Google re-auth, we need to trigger the sign-in flow again to get credentials
+        // This is complex because GoogleSignIn returns a GoogleSignInAccount, not a credential directly without plugins.
+        // Assuming we rely on the UI to just "Sign In" again or we use the GoogleAuthProvider credential if we had the token.
+        throw Exception(
+            'Google re-authentication not fully implemented in this flow. Please Log out and Log in again.');
+      }
+
+      if (credential != null) {
+        await user.reauthenticateWithCredential(credential);
+        await deleteAccount(); // Retry deletion
+      }
+    } catch (e) {
+      _errorMessage = 'Re-authentication failed: ${e.toString()}';
+      _status = ProfileStatus.error;
+      notifyListeners();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> logout() async {
     _status = ProfileStatus.loading;
     notifyListeners();
     try {
-      await _profileRepository.logoutUser();
+      // Use the service to set the flag before signing out
+      final authService = FirebaseAuthService();
+      await authService.normalLogout(); // This calls signOut internally
+
       await clearUserData();
       // Clear any other local state if needed
       // For example, if you have a favorites provider:
@@ -252,6 +292,10 @@ class ProfileProvider extends ChangeNotifier {
       await clearUserData();
       _status = ProfileStatus.success;
     } catch (e) {
+      // Propagate specific exceptions like RequiresRecentLoginException
+      if (e is RequiresRecentLoginException) {
+        rethrow;
+      }
       _errorMessage = 'Account deletion failed: ${e.toString()}';
       _status = ProfileStatus.error;
       notifyListeners();

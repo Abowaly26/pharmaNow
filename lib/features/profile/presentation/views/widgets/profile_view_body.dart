@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 
 import '../../../../../core/helper_functions/build_error_bar.dart';
+import '../../../../../core/errors/exceptions.dart';
 import 'profile_tab/notification_view.dart';
 
 // ArcPainter and SettingItem remain the same
@@ -277,27 +278,35 @@ class ProfileViewBody extends StatelessWidget {
                             return ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red),
-                              onPressed: provider.status ==
-                                      ProfileStatus.loading
-                                  ? null
-                                  : () async {
-                                      try {
-                                        await Provider.of<ProfileProvider>(
-                                                context,
-                                                listen: false)
-                                            .deleteAccount();
-                                        if (context.mounted) {
-                                          Navigator.of(context)
-                                              .pop(); // Close confirm dialog
-                                          // The auth listener in main.dart should handle redirection
-                                        }
-                                      } catch (e) {
-                                        if (context.mounted) {
-                                          Navigator.of(context).pop();
-                                          showCustomBar(context, e.toString());
-                                        }
-                                      }
-                                    },
+                              onPressed:
+                                  provider.status == ProfileStatus.loading
+                                      ? null
+                                      : () async {
+                                          try {
+                                            await Provider.of<ProfileProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .deleteAccount();
+                                            if (context.mounted) {
+                                              Navigator.of(context)
+                                                  .pop(); // Close confirm dialog
+                                              // The auth listener in main.dart should handle redirection
+                                            }
+                                          } catch (e) {
+                                            if (context.mounted) {
+                                              Navigator.of(context).pop();
+                                              if (e
+                                                  is RequiresRecentLoginException) {
+                                                // Show Re-auth Dialog
+                                                _showReAuthDialog(
+                                                    context, provider);
+                                              } else {
+                                                showCustomBar(
+                                                    context, e.toString());
+                                              }
+                                            }
+                                          }
+                                        },
                               child: provider.status == ProfileStatus.loading
                                   ? SizedBox(
                                       width: 20.w,
@@ -351,14 +360,7 @@ class ProfileViewBody extends StatelessWidget {
                                                       listen: false);
                                               await profileProvider.logout();
 
-                                              // Navigate to login screen
-                                              if (context.mounted) {
-                                                Navigator.of(context)
-                                                    .pushNamedAndRemoveUntil(
-                                                  'loginView',
-                                                  (route) => false,
-                                                );
-                                              }
+                                              // Navigation is handled by main.dart listener
                                             } catch (e) {
                                               if (context.mounted) {
                                                 showCustomBar(
@@ -405,6 +407,59 @@ class ProfileViewBody extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showReAuthDialog(BuildContext context, ProfileProvider provider) {
+    final TextEditingController passwordController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: ColorManager.primaryColor,
+        title: Text('Security Check', style: TextStyle(color: Colors.black)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Please enter your password to confirm account deletion.',
+              style: TextStyles.skip.copyWith(color: Colors.black),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: 'Password',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close dialog logic
+              try {
+                await provider.reauthenticateAndDelete(passwordController.text);
+                // Redirection happens in main.dart listener or logout logic usually,
+                // but deleteAccount calls clearing which is fine.
+              } catch (e) {
+                if (context.mounted) {
+                  showCustomBar(context, e.toString());
+                }
+              }
+            },
+            child: Text('Confirm', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }

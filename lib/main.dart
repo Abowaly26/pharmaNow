@@ -12,6 +12,7 @@ import 'package:pharma_now/features/favorites/di/favorites_injection.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 import 'package:pharma_now/firebase_options.dart';
+import 'package:pharma_now/core/services/firebase_auth_service.dart';
 import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart'; // Import SignInView for the route name
 import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
@@ -119,11 +120,21 @@ class _PharmaNowState extends State<PharmaNow> {
         if (!isPublic) {
           Future.delayed(const Duration(milliseconds: 500), () {
             if (navigatorKey.currentState != null) {
-              navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                SignInView.routeName,
-                (route) => false,
-                arguments: {'accountDeleted': true},
-              );
+              final authService = FirebaseAuthService();
+              if (authService.isNormalLogout) {
+                authService.setNormalLogout(false);
+                navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                  SignInView.routeName,
+                  (route) => false,
+                  arguments: {'accountDeleted': false},
+                );
+              } else {
+                navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                  SignInView.routeName,
+                  (route) => false,
+                  arguments: {'accountDeleted': true},
+                );
+              }
             }
           });
         }

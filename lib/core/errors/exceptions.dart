@@ -17,3 +17,8 @@ abstract class Failures {
 class ServerFailure extends Failures {
   ServerFailure(super.message);
 }
+
+class RequiresRecentLoginException implements Exception {
+  final String message;
+  RequiresRecentLoginException(this.message);
+}
