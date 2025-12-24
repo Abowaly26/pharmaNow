@@ -12,16 +12,19 @@ class VerificationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final fromSplash = args?['fromSplash'] ?? false;
+
     return Scaffold(
       backgroundColor: ColorManager.primaryColor,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(48.sp),
         child: PharmaAppBar(
           title: 'Verification',
-        
         ),
       ),
-      body: VerificationViewBody(),
+      body: VerificationViewBody(fromSplash: fromSplash),
     );
   }
 }

@@ -9,7 +9,6 @@ import 'package:pharma_now/features/home/presentation/views/main_view.dart';
 
 import '../../../../../core/services/firebase_auth_service.dart';
 import '../../../../on_boarding/presentation/views/onboarding_view.dart';
-import 'package:pharma_now/features/auth/presentation/views/verification_view_signup.dart';
 
 class SplashViewBody extends StatefulWidget {
   const SplashViewBody({super.key});
@@ -54,19 +53,21 @@ class _SplashViewBodyState extends State<SplashViewBody> {
   void excuteNavigation() {
     bool isOnBoardingViewSeen = prefs.getBool(kIsOnBoardingViewSeen);
 
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () async {
       debugPrint('Onboarding Seen: $isOnBoardingViewSeen');
       if (!mounted) return;
       if (isOnBoardingViewSeen) {
         var isLoggedIn = FirebaseAuthService().isLoggedIn();
         if (isLoggedIn) {
-          // Check verification status to prevent unverified users from accessing Home
+          // Check verification status
           final user = FirebaseAuth.instance.currentUser;
           if (user != null && user.emailVerified) {
             Navigator.pushReplacementNamed(context, MainView.routeName);
           } else {
-            // If logged in but not verified, go directly to verification screen
-            Navigator.pushReplacementNamed(context, VerificationView.routeName);
+            // If logged in but not verified, sign out and go to login
+            await FirebaseAuthService().signOut();
+            if (!mounted) return;
+            Navigator.pushReplacementNamed(context, SignInView.routeName);
           }
         } else {
           Navigator.pushReplacementNamed(context, SignInView.routeName);

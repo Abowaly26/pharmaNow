@@ -38,9 +38,9 @@ Map<MessageType, Map<String, dynamic>> _getMessageTypeStyles() {
       'icon': Icons.check_circle_outline,
     },
     MessageType.warning: {
-      'backgroundColor': const Color(0x1AF59E0B),
+      'backgroundColor': const Color(0xFFF59E0B),
       'borderColor': const Color(0xFFFCD34D).withOpacity(0.70),
-      'accentColor': const Color(0xFFF59E0B),
+      'accentColor': const Color.fromARGB(255, 255, 212, 137),
       'iconBackgroundColor': const Color(0xFFFCD34D).withOpacity(0.20),
       'icon': Icons.warning_amber_rounded,
     },

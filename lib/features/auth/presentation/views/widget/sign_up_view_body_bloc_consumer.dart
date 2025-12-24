@@ -19,6 +19,8 @@ class SignupViewBodyBlocConsumer extends StatelessWidget {
         if (state is SignupSuccess) {
           showSuccessBottomSheet(
             context,
+            isDismissible: false,
+            enableDrag: false,
             'Your account has been created. We sent a verification email. Please check your Inbox or Spam folder, then verify your account.',
             () {
               Navigator.pushReplacementNamed(

@@ -95,14 +95,18 @@ class _PharmaNowState extends State<PharmaNow> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         try {
+          debugPrint('UserCheckTimer: Reloading user...');
           await user.reload();
+          debugPrint('UserCheckTimer: User reloaded successfully');
         } on FirebaseAuthException catch (e) {
+          debugPrint('UserCheckTimer: FirebaseAuthException [${e.code}]');
           if (e.code == 'user-not-found' || e.code == 'user-disabled') {
+            debugPrint(
+                'UserCheckTimer: Security threat/Deletion detected, signing out');
             await FirebaseAuth.instance.signOut();
           }
         } catch (e) {
-          // Flatten any other errors to avoid crashing the app on network issues
-          debugPrint('Error reloading user: $e');
+          debugPrint('UserCheckTimer: Error reloading user: $e');
         }
       }
     });
@@ -111,14 +115,17 @@ class _PharmaNowState extends State<PharmaNow> {
   void _listenToAuthChanges() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {
-        // User is signed out or account deleted
-        // Check if we are on a protected route
-        if (!authNavigationObserver.isCurrentRoutePublic) {
-          // Navigate to Sign In and remove all previous routes
-          navigatorKey.currentState?.pushNamedAndRemoveUntil(
-            SignInView.routeName,
-            (route) => false,
-          );
+        bool isPublic = authNavigationObserver.isCurrentRoutePublic;
+        if (!isPublic) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (navigatorKey.currentState != null) {
+              navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                SignInView.routeName,
+                (route) => false,
+                arguments: {'accountDeleted': true},
+              );
+            }
+          });
         }
       }
     });

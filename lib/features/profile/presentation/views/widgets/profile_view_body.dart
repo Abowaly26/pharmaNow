@@ -12,6 +12,7 @@ import 'package:pharma_now/features/profile/presentation/views/widgets/profile_t
 import 'package:provider/provider.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 
+import '../../../../../core/helper_functions/build_error_bar.dart';
 import 'profile_tab/notification_view.dart';
 
 // ArcPainter and SettingItem remain the same
@@ -253,6 +254,70 @@ class ProfileViewBody extends StatelessWidget {
               ),
               SizedBox(height: 0.01 * height),
               SettingItem(
+                icon: Icons.delete_forever,
+                title: "Delete Account",
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: ColorManager.primaryColor,
+                      title: Text('Delete Account',
+                          style: TextStyle(color: Colors.red)),
+                      content: Text(
+                        'Are you sure you want to delete your account? This action cannot be undone.',
+                        style: TextStyles.skip.copyWith(color: Colors.black),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('Cancel'),
+                        ),
+                        Consumer<ProfileProvider>(
+                          builder: (context, provider, child) {
+                            return ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red),
+                              onPressed: provider.status ==
+                                      ProfileStatus.loading
+                                  ? null
+                                  : () async {
+                                      try {
+                                        await Provider.of<ProfileProvider>(
+                                                context,
+                                                listen: false)
+                                            .deleteAccount();
+                                        if (context.mounted) {
+                                          Navigator.of(context)
+                                              .pop(); // Close confirm dialog
+                                          // The auth listener in main.dart should handle redirection
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          Navigator.of(context).pop();
+                                          showCustomBar(context, e.toString());
+                                        }
+                                      }
+                                    },
+                              child: provider.status == ProfileStatus.loading
+                                  ? SizedBox(
+                                      width: 20.w,
+                                      height: 20.w,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text('Delete',
+                                      style: TextStyle(color: Colors.white)),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              SettingItem(
                 icon: Icons.logout,
                 title: "Log Out",
                 onTap: () {
@@ -269,58 +334,55 @@ class ProfileViewBody extends StatelessWidget {
                         ),
                       ),
                       actions: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.0.w),
-                          child: TextButton(
-                            onPressed: () async {
-                              try {
-                                // Show loading dialog
-                                showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
+                        Consumer<ProfileProvider>(
+                          builder: (context, provider, child) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20.0.w),
+                              child: TextButton(
+                                onPressed:
+                                    provider.status == ProfileStatus.loading
+                                        ? null
+                                        : () async {
+                                            try {
+                                              // Perform logout using the profile provider
+                                              final profileProvider =
+                                                  Provider.of<ProfileProvider>(
+                                                      context,
+                                                      listen: false);
+                                              await profileProvider.logout();
 
-                                // Perform logout using the profile provider
-                                final profileProvider =
-                                    Provider.of<ProfileProvider>(context,
-                                        listen: false);
-                                await profileProvider.logout();
-
-                                // Navigate to login screen
-                                if (context.mounted) {
-                                  Navigator.of(context)
-                                      .pop(); // Close loading dialog
-                                  Navigator.of(context).pushNamedAndRemoveUntil(
-                                    'loginView',
-                                    (route) => false,
-                                  );
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  Navigator.of(context)
-                                      .pop(); // Close loading dialog on error
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Logout failed: ${e.toString()}',
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  log('Logout error: $e',
-                                      name: 'ProfileViewBody');
-                                }
-                              }
-                            },
-                            child: Text('Logout',
-                                style: TextStyles.buttonLabel
-                                    .copyWith(color: ColorManager.redColorF5)),
-                          ),
+                                              // Navigate to login screen
+                                              if (context.mounted) {
+                                                Navigator.of(context)
+                                                    .pushNamedAndRemoveUntil(
+                                                  'loginView',
+                                                  (route) => false,
+                                                );
+                                              }
+                                            } catch (e) {
+                                              if (context.mounted) {
+                                                showCustomBar(
+                                                    context, e.toString());
+                                                log('Logout error: $e',
+                                                    name: 'ProfileViewBody');
+                                              }
+                                            }
+                                          },
+                                child: provider.status == ProfileStatus.loading
+                                    ? SizedBox(
+                                        width: 20.w,
+                                        height: 20.w,
+                                        child: CircularProgressIndicator(
+                                          color: ColorManager.redColorF5,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text('Logout',
+                                        style: TextStyles.buttonLabel.copyWith(
+                                            color: ColorManager.redColorF5)),
+                              ),
+                            );
+                          },
                         ),
                         Padding(
                           padding: EdgeInsets.only(right: 10.0.w),

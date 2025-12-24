@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
@@ -15,7 +16,8 @@ import '../sign_in_view.dart';
 import 'package:pharma_now/core/services/firebase_auth_service.dart';
 
 class VerificationViewBody extends StatefulWidget {
-  const VerificationViewBody({super.key});
+  const VerificationViewBody({super.key, this.fromSplash = false});
+  final bool fromSplash;
 
   @override
   State<VerificationViewBody> createState() => _VerificationViewBodyState();
@@ -54,6 +56,15 @@ class _VerificationViewBodyState extends State<VerificationViewBody> {
 
   Future<void> _resendVerificationEmail() async {
     if (_sending || _resendCooldownSeconds > 0) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      showCustomBar(
+          context, 'User not found. Please return to login and sign in again.',
+          type: MessageType.error);
+      return;
+    }
+
     setState(() => _sending = true);
     final repo = getIt<AuthRepo>();
     final result = await repo.sendEmailVerification();
@@ -103,7 +114,28 @@ class _VerificationViewBodyState extends State<VerificationViewBody> {
   void initState() {
     super.initState();
     _startResendCooldown();
-    // No auto-check loop because user is signed out.
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final args = ModalRoute.of(context)?.settings.arguments as Map?;
+      if (args != null) {
+        if (args['fromSplash'] == true) {
+          showCustomBar(
+            context,
+            'Your account is not verified yet. Please check your email for the verification link to proceed.',
+            type: MessageType.warning,
+          );
+        } else if (args['fromSignIn'] == true) {
+          final message =
+              args['message'] ?? 'Please verify your email address.';
+          showCustomBar(
+            context,
+            message,
+            type: MessageType.warning,
+          );
+        }
+      }
+    });
   }
 
   @override

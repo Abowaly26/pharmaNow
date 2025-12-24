@@ -225,6 +225,8 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    _status = ProfileStatus.loading;
+    notifyListeners();
     try {
       await _profileRepository.logoutUser();
       await clearUserData();
@@ -241,5 +243,28 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  // ... (remaining functions like deleteAccount, resetStatus)
+  Future<void> deleteAccount() async {
+    _isLoading = true;
+    _status = ProfileStatus.loading;
+    notifyListeners();
+    try {
+      await _profileRepository.deleteUserAccount();
+      await clearUserData();
+      _status = ProfileStatus.success;
+    } catch (e) {
+      _errorMessage = 'Account deletion failed: ${e.toString()}';
+      _status = ProfileStatus.error;
+      notifyListeners();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void resetStatus() {
+    _status = ProfileStatus.initial;
+    _errorMessage = '';
+    notifyListeners();
+  }
 }

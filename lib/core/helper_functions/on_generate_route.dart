@@ -26,22 +26,40 @@ import '../../features/search/presentation/views/search_view.dart';
 Route<dynamic> onGenerateRoute(RouteSettings setting) {
   switch (setting.name) {
     case SplashView.routeName:
-      return MaterialPageRoute(builder: (context) => const SplashView());
+      return MaterialPageRoute(
+        builder: (context) => const SplashView(),
+        settings: setting,
+      );
 
     case CheckoutView.routeName:
-      return MaterialPageRoute(builder: (context) => const CheckoutView());
+      return MaterialPageRoute(
+        builder: (context) => const CheckoutView(),
+        settings: setting,
+      );
 
     case OnboardingView.routeName:
-      return MaterialPageRoute(builder: (context) => const OnboardingView());
+      return MaterialPageRoute(
+        builder: (context) => const OnboardingView(),
+        settings: setting,
+      );
 
     case SignInView.routeName:
-      return MaterialPageRoute(builder: (context) => const SignInView());
+      return MaterialPageRoute(
+        builder: (context) => const SignInView(),
+        settings: setting,
+      );
 
     case SingnUpView.routeName:
-      return MaterialPageRoute(builder: (context) => const SingnUpView());
+      return MaterialPageRoute(
+        builder: (context) => const SingnUpView(),
+        settings: setting,
+      );
 
     case VerificationView.routeName:
-      return MaterialPageRoute(builder: (context) => const VerificationView());
+      return MaterialPageRoute(
+        builder: (context) => const VerificationView(),
+        settings: setting,
+      );
 
     case ResetPasswordView.routeName:
       final code = setting.arguments as String?;
@@ -49,44 +67,82 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
           builder: (context) => ResetPasswordView(oobCode: code));
 
     case MainView.routeName:
-      return MaterialPageRoute(builder: (context) => const MainView());
+      return MaterialPageRoute(
+        builder: (context) => const MainView(),
+        settings: setting,
+      );
 
     case FavoriteView.routeName:
-      return MaterialPageRoute(builder: (context) => const FavoriteView());
+      return MaterialPageRoute(
+        builder: (context) => const FavoriteView(),
+        settings: setting,
+      );
 
     case InfoMedicinesView.routeName:
-      return MaterialPageRoute(builder: (context) => const InfoMedicinesView());
+      return MaterialPageRoute(
+        builder: (context) => const InfoMedicinesView(),
+        settings: setting,
+      );
 
     case NotificationView.routeName:
-      return MaterialPageRoute(builder: (context) => const NotificationView());
+      return MaterialPageRoute(
+        builder: (context) => const NotificationView(),
+        settings: setting,
+      );
 
     case OffersView.routeName:
-      return MaterialPageRoute(builder: (context) => const OffersView());
+      return MaterialPageRoute(
+        builder: (context) => const OffersView(),
+        settings: setting,
+      );
 
     case SearchView.routeName:
-      return MaterialPageRoute(builder: (context) => const SearchView());
+      return MaterialPageRoute(
+        builder: (context) => const SearchView(),
+        settings: setting,
+      );
 
     case ProfileView.routeName:
-      return MaterialPageRoute(builder: (context) => const ProfileView());
+      return MaterialPageRoute(
+        builder: (context) => const ProfileView(),
+        settings: setting,
+      );
 
     case Notifications.routeName:
-      return MaterialPageRoute(builder: (context) => Notifications());
+      return MaterialPageRoute(
+        builder: (context) => Notifications(),
+        settings: setting,
+      );
 
     case EditProfile.routeName:
-      return MaterialPageRoute(builder: (context) => EditProfile());
+      return MaterialPageRoute(
+        builder: (context) => EditProfile(),
+        settings: setting,
+      );
 
     case ChangePasswordView.routeName:
-      return MaterialPageRoute(builder: (context) => ChangePasswordView());
+      return MaterialPageRoute(
+        builder: (context) => ChangePasswordView(),
+        settings: setting,
+      );
 
     case MedicineDetailsView.routeName:
-      return MaterialPageRoute(builder: (context) => MedicineDetailsView());
+      return MaterialPageRoute(
+        builder: (context) => MedicineDetailsView(),
+        settings: setting,
+      );
 
     case CartView.routeName:
-      return MaterialPageRoute(builder: (context) => CartView());
+      return MaterialPageRoute(
+        builder: (context) => CartView(),
+        settings: setting,
+      );
 
     case ForgetPasswordView.routeName:
       return MaterialPageRoute(
-          builder: (context) => const ForgetPasswordView());
+        builder: (context) => const ForgetPasswordView(),
+        settings: setting,
+      );
 
     default:
       return MaterialPageRoute(builder: (context) => const Scaffold());
