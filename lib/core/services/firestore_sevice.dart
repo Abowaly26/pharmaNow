@@ -58,6 +58,34 @@ class FireStoreSevice implements DatabaseService {
   }
 
   @override
+  Future<Map<String, dynamic>?> getUserDataByEmail(String email) async {
+    try {
+      final querySnapshot = await firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return null;
+      }
+
+      // Return the data with UID included
+      final data = querySnapshot.docs.first.data();
+      data['uId'] = querySnapshot.docs.first.id;
+      return data;
+    } catch (e) {
+      print('Error getting user data by email: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<void> deleteUserData(String uid) async {
+    await firestore.collection('users').doc(uid).delete();
+  }
+
+  @override
   Future<List<Map<String, dynamic>>> searchMedicines({
     required String path,
     required String query,

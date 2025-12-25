@@ -164,33 +164,63 @@ class AuthRepoImpl extends AuthRepo {
   Future<Either<Failures, UserEntity>> signinWithGoogle() async {
     User? user;
     try {
+      // Sign in with Google normally
       user = await firebaseAuthService.signInWithGoogle();
-      // Change from UserModel to UserEntity here
-      UserEntity userEntity = UserModel.fromFirebaseUser(user);
+      final email = user.email!;
+      final newUid = user.uid;
 
-      var isUserExist = await databaseService.checkIfDataExist(
-          path: BackendEndpoint.isUserExist, docuementId: user.uid);
+      log('✅ Signed in with Google: email=$email, uid=$newUid');
 
-      if (isUserExist) {
-        userEntity = await getUserData(uid: user.uid);
-        // Update userEntity with Google's displayName if different
-        if (user.displayName != null && user.displayName != userEntity.name) {
-          userEntity = UserModel(
-            name: user.displayName!,
-            email: userEntity.email,
-            uId: userEntity.uId,
-          );
-          await addUserData(user: userEntity); // Update Firestore
-        }
-      } else {
-        await addUserData(user: userEntity);
+      // Check if data exists for this UID
+      var dataExistsForCurrentUid = await databaseService.checkIfDataExist(
+          path: BackendEndpoint.isUserExist, docuementId: newUid);
+
+      if (dataExistsForCurrentUid) {
+        // User has signed in with Google before
+        log('📂 Found existing data for UID: $newUid');
+        final userEntity = await getUserData(uid: newUid);
+        await saveUserData(user: userEntity);
+        return right(userEntity);
       }
 
-      await saveUserData(user: userEntity); // Always update SharedPreferences
+      // No data for this UID, check if there's old data with same email
+      log('🔍 Searching for existing data with email: $email');
+      final oldUserData = await getUserDataByEmail(email);
+
+      if (oldUserData != null) {
+        // Found old data from password account
+        log('📦 Found old data for email $email, migrating to new UID');
+
+        // Create user entity with old data but new UID
+        final userEntity = UserEntity(
+          name: oldUserData.name,
+          email: email,
+          uId: newUid, // Use new Google UID
+        );
+
+        // Save to new UID
+        await addUserData(user: userEntity);
+        await saveUserData(user: userEntity);
+
+        // Optional: Delete old UID data
+        // Note: This will break password login
+        // Uncomment the line below if you want to remove old data
+        // await databaseService.deleteUserData(oldUserData.uId);
+
+        log('✅ Data migrated successfully to UID: $newUid');
+        return right(userEntity);
+      }
+
+      // No existing data at all - new user
+      log('🆕 New Google user, creating fresh data');
+      final userEntity = UserModel.fromFirebaseUser(user);
+      await addUserData(user: userEntity);
+      await saveUserData(user: userEntity);
+
       return right(userEntity);
     } catch (e) {
       await deleteUser(user);
-      log('Exception in AuthRepoImpl.singinWithGoogle: ${e.toString()}');
+      log('❌ Exception in signinWithGoogle: ${e.toString()}');
       return left(ServerFailure(
           'An error occurred on the server. Please try again later.'));
     }
@@ -233,6 +263,18 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   @override
+  Future<UserEntity?> getUserDataByEmail(String email) async {
+    try {
+      final userData = await databaseService.getUserDataByEmail(email);
+      if (userData == null) return null;
+
+      return UserModel.fromJson(userData);
+    } catch (e) {
+      log('Exception in getUserDataByEmail: $e');
+      return null;
+    }
+  }
+
   @override
   Future<Either<Failures, void>> sendPasswordResetEmail(String email) async {
     try {
