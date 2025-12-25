@@ -85,37 +85,29 @@ class ProfileProvider extends ChangeNotifier {
             bool isGoogleUser = firebaseUser.providerData
                 .any((userInfo) => userInfo.providerId == 'google.com');
 
-            if (isGoogleUser && firebaseUser.displayName != null) {
-              // For Google users, ALWAYS use Google's displayName
-              _currentUser = UserModel(
-                name: firebaseUser.displayName!,
-                email: firebaseUser.email ?? userDataFromFirestore.email,
-                uId: userDataFromFirestore.uId,
-              );
+            // Use Firestore name as the primary source of truth regardless of auth method
+            _currentUser = userDataFromFirestore;
 
-              // Update Firestore with Google name
-              if (userDataFromFirestore.name != firebaseUser.displayName) {
-                await _profileRepository.updateUserProfile(_currentUser!);
-                log('Updated Firestore with Google name: ${firebaseUser.displayName}',
+            // Sync Auth displayName with Firestore name to ensure consistency
+            if (firebaseUser.displayName != userDataFromFirestore.name) {
+              try {
+                await firebaseUser
+                    .updateDisplayName(userDataFromFirestore.name);
+                await firebaseUser.reload();
+                log('Synced Auth displayName with Firestore name: ${userDataFromFirestore.name}',
+                    name: 'ProfileProvider');
+              } catch (e) {
+                log('Failed to sync displayName: $e',
                     name: 'ProfileProvider');
               }
-            } else {
-              // For email users, use Firestore as source of truth
-              _currentUser = userDataFromFirestore;
+            }
 
-              // Sync Auth displayName with Firestore
-              if (firebaseUser.displayName != userDataFromFirestore.name) {
-                try {
-                  await firebaseUser
-                      .updateDisplayName(userDataFromFirestore.name);
-                  await firebaseUser.reload();
-                  log('Synced Auth displayName with Firestore name: ${userDataFromFirestore.name}',
-                      name: 'ProfileProvider');
-                } catch (e) {
-                  log('Failed to sync displayName: $e',
-                      name: 'ProfileProvider');
-                }
-              }
+            // If the user is a Google user but has a different name in Firestore,
+            // we still prioritize the Firestore name (the registered name)
+            if (isGoogleUser && firebaseUser.displayName != null &&
+                firebaseUser.displayName != userDataFromFirestore.name) {
+              log('Google display name (${firebaseUser.displayName}) differs from registered name (${userDataFromFirestore.name}). Using registered name.',
+                  name: 'ProfileProvider');
             }
           } else {
             // User does NOT exist in Firestore (New User or broken state)
