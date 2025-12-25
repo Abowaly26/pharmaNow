@@ -39,9 +39,7 @@ class HomeAppbar extends StatelessWidget {
         width: 24,
         height: 24,
       ),
-      callback: (BuildContext ctx) {
-        
-      },
+      callback: (BuildContext ctx) {},
     ),
   ];
 
@@ -92,13 +90,13 @@ class HomeAppbar extends StatelessWidget {
             builder: (context, provider, child) {
               final userName = provider.currentUser?.name ?? '';
               final displayName = userName.isEmpty
-                  ? 'Guest'
+                  ? ''
                   : userName.length > 10
                       ? '${userName.substring(0, 8)}...'
                       : userName;
 
               return Text(
-                'Hello $displayName 👋',
+                displayName.isEmpty ? 'Hello 👋' : 'Hello $displayName 👋',
                 style: TextStyles.description,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

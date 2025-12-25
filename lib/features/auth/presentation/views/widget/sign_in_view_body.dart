@@ -23,10 +23,21 @@ class SiginViewBody extends StatefulWidget {
 }
 
 class _SiginViewBodyState extends State<SiginViewBody> {
+  final FocusNode emailFocus = FocusNode();
+  final FocusNode passwordFocus = FocusNode();
+
   AutovalidateMode autovalidateMode = AutovalidateMode.disabled;
   late String email, password;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    emailFocus.dispose();
+    passwordFocus.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -37,6 +48,11 @@ class _SiginViewBodyState extends State<SiginViewBody> {
           autovalidateMode: autovalidateMode,
           child: Column(children: [
             CustomTextField(
+                focusNode: emailFocus,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (value) {
+                  FocusScope.of(context).requestFocus(passwordFocus);
+                },
                 onSaved: (p0) {
                   email = p0!;
                 },
@@ -49,6 +65,11 @@ class _SiginViewBodyState extends State<SiginViewBody> {
               height: 16.h,
             ),
             PasswordFiled(
+              focusNode: passwordFocus,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) {
+                FocusScope.of(context).unfocus();
+              },
               onSaved: (p0) {
                 password = p0!;
               },

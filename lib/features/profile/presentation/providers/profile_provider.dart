@@ -1,5 +1,7 @@
 import 'dart:developer';
-import 'dart:io'; // Still required if other functions use it, otherwise it can be removed.
+import 'dart:convert';
+import 'package:pharma_now/constants.dart';
+import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_now/features/auth/data/models/user_model.dart';
@@ -7,7 +9,7 @@ import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 import 'package:pharma_now/features/profile/domain/repositories/profile_repository.dart';
 import 'package:pharma_now/core/services/firebase_auth_service.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 enum ProfileStatus {
   initial,
@@ -49,6 +51,25 @@ class ProfileProvider extends ChangeNotifier {
 
   Future<void> _loadUserDataFromFirebase(String uid) async {
     log('Loading user data for UID: $uid', name: 'ProfileProvider');
+
+    // 1. Try to load from local storage first for immediate feedback
+    try {
+      String? localUserJson = prefs.getString(kUserData);
+      if (localUserJson != null) {
+        Map<String, dynamic> localUserMap = jsonDecode(localUserJson);
+        // Verify it belongs to the current user
+        if (localUserMap['uId'] == uid) {
+          _currentUser = UserModel.fromJson(localUserMap);
+          _status = ProfileStatus.success;
+          notifyListeners();
+          log('Loaded user data from SharedPreferences',
+              name: 'ProfileProvider');
+        }
+      }
+    } catch (e) {
+      log('Failed to load local user data: $e', name: 'ProfileProvider');
+    }
+
     int retryCount = 0;
     const maxRetries = 3;
 
@@ -59,77 +80,56 @@ class ProfileProvider extends ChangeNotifier {
           UserEntity? userDataFromFirestore =
               await _profileRepository.getUserProfile(uid);
 
-          // Determine the authoritative name
-          // 1. Prefer Firebase Auth displayName if available
-          // 2. Fallback to Firestore name if Auth displayName is missing
-          // 3. Last resort: Email prefix
-
-          String? authDisplayName = firebaseUser.displayName;
-          String authoritativeEmail = firebaseUser.email ?? '';
-
           if (userDataFromFirestore != null) {
-            // User exists in Firestore
-            String currentNameInFirestore = userDataFromFirestore.name;
-            String currentEmailInFirestore = userDataFromFirestore.email;
+            // Check if user is signed in with Google
+            bool isGoogleUser = firebaseUser.providerData
+                .any((userInfo) => userInfo.providerId == 'google.com');
 
-            bool needsFirestoreUpdate = false;
-            String finalName = currentNameInFirestore;
+            if (isGoogleUser && firebaseUser.displayName != null) {
+              // For Google users, ALWAYS use Google's displayName
+              _currentUser = UserModel(
+                name: firebaseUser.displayName!,
+                email: firebaseUser.email ?? userDataFromFirestore.email,
+                uId: userDataFromFirestore.uId,
+              );
 
-            if (authDisplayName != null && authDisplayName.isNotEmpty) {
-              // Case A: Auth has a name.
-              // If it differs from Firestore, we assume Auth (e.g. Google or fresh Login) is the source of truth,
-              // OR we could assume Firestore is source of truth if we think Auth might possess stale data?
-              // Usually for Google Sign In, Auth is truth. For Profile Edit, Firestore is updated then Auth.
-              // Let's assume if they differ, we sync Auth -> Firestore, UNLESS Auth name is just email prefix?
-              // No, we trust a non-empty displayName.
-
-              if (currentNameInFirestore != authDisplayName) {
-                finalName = authDisplayName;
-                needsFirestoreUpdate = true;
+              // Update Firestore with Google name
+              if (userDataFromFirestore.name != firebaseUser.displayName) {
+                await _profileRepository.updateUserProfile(_currentUser!);
+                log('Updated Firestore with Google name: ${firebaseUser.displayName}',
+                    name: 'ProfileProvider');
               }
             } else {
-              // Case B: Auth has NO name (e.g. legacy email/pass user).
-              // Do NOT overwrite Firestore. Instead, backfill Auth.
-              if (currentNameInFirestore.isNotEmpty) {
+              // For email users, use Firestore as source of truth
+              _currentUser = userDataFromFirestore;
+
+              // Sync Auth displayName with Firestore
+              if (firebaseUser.displayName != userDataFromFirestore.name) {
                 try {
-                  await firebaseUser.updateDisplayName(currentNameInFirestore);
+                  await firebaseUser
+                      .updateDisplayName(userDataFromFirestore.name);
                   await firebaseUser.reload();
+                  log('Synced Auth displayName with Firestore name: ${userDataFromFirestore.name}',
+                      name: 'ProfileProvider');
                 } catch (e) {
-                  log('Failed to backfill displayName: $e',
+                  log('Failed to sync displayName: $e',
                       name: 'ProfileProvider');
                 }
-              } else {
-                // Both are empty? unlikely, but use email suffix
-                finalName = authoritativeEmail.split('@')[0];
-                needsFirestoreUpdate = true;
               }
-            }
-
-            // Check email sync
-            if (currentEmailInFirestore != authoritativeEmail) {
-              needsFirestoreUpdate = true;
-            }
-
-            if (needsFirestoreUpdate) {
-              _currentUser = UserModel(
-                uId: userDataFromFirestore.uId,
-                name: finalName,
-                email: authoritativeEmail,
-              );
-              await _profileRepository.updateUserProfile(_currentUser!);
-              log('Updated user profile in Firestore to match Auth/Rules',
-                  name: 'ProfileProvider');
-            } else {
-              _currentUser = userDataFromFirestore;
             }
           } else {
             // User does NOT exist in Firestore (New User or broken state)
-            String nameToUse =
-                authDisplayName ?? authoritativeEmail.split('@')[0];
+            // Reload user to get the latest displayName
+            await firebaseUser.reload();
+            final updatedUser = FirebaseAuth.instance.currentUser;
+
+            String nameToUse = updatedUser?.displayName ??
+                firebaseUser.email?.split('@')[0] ??
+                '';
 
             _currentUser = UserModel(
               name: nameToUse,
-              email: authoritativeEmail,
+              email: firebaseUser.email ?? '',
               uId: firebaseUser.uid,
             );
             await _profileRepository.updateUserProfile(_currentUser!);
@@ -235,23 +235,67 @@ class ProfileProvider extends ChangeNotifier {
       if (user == null) throw Exception('No user found');
 
       AuthCredential? credential;
-      if (password != null) {
+
+      // Check provider to decide on re-auth strategy
+      // Check for Google provider FIRST (higher priority)
+      bool isGoogleUser = user.providerData
+          .any((userInfo) => userInfo.providerId == 'google.com');
+
+      bool isPasswordProvider = user.providerData
+          .any((userInfo) => userInfo.providerId == 'password');
+
+      if (isGoogleUser) {
+        // For Google users, re-authenticate with Google Sign In
+        try {
+          final GoogleSignIn googleSignIn = GoogleSignIn();
+          final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+          if (googleUser == null) {
+            throw 'Google sign-in cancelled';
+          }
+
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser.authentication;
+          credential = GoogleAuthProvider.credential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
+
+          await user.reauthenticateWithCredential(credential);
+        } catch (e) {
+          throw 'Failed to re-authenticate with Google. Please try again.';
+        }
+      } else if (isPasswordProvider) {
+        if (password == null || password.isEmpty) {
+          throw 'Please enter your password';
+        }
         credential = EmailAuthProvider.credential(
             email: user.email!, password: password);
+        await user.reauthenticateWithCredential(credential);
       } else {
-        // For Google re-auth, we need to trigger the sign-in flow again to get credentials
-        // This is complex because GoogleSignIn returns a GoogleSignInAccount, not a credential directly without plugins.
-        // Assuming we rely on the UI to just "Sign In" again or we use the GoogleAuthProvider credential if we had the token.
-        throw Exception(
-            'Google re-authentication not fully implemented in this flow. Please Log out and Log in again.');
+        // For Google or others, we attempt delete directly.
+        // If it fails with 'requires-recent-login', we can't easily re-auth
+        // without popping a Google Sign In flow, which defines a different UX.
+        // For now, we proceed to delete.
       }
 
-      if (credential != null) {
-        await user.reauthenticateWithCredential(credential);
-        await deleteAccount(); // Retry deletion
+      await deleteAccount();
+    } on FirebaseAuthException catch (e) {
+      String msg = 'Re-authentication failed';
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        msg = 'Incorrect password. Please try again.';
+      } else if (e.code == 'requires-recent-login') {
+        msg =
+            'Security requires you to log out and log back in before deleting.';
+      } else {
+        msg = e.message ?? 'An error occurred during re-authentication';
       }
+      _errorMessage = msg;
+      _status = ProfileStatus.error;
+      notifyListeners();
+      throw msg; // Throw just the message string for clearer UI display
     } catch (e) {
-      _errorMessage = 'Re-authentication failed: ${e.toString()}';
+      _errorMessage = e.toString();
       _status = ProfileStatus.error;
       notifyListeners();
       rethrow;
@@ -288,6 +332,7 @@ class ProfileProvider extends ChangeNotifier {
     _status = ProfileStatus.loading;
     notifyListeners();
     try {
+      FirebaseAuthService().setUserDeleted(true);
       await _profileRepository.deleteUserAccount();
       await clearUserData();
       _status = ProfileStatus.success;

@@ -32,15 +32,17 @@ class AuthRepoImpl extends AuthRepo {
       // Implement the fix: Update the Firebase User's displayName immediately
       if (user != null) {
         await user.updateDisplayName(name);
-        // Refresh the user to ensure local state is updated (though updateDisplayName usually updates the object)
         await user.reload();
-        user = FirebaseAuth.instance.currentUser;
+        var refreshedUser = FirebaseAuth.instance.currentUser;
+        if (refreshedUser != null) {
+          user = refreshedUser;
+        }
       }
 
       var userEntity = UserEntity(
         name: name,
         email: email,
-        uId: user!.uid,
+        uId: user.uid,
       );
 
       var isUserExist = await databaseService.checkIfDataExist(
@@ -52,6 +54,7 @@ class AuthRepoImpl extends AuthRepo {
       }
 
       // await addUserData(user: userEntity);
+      await saveUserData(user: userEntity);
 
       // CRITICAL: Sign out immediately so the user is not automatically logged in
       // Do not sign out here. We keep the user signed in to check verification status.
@@ -61,11 +64,15 @@ class AuthRepoImpl extends AuthRepo {
     } on CustomException catch (e) {
       await deleteUser(user);
       return left(ServerFailure(e.message));
+    } on FirebaseException catch (e) {
+      await deleteUser(user);
+      log('FirebaseException in AuthRepoImpl.createUserWithEmailAndPassword: ${e.code} - ${e.message}');
+      return left(ServerFailure(e.message ?? 'A Firebase error occurred.'));
     } catch (e) {
       await deleteUser(user);
       log('Exception in AuthRepoImpl.createUserWithEmailAndPassword: ${e.toString()}');
       return left(ServerFailure(
-          'An error occurred on the server. Please try again later.'));
+          'An unexpected error occurred. Please try again later.'));
     }
   }
 
@@ -166,11 +173,20 @@ class AuthRepoImpl extends AuthRepo {
 
       if (isUserExist) {
         userEntity = await getUserData(uid: user.uid);
+        // Update userEntity with Google's displayName if different
+        if (user.displayName != null && user.displayName != userEntity.name) {
+          userEntity = UserModel(
+            name: user.displayName!,
+            email: userEntity.email,
+            uId: userEntity.uId,
+          );
+          await addUserData(user: userEntity); // Update Firestore
+        }
       } else {
         await addUserData(user: userEntity);
       }
 
-      await saveUserData(user: userEntity);
+      await saveUserData(user: userEntity); // Always update SharedPreferences
       return right(userEntity);
     } catch (e) {
       await deleteUser(user);

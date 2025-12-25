@@ -14,21 +14,6 @@ class SignupCubit extends Cubit<SignupState> {
       String email, String password, String name) async {
     emit(SignupLoading());
 
-    final existsResult = await authRepo.checkEmailExists(email);
-    final exists = existsResult.fold(
-      (failure) {
-        emit(SignupFailure(message: failure.message));
-        return null;
-      },
-      (value) => value,
-    );
-    if (exists == null) return;
-    if (exists) {
-      emit(SignupFailure(
-          message: 'An account already exists with this email address.'));
-      return;
-    }
-
     final result =
         await authRepo.createUserWithEmailAndPassword(email, password, name);
     result.fold(
@@ -43,4 +28,5 @@ class SignupCubit extends Cubit<SignupState> {
       },
     );
   }
-}
+  }
+

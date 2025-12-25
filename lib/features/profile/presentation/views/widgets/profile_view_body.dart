@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 
 import 'package:pharma_now/core/utils/color_manger.dart';
@@ -14,6 +15,7 @@ import 'package:pharma_now/features/profile/presentation/providers/profile_provi
 
 import '../../../../../core/helper_functions/build_error_bar.dart';
 import '../../../../../core/errors/exceptions.dart';
+import '../../../../../core/widgets/password_field.dart';
 import 'profile_tab/notification_view.dart';
 
 // ArcPainter and SettingItem remain the same
@@ -258,72 +260,8 @@ class ProfileViewBody extends StatelessWidget {
                 icon: Icons.delete_forever,
                 title: "Delete Account",
                 onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: ColorManager.primaryColor,
-                      title: Text('Delete Account',
-                          style: TextStyle(color: Colors.red)),
-                      content: Text(
-                        'Are you sure you want to delete your account? This action cannot be undone.',
-                        style: TextStyles.skip.copyWith(color: Colors.black),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text('Cancel'),
-                        ),
-                        Consumer<ProfileProvider>(
-                          builder: (context, provider, child) {
-                            return ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red),
-                              onPressed:
-                                  provider.status == ProfileStatus.loading
-                                      ? null
-                                      : () async {
-                                          try {
-                                            await Provider.of<ProfileProvider>(
-                                                    context,
-                                                    listen: false)
-                                                .deleteAccount();
-                                            if (context.mounted) {
-                                              Navigator.of(context)
-                                                  .pop(); // Close confirm dialog
-                                              // The auth listener in main.dart should handle redirection
-                                            }
-                                          } catch (e) {
-                                            if (context.mounted) {
-                                              Navigator.of(context).pop();
-                                              if (e
-                                                  is RequiresRecentLoginException) {
-                                                // Show Re-auth Dialog
-                                                _showReAuthDialog(
-                                                    context, provider);
-                                              } else {
-                                                showCustomBar(
-                                                    context, e.toString());
-                                              }
-                                            }
-                                          }
-                                        },
-                              child: provider.status == ProfileStatus.loading
-                                  ? SizedBox(
-                                      width: 20.w,
-                                      height: 20.w,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text('Delete',
-                                      style: TextStyle(color: Colors.white)),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  );
+                  _showReAuthDialog(context,
+                      Provider.of<ProfileProvider>(context, listen: false));
                 },
               ),
               SettingItem(
@@ -331,6 +269,7 @@ class ProfileViewBody extends StatelessWidget {
                 title: "Log Out",
                 onTap: () {
                   showDialog(
+                    barrierDismissible: false,
                     context: context,
                     builder: (context) => AlertDialog(
                       backgroundColor: ColorManager.primaryColor,
@@ -343,60 +282,71 @@ class ProfileViewBody extends StatelessWidget {
                         ),
                       ),
                       actions: [
-                        Consumer<ProfileProvider>(
-                          builder: (context, provider, child) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20.0.w),
-                              child: TextButton(
-                                onPressed:
-                                    provider.status == ProfileStatus.loading
-                                        ? null
-                                        : () async {
-                                            try {
-                                              // Perform logout using the profile provider
-                                              final profileProvider =
-                                                  Provider.of<ProfileProvider>(
-                                                      context,
-                                                      listen: false);
-                                              await profileProvider.logout();
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 10.0.w),
+                              child: Consumer<ProfileProvider>(
+                                builder: (context, provider, child) {
+                                  return SizedBox(
+                                    width: 100.w,
+                                    child: TextButton(
+                                      onPressed: provider.status ==
+                                              ProfileStatus.loading
+                                          ? null
+                                          : () async {
+                                              try {
+                                                // Perform logout using the profile provider
+                                                final profileProvider = Provider
+                                                    .of<ProfileProvider>(
+                                                        context,
+                                                        listen: false);
+                                                await profileProvider.logout();
 
-                                              // Navigation is handled by main.dart listener
-                                            } catch (e) {
-                                              if (context.mounted) {
-                                                showCustomBar(
-                                                    context, e.toString());
-                                                log('Logout error: $e',
-                                                    name: 'ProfileViewBody');
+                                                // Navigation is handled by main.dart listener
+                                              } catch (e) {
+                                                if (context.mounted) {
+                                                  showCustomBar(
+                                                      context, e.toString());
+                                                  log('Logout error: $e',
+                                                      name: 'ProfileViewBody');
+                                                }
                                               }
-                                            }
-                                          },
-                                child: provider.status == ProfileStatus.loading
-                                    ? SizedBox(
-                                        width: 20.w,
-                                        height: 20.w,
-                                        child: CircularProgressIndicator(
-                                          color: ColorManager.redColorF5,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text('Logout',
-                                        style: TextStyles.buttonLabel.copyWith(
-                                            color: ColorManager.redColorF5)),
+                                            },
+                                      child: provider.status ==
+                                              ProfileStatus.loading
+                                          ? SizedBox(
+                                              width: 20.w,
+                                              height: 20.w,
+                                              child: CircularProgressIndicator(
+                                                color: ColorManager.redColorF5,
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : Text('Logout',
+                                              style: TextStyles.buttonLabel
+                                                  .copyWith(
+                                                      color: ColorManager
+                                                          .redColorF5)),
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 10.0.w),
-                          child: ElevatedButton(
-                            style: ButtonStyles.smallButton,
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Cancel',
-                                style: TextStyles.buttonLabel.copyWith(
-                                    color: ColorManager.primaryColor)),
-                          ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(right: 10.0.w),
+                              child: ElevatedButton(
+                                style: ButtonStyles.smallButton,
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('Cancel',
+                                    style: TextStyles.buttonLabel.copyWith(
+                                        color: ColorManager.primaryColor)),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -413,54 +363,87 @@ class ProfileViewBody extends StatelessWidget {
 
   void _showReAuthDialog(BuildContext context, ProfileProvider provider) {
     final TextEditingController passwordController = TextEditingController();
+    final user = FirebaseAuth.instance.currentUser;
+
+    // Check for Google provider first (higher priority)
+    bool isGoogleUser = user?.providerData
+            .any((userInfo) => userInfo.providerId == 'google.com') ??
+        false;
+
+    // Only show password field if NOT Google user AND has password provider
+    bool shouldShowPassword = !isGoogleUser &&
+        (user?.providerData
+                .any((userInfo) => userInfo.providerId == 'password') ??
+            false);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: ColorManager.primaryColor,
-        title: Text('Security Check', style: TextStyle(color: Colors.black)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Please enter your password to confirm account deletion.',
-              style: TextStyles.skip.copyWith(color: Colors.black),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: 'Password',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(),
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          backgroundColor: ColorManager.primaryColor,
+          title: Text('Delete Account', style: TextStyle(color: Colors.red)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Are you sure you want to delete your account? This action cannot be undone.',
+                style: TextStyles.skip.copyWith(color: Colors.black),
               ),
+              if (shouldShowPassword) ...[
+                SizedBox(height: 10),
+                PasswordFiled(
+                  controller: passwordController,
+                  lable: 'Password',
+                  icon: Assets.passwordIcon,
+                  hint: 'Password',
+                  textInputType: TextInputType.visiblePassword,
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            Consumer<ProfileProvider>(
+              builder: (context, provider, child) {
+                if (provider.status == ProfileStatus.loading) {
+                  return CircularProgressIndicator(color: Colors.red);
+                }
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: () async {
+                    if (shouldShowPassword && passwordController.text.isEmpty) {
+                      showCustomBar(context, 'Please enter your password');
+                      return;
+                    }
+
+                    try {
+                      // Pass null for Google users, password text for email users
+                      final passwordToSend =
+                          shouldShowPassword ? passwordController.text : null;
+
+                      await provider.reauthenticateAndDelete(passwordToSend);
+                      if (context.mounted) {
+                        Navigator.of(context).pop(); // Close only on success
+                      }
+                    } catch (e) {
+                      // Error is already handled in provider to throw a user-friendly message
+                      // kept dialog open
+                      if (context.mounted) {
+                        showCustomBar(context, e.toString());
+                      }
+                    }
+                  },
+                  child: Text('Confirm', style: TextStyle(color: Colors.white)),
+                );
+              },
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () async {
-              Navigator.of(context).pop(); // Close dialog logic
-              try {
-                await provider.reauthenticateAndDelete(passwordController.text);
-                // Redirection happens in main.dart listener or logout logic usually,
-                // but deleteAccount calls clearing which is fine.
-              } catch (e) {
-                if (context.mounted) {
-                  showCustomBar(context, e.toString());
-                }
-              }
-            },
-            child: Text('Confirm', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+        );
+      }),
     );
   }
 }

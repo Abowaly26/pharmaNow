@@ -14,6 +14,14 @@ class FirebaseAuthService {
     _isNormalLogout = value;
   }
 
+  static bool _isUserDeleted = false;
+
+  bool get isUserDeleted => _isUserDeleted;
+
+  void setUserDeleted(bool value) {
+    _isUserDeleted = value;
+  }
+
   Future deleteUser() async {
     await FirebaseAuth.instance.currentUser!.delete();
   }

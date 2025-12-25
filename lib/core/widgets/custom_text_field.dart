@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
@@ -16,7 +17,7 @@ class CustomTextField extends StatelessWidget {
       this.validator,
       this.controller,
       this.obscureText = false,
-      this.suffixIcon});
+      this.suffixIcon, this.inputFormatters, this.focusNode, this.textInputAction, this.onFieldSubmitted  });
   final String lable;
   final String icon;
   final String hint;
@@ -26,6 +27,11 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController? controller;
   final bool obscureText;
   final Widget? suffixIcon;
+   final List<TextInputFormatter>? inputFormatters;
+   final FocusNode? focusNode;
+   final TextInputAction? textInputAction;
+   final Function(String)? onFieldSubmitted;
+
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +50,10 @@ class CustomTextField extends StatelessWidget {
           height: 8.h,
         ),
         TextFormField(
+          focusNode: focusNode,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
+          inputFormatters: inputFormatters,
           obscureText: obscureText,
           controller: controller,
           keyboardType: textInputType,

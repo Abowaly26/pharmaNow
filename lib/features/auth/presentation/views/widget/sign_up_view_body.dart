@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
@@ -27,9 +28,17 @@ class _SingnUpBodyState extends State<SingnUpBody> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final FocusNode nameFocus = FocusNode();
+  final FocusNode emailFocus = FocusNode();
+  final FocusNode passwordFocus = FocusNode();
+  final FocusNode confirmPasswordFocus = FocusNode();
 
   @override
   void dispose() {
+    nameFocus.dispose();
+    emailFocus.dispose();
+    passwordFocus.dispose();
+    confirmPasswordFocus.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
@@ -45,6 +54,16 @@ class _SingnUpBodyState extends State<SingnUpBody> {
           autovalidateMode: autovalidateMode,
           child: Column(children: [
             CustomTextField(
+              focusNode: nameFocus,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (value) {
+                FocusScope.of(context).requestFocus(emailFocus);
+              },
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'[a-zA-Z\u0600-\u06FF ]'),
+                ),
+              ],
               onSaved: (p0) {
                 userName = p0!;
               },
@@ -58,6 +77,11 @@ class _SingnUpBodyState extends State<SingnUpBody> {
               height: 16,
             ),
             CustomTextField(
+                focusNode: emailFocus,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (value) {
+                  FocusScope.of(context).requestFocus(passwordFocus);
+                },
                 textInputType: TextInputType.emailAddress,
                 onSaved: (p0) {
                   email = p0!;
@@ -70,6 +94,11 @@ class _SingnUpBodyState extends State<SingnUpBody> {
               height: 16.h,
             ),
             PasswordFiled(
+              focusNode: passwordFocus,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (value) {
+                FocusScope.of(context).requestFocus(confirmPasswordFocus);
+              },
               onSaved: (p0) {
                 password = p0!;
               },
@@ -84,6 +113,11 @@ class _SingnUpBodyState extends State<SingnUpBody> {
               height: 16.h,
             ),
             PasswordFiled(
+              focusNode: confirmPasswordFocus,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) {
+                FocusScope.of(context).unfocus();
+              },
               onSaved: (p0) {
                 password = p0!;
               },

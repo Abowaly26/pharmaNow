@@ -128,11 +128,18 @@ class _PharmaNowState extends State<PharmaNow> {
                   (route) => false,
                   arguments: {'accountDeleted': false},
                 );
+              } else if (authService.isUserDeleted) {
+                authService.setUserDeleted(false);
+                navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                  SignInView.routeName,
+                  (route) => false,
+                  arguments: {'accountDeleted': true, 'reason': 'user'},
+                );
               } else {
                 navigatorKey.currentState?.pushNamedAndRemoveUntil(
                   SignInView.routeName,
                   (route) => false,
-                  arguments: {'accountDeleted': true},
+                  arguments: {'accountDeleted': true, 'reason': 'admin'},
                 );
               }
             }

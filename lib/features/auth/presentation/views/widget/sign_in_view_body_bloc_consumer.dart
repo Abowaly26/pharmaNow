@@ -28,13 +28,22 @@ class _SigninViewBodyBlocConsumerState
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final accountDeleted = args?['accountDeleted'] ?? false;
+    final reason = args?['reason'] as String?;
 
     if (accountDeleted && !_hasShownAccountDeletedBar) {
       _hasShownAccountDeletedBar = true;
+      String message;
+      if (reason == 'user') {
+        message = 'Your account has been deleted successfully.';
+      } else {
+        message =
+            'Your account has been disabled by the administrator. Please contact support.';
+      }
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showCustomBar(
           context,
-          'Your account has been deleted or disabled. Please contact support or sign in with a different account.',
+          message,
           type: MessageType.warning,
         );
       });

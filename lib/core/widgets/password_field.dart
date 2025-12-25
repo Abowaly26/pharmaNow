@@ -13,6 +13,9 @@ class PasswordFiled extends StatefulWidget {
     required this.textInputType,
     this.validator,
     this.controller,
+    this.focusNode,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
   final String lable;
   final String icon;
@@ -21,6 +24,9 @@ class PasswordFiled extends StatefulWidget {
   final void Function(String?)? onSaved;
   final String? Function(String?)? validator;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final Function(String)? onFieldSubmitted;
 
   @override
   State<PasswordFiled> createState() => _PasswordFiledState();
@@ -31,6 +37,9 @@ class _PasswordFiledState extends State<PasswordFiled> {
   @override
   Widget build(BuildContext context) {
     return CustomTextField(
+        focusNode: widget.focusNode,
+        textInputAction: widget.textInputAction,
+        onFieldSubmitted: widget.onFieldSubmitted,
         obscureText: obscureText,
         textInputType: widget.textInputType,
         onSaved: widget.onSaved,
