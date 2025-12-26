@@ -93,17 +93,12 @@ class SearchSuggestionsList extends StatelessWidget {
         highlightFontWeight: FontWeight.w500,
         caseSensitive: false,
       ),
-      subtitle: SearchHighlightText(
-        text: medicine.pharmacyName,
-        query: query,
-        defaultStyle: TextStyle(
+      subtitle: Text(
+        medicine.pharmacyName,
+        style: TextStyle(
           fontSize: 12.sp,
           color: ColorManager.greyColor,
         ),
-        highlightColor: ColorManager.secondaryColor,
-        highlightBackgroundColor: ColorManager.secondaryColor.withOpacity(0.12),
-        highlightFontWeight: FontWeight.w500,
-        caseSensitive: false,
       ),
       trailing: Icon(
         Icons.arrow_forward_ios,

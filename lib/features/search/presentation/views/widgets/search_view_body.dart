@@ -389,18 +389,12 @@ class SearchMedicinesListViewItem extends StatelessWidget {
               ),
             ),
             Container(
-              child: SearchHighlightText(
-                text: medicineEntity.pharmacyName,
-                query: searchQuery ?? '',
-                defaultStyle: TextStyles.listView_product_name.copyWith(
+              child: Text(
+                medicineEntity.pharmacyName,
+                style: TextStyles.listView_product_name.copyWith(
                   fontSize: 10.sp,
                   color: ColorManager.textInputColor,
                 ),
-                highlightColor: ColorManager.secondaryColor,
-                highlightBackgroundColor:
-                    ColorManager.secondaryColor.withOpacity(0.12),
-                highlightFontWeight: FontWeight.w500,
-                caseSensitive: false,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
