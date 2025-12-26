@@ -39,7 +39,6 @@ class PharmaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Function()? onPressed;
 
   @override
-  @override
   Widget build(BuildContext context) {
     return AppBar(
       elevation: 0,

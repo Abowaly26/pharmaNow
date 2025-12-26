@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pharma_now/features/medical_assistant/chat_bot.dart';
 
 import 'package:provider/provider.dart';
 
@@ -39,7 +40,13 @@ class HomeAppbar extends StatelessWidget {
         width: 24,
         height: 24,
       ),
-      callback: (BuildContext ctx) {},
+      callback: (BuildContext ctx) {
+        Navigator.of(ctx).push(
+          MaterialPageRoute(
+            builder: (context) => ChatPage(),
+          ),
+        );
+      },
     ),
   ];
 

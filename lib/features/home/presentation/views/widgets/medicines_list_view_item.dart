@@ -44,6 +44,8 @@ class MedicineListViewItem extends StatelessWidget {
       'price': medicineEntity.price,
       'imageUrl': medicineEntity.subabaseORImageUrl,
       'pharmacyName': medicineEntity.pharmacyName,
+      'pharmacyId': medicineEntity.pharmacyId,
+      'pharmcyAddress': medicineEntity.pharmcyAddress,
       'discountRating': medicineEntity.discountRating,
       'isNewProduct': medicineEntity.isNewProduct,
       'description': medicineEntity.description,

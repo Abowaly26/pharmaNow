@@ -47,6 +47,8 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
       'price': widget.medicineEntity.price,
       'imageUrl': widget.medicineEntity.subabaseORImageUrl,
       'pharmacyName': widget.medicineEntity.pharmacyName,
+      'pharmacyId': widget.medicineEntity.pharmacyId,
+      'pharmcyAddress': widget.medicineEntity.pharmcyAddress,
       'discountRating': widget.medicineEntity.discountRating,
       'isNewProduct': widget.medicineEntity.isNewProduct,
       'description': widget.medicineEntity.description,

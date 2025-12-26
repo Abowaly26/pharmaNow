@@ -22,6 +22,7 @@ import '../../features/profile/presentation/views/widgets/profile_tab/edit_profi
 import '../../features/profile/presentation/views/widgets/profile_tab/notification_view.dart';
 import '../../features/profile/presentation/views/widgets/profile_tab/change_password_view.dart';
 import '../../features/search/presentation/views/search_view.dart';
+import '../../features/medical_assistant/chat_bot.dart';
 
 Route<dynamic> onGenerateRoute(RouteSettings setting) {
   switch (setting.name) {
@@ -141,6 +142,12 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case ForgetPasswordView.routeName:
       return MaterialPageRoute(
         builder: (context) => const ForgetPasswordView(),
+        settings: setting,
+      );
+
+    case ChatPage.routeName:
+      return MaterialPageRoute(
+        builder: (context) => const ChatPage(),
         settings: setting,
       );
 

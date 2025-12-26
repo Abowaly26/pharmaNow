@@ -42,6 +42,8 @@ class InfoMedicinesListViewItem extends StatelessWidget {
       'price': medicineEntity.price,
       'imageUrl': medicineEntity.subabaseORImageUrl,
       'pharmacyName': medicineEntity.pharmacyName,
+      'pharmacyId': medicineEntity.pharmacyId,
+      'pharmcyAddress': medicineEntity.pharmcyAddress,
       'discountRating': medicineEntity.discountRating,
       'isNewProduct': medicineEntity.isNewProduct,
       'description': medicineEntity.description,
@@ -188,26 +190,27 @@ class InfoMedicinesListViewItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            medicineEntity.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyles.listView_product_name,
-                          ),
-                        ),
-                        SizedBox(width: 16.w),
-                        _buildQuantityStatus(),
-                      ],
+                    child: Flexible(
+                      child: Text(
+                        medicineEntity.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyles.listView_product_name,
+                      ),
                     ),
                   ),
+                  SizedBox(width: 12.w),
                   // Favorite button - uses the shared FavoriteButton component to add/remove medicine from favorites
-                  FavoriteButton(
-                    itemId: medicineEntity.code,
-                    itemData: _convertEntityToModel(),
-                    size: 24,
+                  Row(
+                    children: [
+                      _buildQuantityStatus(),
+                      SizedBox(width: 8.w),
+                      FavoriteButton(
+                        itemId: medicineEntity.code,
+                        itemData: _convertEntityToModel(),
+                        size: 24,
+                      ),
+                    ],
                   ),
                 ],
               ),
