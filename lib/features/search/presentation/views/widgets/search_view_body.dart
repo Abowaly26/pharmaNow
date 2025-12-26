@@ -8,6 +8,7 @@ import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/searchtextfield.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import '../../../../../core/widgets/search_highlight_text.dart';
 import '../../../../home/presentation/views/medicine_details_view.dart';
 import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
 import '../../cubit/cubit/search_cubit.dart';
@@ -99,6 +100,7 @@ class SearchViewBody extends StatelessWidget {
                       child: SearchMedicinesListViewItem(
                         index: index,
                         medicineEntity: medicine,
+                        searchQuery: state.searchQuery,
                         onTap: () {
                           // Navigate to medicine details view
                           Navigator.of(context).push(
@@ -178,12 +180,14 @@ class SearchViewBody extends StatelessWidget {
 class SearchMedicinesListViewItem extends StatelessWidget {
   final int index;
   final MedicineEntity medicineEntity;
+  final String? searchQuery; // Add search query parameter for highlighting
   final VoidCallback? onTap;
 
   const SearchMedicinesListViewItem({
     super.key,
     required this.index,
     required this.medicineEntity,
+    this.searchQuery,
     this.onTap,
   });
 
@@ -355,11 +359,19 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                     child: Row(
                       children: [
                         Flexible(
-                          child: Text(
-                            medicineEntity.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyles.listView_product_name,
+                          child: Container(
+                            child: SearchHighlightText(
+                              text: medicineEntity.name,
+                              query: searchQuery ?? '',
+                              defaultStyle: TextStyles.listView_product_name,
+                              highlightColor: ColorManager.secondaryColor,
+                              highlightBackgroundColor:
+                                  ColorManager.secondaryColor.withOpacity(0.12),
+                              highlightFontWeight: FontWeight.w500,
+                              caseSensitive: false,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
                         SizedBox(width: 16.w),
@@ -376,13 +388,21 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                 ],
               ),
             ),
-            Text(
-              medicineEntity.pharmacyName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyles.listView_product_name.copyWith(
-                fontSize: 10.sp,
-                color: ColorManager.textInputColor,
+            Container(
+              child: SearchHighlightText(
+                text: medicineEntity.pharmacyName,
+                query: searchQuery ?? '',
+                defaultStyle: TextStyles.listView_product_name.copyWith(
+                  fontSize: 10.sp,
+                  color: ColorManager.textInputColor,
+                ),
+                highlightColor: ColorManager.secondaryColor,
+                highlightBackgroundColor:
+                    ColorManager.secondaryColor.withOpacity(0.12),
+                highlightFontWeight: FontWeight.w500,
+                caseSensitive: false,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             SizedBox(height: 4.h),

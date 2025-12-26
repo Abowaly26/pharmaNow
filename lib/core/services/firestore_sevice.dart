@@ -108,14 +108,9 @@ class FireStoreSevice implements DatabaseService {
       for (var doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final String name = (data['name'] ?? '').toString().toLowerCase();
-        final String description =
-            (data['description'] ?? '').toString().toLowerCase();
-        final String code = (data['code'] ?? '').toString().toLowerCase();
 
-        // Check if any of the fields contain our search query
-        if (name.contains(searchQuery) ||
-            description.contains(searchQuery) ||
-            code.contains(searchQuery)) {
+        // Check if name contains our search query
+        if (name.contains(searchQuery)) {
           // Add document ID to the data for reference
           final Map<String, dynamic> result = {...data};
           result['id'] = doc.id;
