@@ -11,7 +11,7 @@ import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
-import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
+import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 
 class OffersListViewItem extends StatelessWidget {
   final int index;
@@ -142,8 +142,6 @@ class OffersListViewItem extends StatelessWidget {
                   )
                 : Container(),
           ),
-          // زر المفضلة - يستخدم مكون FavoriteButton المشترك لإضافة/إزالة العرض من المفضلة
-          // Favorite icon - uses the shared FavoriteButton component to add/remove offer from favorites
           Positioned(
             top: 8.h,
             right: 8.w,
@@ -185,7 +183,7 @@ class OffersListViewItem extends StatelessWidget {
             SizedBox(height: 8.h),
             Row(
               children: [
-                Flexible(
+                Expanded(
                   child: Text(
                     medicineEntity.name,
                     maxLines: 1,
@@ -193,8 +191,11 @@ class OffersListViewItem extends StatelessWidget {
                     style: TextStyles.listView_product_name,
                   ),
                 ),
-                SizedBox(width: 16.w),
-                _buildQuantityStatus(),
+                SizedBox(width: 8.w),
+                Padding(
+                  padding: EdgeInsets.only(right: 4.w),
+                  child: _buildQuantityStatus(),
+                ),
               ],
             ),
             Text(

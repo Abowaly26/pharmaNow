@@ -11,7 +11,7 @@ import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
-import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
+import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 
 class MedicineListViewItem extends StatelessWidget {
   final int index;
@@ -197,7 +197,7 @@ class MedicineListViewItem extends StatelessWidget {
             SizedBox(height: 8.h),
             Row(
               children: [
-                Flexible(
+                Expanded(
                   child: Text(
                     medicineEntity.name,
                     maxLines: 1,
@@ -205,8 +205,11 @@ class MedicineListViewItem extends StatelessWidget {
                     style: TextStyles.listView_product_name,
                   ),
                 ),
-                SizedBox(width: 16.w),
-                _buildQuantityStatus(),
+                SizedBox(width: 6.w),
+                Padding(
+                  padding: EdgeInsets.only(right: 4.w),
+                  child: _buildQuantityStatus(),
+                ),
               ],
             ),
             Text(

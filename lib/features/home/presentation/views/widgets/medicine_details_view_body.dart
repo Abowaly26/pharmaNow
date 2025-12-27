@@ -6,7 +6,7 @@ import 'package:pharma_now/core/utils/app_images.dart';
 import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
-import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
+import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:cached_network_image/cached_network_image.dart';

@@ -10,7 +10,7 @@ import '../../../../../core/widgets/searchtextfield.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../../core/widgets/search_highlight_text.dart';
 import '../../../../home/presentation/views/medicine_details_view.dart';
-import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
+import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 import '../../cubit/cubit/search_cubit.dart';
 import '../../cubit/cubit/search_state.dart';
 import '../../../../../core/enitites/medicine_entity.dart';

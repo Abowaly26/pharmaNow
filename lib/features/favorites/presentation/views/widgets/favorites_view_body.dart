@@ -82,6 +82,7 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
               },
             ),
 
+            SizedBox(height: 8.h),
             // Favorites content
             Expanded(
               child: Consumer<FavoritesProvider>(

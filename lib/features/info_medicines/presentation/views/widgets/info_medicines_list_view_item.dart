@@ -9,7 +9,7 @@ import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
-import '../../../../../features/favorites/presentation/widgets/favorite_button.dart';
+import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 
 class InfoMedicinesListViewItem extends StatelessWidget {
   final int index;
