@@ -17,6 +17,7 @@ class OrderEntity extends Equatable {
   final String orderStatus;
   final DateTime createdAt;
   final String? userId;
+  final String? paymentProofUrl;
 
   OrderEntity({
     this.orderId,
@@ -29,6 +30,7 @@ class OrderEntity extends Equatable {
     this.orderStatus = 'pending',
     DateTime? createdAt,
     this.userId,
+    this.paymentProofUrl,
   }) : createdAt = createdAt ?? DateTime.now();
 
   @override
@@ -43,6 +45,7 @@ class OrderEntity extends Equatable {
         orderStatus,
         createdAt,
         userId,
+        paymentProofUrl,
       ];
 
   // Convert to JSON for Firestore
@@ -63,6 +66,9 @@ class OrderEntity extends Equatable {
     String? orderStatus,
     DateTime? createdAt,
     String? userId,
+    String? paymentProofUrl,
+    String? promoCode,
+    double? discountAmount,
   }) {
     return OrderEntity(
       orderId: orderId ?? this.orderId,
@@ -76,6 +82,7 @@ class OrderEntity extends Equatable {
       orderStatus: orderStatus ?? this.orderStatus,
       createdAt: createdAt ?? this.createdAt,
       userId: userId ?? this.userId,
+      paymentProofUrl: paymentProofUrl ?? this.paymentProofUrl,
     );
   }
 }

@@ -15,7 +15,6 @@ class OrderService {
   // Check if user is logged in
   bool get isUserLoggedIn => currentUserId != null;
 
-  /// Create an order from cart items and save to Firebase
   Future<String> createOrderFromCart({
     required List<CartItemEntity> cartItems,
     required bool payWithCash,
@@ -23,6 +22,7 @@ class OrderService {
     required double subtotal,
     required double deliveryFee,
     required double totalAmount,
+    String? paymentProofUrl,
   }) async {
     if (!isUserLoggedIn) {
       throw Exception('You must be logged in to create an order');
@@ -38,6 +38,7 @@ class OrderService {
         deliveryFee: deliveryFee,
         totalAmount: totalAmount,
         userId: currentUserId,
+        paymentProofUrl: paymentProofUrl,
       );
 
       // Convert order to JSON

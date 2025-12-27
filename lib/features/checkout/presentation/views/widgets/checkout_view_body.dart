@@ -1,8 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:pharma_now/core/services/get_it_service.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:pharma_now/core/utils/color_manger.dart';
+import 'package:pharma_now/core/utils/text_styles.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
+import 'package:pharma_now/core/widgets/bottom_pop_up.dart';
 import 'package:pharma_now/features/checkout/data/services/order_service.dart';
 import 'package:pharma_now/features/checkout/domain/entites/shipingadressentity.dart';
 import 'package:pharma_now/features/checkout/presentation/views/widgets/checkout_steps.dart';
@@ -10,6 +14,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
+import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 
 class CheckoutViewBody extends StatefulWidget {
   const CheckoutViewBody({super.key});
@@ -35,6 +41,14 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   int selectedPayment = -1;
   int currentPage = 0;
 
+  // Wallet phone number and Payment Proof
+  String walletPhone = '';
+  final walletPhoneController = TextEditingController();
+  String? paymentProofUrl;
+  String? selectedImagePath; // To show preview
+  bool isUploadingImage = false;
+  File? paymentProofFile;
+
   // Dynamic shipping options
   final List<String> shippingTitles = [
     'Express Delivery',
@@ -48,6 +62,34 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   final List<IconData> shippingIcons = [
     Icons.local_shipping,
     Icons.local_shipping_outlined,
+  ];
+
+  // Payment options - showing our wallet numbers
+  final List<Map<String, dynamic>> paymentOptions = [
+    {
+      'title': 'Cash on Delivery',
+      'subtitle': 'Pay when you receive your order',
+      'icon': Icons.money,
+      'showWalletNumber': false,
+    },
+    {
+      'title': 'Vodafone Cash',
+      'subtitle': 'Transfer to: 01012345678',
+      'icon': Icons.phone_android,
+      'showWalletNumber': true,
+      'walletNumber': '01012345678',
+      'requiresInput': true,
+      'hint': 'Enter your Vodafone Cash number',
+    },
+    {
+      'title': 'InstaPay',
+      'subtitle': 'Transfer to: 01098765432',
+      'icon': Icons.account_balance_wallet,
+      'showWalletNumber': true,
+      'walletNumber': '01098765432',
+      'requiresInput': true,
+      'hint': 'Enter your InstaPay account number/phone',
+    },
   ];
 
   // Text Controllers for address fields
@@ -67,13 +109,21 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       vsync: this,
     );
 
-    // Initialize text controllers
-    fullNameController = TextEditingController();
-    emailController = TextEditingController();
+    // Initialize text controllers with user data if available
+    final user = context.read<ProfileProvider>().currentUser;
+    fullNameController = TextEditingController(text: user?.name ?? '');
+    emailController = TextEditingController(text: user?.email ?? '');
     addressController = TextEditingController();
     cityController = TextEditingController();
     apartmentController = TextEditingController();
     phoneController = TextEditingController();
+
+    // Sync initial values with state variables
+    fullName = fullNameController.text;
+    email = emailController.text;
+
+    // Initialize variables
+    paymentProofFile = null;
 
     pageController.addListener(() {
       setState(() {
@@ -94,8 +144,21 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     cityController.dispose();
     apartmentController.dispose();
     phoneController.dispose();
+    walletPhoneController.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _pickPaymentProof() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        paymentProofFile = File(pickedFile.path);
+        selectedImagePath = pickedFile.path;
+      });
+    }
   }
 
   @override
@@ -107,99 +170,89 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         double delivery =
             selectedShipping >= 0 ? shippingPrices[selectedShipping] : 0;
         double total = subtotal + delivery;
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                ColorManager.primaryColor,
-                ColorManager.primaryColor.withOpacity(0.95),
-              ],
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
             ),
-          ),
-          child: Column(
-            children: [
-              // Header with progress
-              Container(
-                padding: EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: CheckoutSteps(
-                  currentPage: currentPage,
-                  pageController: pageController,
-                ),
-              ),
-              // Main content
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Header with progress
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 20,
-                        offset: Offset(0, 4),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: PageView.builder(
-                      controller: pageController,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: 3,
-                      itemBuilder: (context, index) {
-                        return AnimatedContainer(
-                          duration: Duration(milliseconds: 300),
-                          padding: EdgeInsets.all(24),
-                          child: _buildPageContent(
-                              index, subtotal, delivery, total),
-                        );
-                      },
+                  child: CheckoutSteps(
+                    currentPage: currentPage,
+                    pageController: pageController,
+                  ),
+                ),
+                // Main content
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 15,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16.r),
+                      child: PageView.builder(
+                        controller: pageController,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: 3,
+                        itemBuilder: (context, index) {
+                          return _buildPageContent(
+                              index, subtotal, delivery, total);
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
-              // Bottom section with button
-              Container(
-                padding: EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: SafeArea(
-                  child: SingleChildScrollView(
+                // Bottom section with button
+                Container(
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (currentPage == 2)
                           _buildPaymentSummary(subtotal, delivery, total),
-                        SizedBox(height: 16),
+                        if (currentPage == 2) SizedBox(height: 12.h),
                         _buildActionButton(),
                       ],
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -221,185 +274,222 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   }
 
   Widget _buildShippingPage() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Choose Delivery Method',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+    return Padding(
+      padding: EdgeInsets.all(20.w),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Choose Delivery Method',
+              style: TextStyles.bold24Black,
             ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Select how you\'d like to receive your order',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
+            SizedBox(height: 8.h),
+            Text(
+              'Select how you\'d like to receive your order',
+              style: TextStyles.settingItemSubTitle,
             ),
-          ),
-          SizedBox(height: 32),
-          ...List.generate(
-              shippingTitles.length,
-              (i) => Column(
-                    children: [
-                      _buildModernShippingOption(
-                        shippingTitles[i],
-                        shippingSubtitles[i],
-                        shippingPrices[i].toStringAsFixed(0),
-                        shippingIcons[i],
-                        i,
-                      ),
-                      if (i != shippingTitles.length - 1) SizedBox(height: 16),
-                    ],
-                  )),
-        ],
+            SizedBox(height: 24.h),
+            ...List.generate(
+                shippingTitles.length,
+                (i) => Column(
+                      children: [
+                        _buildModernShippingOption(
+                          shippingTitles[i],
+                          shippingSubtitles[i],
+                          shippingPrices[i].toStringAsFixed(0),
+                          shippingIcons[i],
+                          i,
+                        ),
+                        if (i != shippingTitles.length - 1)
+                          SizedBox(height: 12.h),
+                      ],
+                    )),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAddressPage() {
-    return Form(
-      key: addressFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Delivery Address',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+    return Padding(
+      padding: EdgeInsets.all(20.w),
+      child: Form(
+        key: addressFormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Delivery Address',
+              style: TextStyles.bold24Black,
             ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Where should we deliver your order?',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
+            SizedBox(height: 8.h),
+            Text(
+              'Where should we deliver your order?',
+              style: TextStyles.settingItemSubTitle,
             ),
-          ),
-          SizedBox(height: 24),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildModernTextField(
-                    'Full Name',
-                    Icons.person_outline,
-                    TextInputType.text,
-                    fullNameController,
-                    (v) {
-                      fullName = v;
-                      setState(() {});
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  _buildModernTextField(
-                    'Email Address',
-                    Icons.email_outlined,
-                    TextInputType.emailAddress,
-                    emailController,
-                    (v) {
-                      email = v;
-                      setState(() {});
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  _buildModernTextField(
-                    'Street Address',
-                    Icons.location_on_outlined,
-                    TextInputType.text,
-                    addressController,
-                    (v) {
-                      address = v;
-                      setState(() {});
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildModernTextField(
-                          'City',
-                          Icons.location_city_outlined,
-                          TextInputType.text,
-                          cityController,
-                          (v) {
-                            city = v;
-                            setState(() {});
-                          },
+            SizedBox(height: 20.h),
+            Expanded(
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Column(
+                  children: [
+                    _buildModernTextField(
+                      'Full Name',
+                      Icons.person_outline,
+                      TextInputType.name,
+                      fullNameController,
+                      (v) => fullName = v,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your full name';
+                        }
+                        if (value.length < 3) {
+                          return 'Name is too short';
+                        }
+                        return null;
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z\s\u0600-\u06FF]')),
+                      ],
+                    ),
+                    SizedBox(height: 14.h),
+                    _buildModernTextField(
+                      'Email Address',
+                      Icons.email_outlined,
+                      TextInputType.emailAddress,
+                      emailController,
+                      (v) => email = v,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        final emailRegex =
+                            RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                        if (!emailRegex.hasMatch(value)) {
+                          return 'Please enter a valid email address';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 14.h),
+                    _buildModernTextField(
+                      'Street Address',
+                      Icons.location_on_outlined,
+                      TextInputType.streetAddress,
+                      addressController,
+                      (v) => address = v,
+                      textInputAction: TextInputAction.next,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Address is required' : null,
+                    ),
+                    SizedBox(height: 14.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildModernTextField(
+                            'City',
+                            Icons.location_city_outlined,
+                            TextInputType.text,
+                            cityController,
+                            (v) => city = v,
+                            textInputAction: TextInputAction.next,
+                            validator: (v) => v == null || v.isEmpty
+                                ? 'City is required'
+                                : null,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: _buildModernTextField(
-                          'Apartment',
-                          Icons.home_outlined,
-                          TextInputType.text,
-                          apartmentController,
-                          (v) {
-                            apartment = v;
-                            setState(() {});
-                          },
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: _buildModernTextField(
+                            'Apartment',
+                            Icons.home_outlined,
+                            TextInputType.text,
+                            apartmentController,
+                            (v) => apartment = v,
+                            textInputAction: TextInputAction.next,
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  _buildModernTextField(
-                    'Phone Number',
-                    Icons.phone_outlined,
-                    TextInputType.phone,
-                    phoneController,
-                    (v) {
-                      phone = v;
-                      setState(() {});
-                    },
-                  ),
-                ],
+                      ],
+                    ),
+                    SizedBox(height: 14.h),
+                    _buildModernTextField(
+                      'Phone Number',
+                      Icons.phone_outlined,
+                      TextInputType.phone,
+                      phoneController,
+                      (v) => phone = v,
+                      textInputAction: TextInputAction.done,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your phone number';
+                        }
+                        if (value.length != 11) {
+                          return 'Phone number must be 11 digits';
+                        }
+                        if (!value.startsWith('01')) {
+                          return 'Invalid Egyptian phone number';
+                        }
+                        return null;
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(11),
+                      ],
+                    ),
+                    SizedBox(height: 20.h),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildPaymentPage() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Payment Method',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+    return Padding(
+      padding: EdgeInsets.all(20.w),
+      child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Payment Method',
+              style: TextStyles.bold24Black,
             ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Choose your preferred payment method',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
+            SizedBox(height: 8.h),
+            Text(
+              'Choose your preferred payment method',
+              style: TextStyles.settingItemSubTitle,
             ),
-          ),
-          SizedBox(height: 32),
-          _buildModernPaymentOption(
-              'Apple Pay', 'assets/images/Apple pay.svg', 0),
-          SizedBox(height: 16),
-          _buildModernPaymentOption(
-              'MasterCard', 'assets/images/MasterCard.svg', 1),
-          SizedBox(height: 16),
-          _buildModernPaymentOption('PayPal', 'assets/images/paypal.svg', 2),
-        ],
+            SizedBox(height: 24.h),
+            ...List.generate(
+              paymentOptions.length,
+              (i) => Column(
+                children: [
+                  _buildModernPaymentOption(
+                    paymentOptions[i]['title'],
+                    paymentOptions[i]['icon'],
+                    i,
+                    requiresInput: paymentOptions[i]['requiresInput'] ?? false,
+                    hint: paymentOptions[i]['hint'],
+                  ),
+                  if (i != paymentOptions.length - 1) SizedBox(height: 12.h),
+                ],
+              ),
+            ),
+            SizedBox(height: 24.h),
+          ],
+        ),
       ),
     );
   }
@@ -421,12 +511,12 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: isSelected
-              ? ColorManager.secondaryColor.withOpacity(0.1)
+              ? ColorManager.secondaryColor.withOpacity(0.08)
               : Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected ? ColorManager.secondaryColor : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
@@ -435,48 +525,52 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
                 color:
                     isSelected ? ColorManager.secondaryColor : Colors.grey[400],
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10.r),
               ),
               child: Icon(
                 icon,
                 color: Colors.white,
-                size: 24,
+                size: 22.sp,
               ),
             ),
-            SizedBox(width: 16),
+            SizedBox(width: 14.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
-                    ),
+                    style: TextStyles.settingItemTitle,
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyles.settingItemSubTitle,
                   ),
                 ],
               ),
             ),
-            Text(
-              '$price EGP',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: ColorManager.secondaryColor,
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? ColorManager.secondaryColor.withOpacity(0.15)
+                    : Colors.grey[200],
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                '$price EGP',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected
+                      ? ColorManager.secondaryColor
+                      : Colors.grey[700],
+                ),
               ),
             ),
           ],
@@ -490,26 +584,60 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     IconData icon,
     TextInputType inputType,
     TextEditingController controller,
-    Function(String) onChanged,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+    Function(String) onChanged, {
+    String? Function(String?)? validator,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputAction textInputAction = TextInputAction.next,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: inputType,
+      onChanged: onChanged,
+      validator: validator,
+      inputFormatters: inputFormatters,
+      textInputAction: textInputAction,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      style: TextStyle(
+        fontSize: 14.sp,
+        color: ColorManager.blackColor,
+        fontWeight: FontWeight.w500,
       ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: inputType,
-        onChanged: onChanged,
-        validator: (v) =>
-            v == null || v.isEmpty ? 'This field is required' : null,
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon: Icon(icon, color: Colors.grey[600]),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          hintStyle: TextStyle(color: Colors.grey[600]),
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, color: Colors.grey[600], size: 20.sp),
+        filled: true,
+        fillColor: Colors.grey[50],
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        hintStyle: TextStyle(
+          color: Colors.grey[400],
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w400,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.grey[200]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.grey[200]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide:
+              BorderSide(color: ColorManager.secondaryColor, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.red.shade300, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.red, width: 1.5),
+        ),
+        errorStyle: TextStyle(
+          color: Colors.red,
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w400,
         ),
       ),
     );
@@ -517,182 +645,437 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
 
   Widget _buildModernPaymentOption(
     String title,
-    String assetPath,
-    int index,
-  ) {
+    IconData icon,
+    int index, {
+    bool requiresInput = false,
+    String? hint,
+  }) {
     bool isSelected = selectedPayment == index;
 
     return GestureDetector(
       onTap: () {
         setState(() {
           selectedPayment = index;
+          if (!requiresInput) {
+            walletPhone = '';
+            walletPhoneController.clear();
+          }
         });
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: isSelected
-              ? ColorManager.secondaryColor.withOpacity(0.1)
+              ? ColorManager.secondaryColor.withOpacity(0.08)
               : Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected ? ColorManager.secondaryColor : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? ColorManager.secondaryColor.withOpacity(0.2)
-                    : Colors.grey[400],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SvgPicture.asset(
-                assetPath,
-                width: 24,
-                height: 24,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(10.w),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? ColorManager.secondaryColor
+                        : Colors.grey[400],
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 22.sp,
+                  ),
                 ),
-              ),
+                SizedBox(width: 14.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyles.settingItemTitle,
+                      ),
+                      Text(
+                        paymentOptions[index]['subtitle'] ?? '',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  Container(
+                    padding: EdgeInsets.all(4.w),
+                    decoration: BoxDecoration(
+                      color: ColorManager.secondaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 14.sp,
+                    ),
+                  ),
+              ],
             ),
-            if (isSelected)
+            // Phone number input for wallet options
+            if (isSelected && requiresInput) ...[
+              SizedBox(height: 12.h),
               Container(
-                padding: EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: ColorManager.secondaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.check,
                   color: Colors.white,
-                  size: 16,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: TextFormField(
+                  controller: walletPhoneController,
+                  keyboardType: TextInputType.phone,
+                  onChanged: (v) {
+                    walletPhone = v;
+                  },
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: ColorManager.blackColor,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: hint ?? 'Enter phone number',
+                    prefixIcon:
+                        Icon(Icons.phone, color: Colors.grey[600], size: 18.sp),
+                    border: InputBorder.none,
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                    hintStyle:
+                        TextStyle(color: Colors.grey[500], fontSize: 13.sp),
+                    errorStyle: TextStyle(fontSize: 10.sp),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Required';
+                    }
+                    if (value.length != 11) {
+                      return 'Invalid';
+                    }
+                    return null;
+                  },
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(11),
+                  ],
                 ),
               ),
+              if (paymentOptions[index]['showWalletNumber'] == true) ...[
+                // Vodafone Cash or InstaPay Professional Card
+                SizedBox(height: 16.h),
+                Container(
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: ColorManager.secondaryColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Transfer to Account:',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                paymentOptions[index]['walletNumber'],
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: ColorManager.blackColor,
+                                  letterSpacing: 1.2,
+                                  fontFamily: 'Courier', // Professional look
+                                ),
+                              ),
+                            ],
+                          ),
+                          Material(
+                            color: ColorManager.secondaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8.r),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8.r),
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(
+                                    text: paymentOptions[index]
+                                        ['walletNumber']));
+                                showCustomBar(
+                                  context,
+                                  'Number copied to clipboard!',
+                                  type: MessageType.success,
+                                );
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(8.w),
+                                child: Icon(
+                                  Icons.copy_rounded,
+                                  color: ColorManager.secondaryColor,
+                                  size: 20.sp,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 10.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline,
+                                color: ColorManager.secondaryColor,
+                                size: 16.sp),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                'Step 1: Transfer total amount to this number.\nStep 2: Take a screenshot and upload it below.',
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  color: Colors.grey[700],
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Text(
+                  'Upload Payment Proof',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: ColorManager.blackColor,
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                GestureDetector(
+                  onTap: _pickPaymentProof,
+                  child: Container(
+                    width: double.infinity,
+                    height: 140.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: Colors.grey[300]!,
+                        width: 1.5,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    child: selectedImagePath != null
+                        ? Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  child: Image.file(
+                                    File(selectedImagePath!),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 8.h,
+                                right: 8.w,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.black54,
+                                  radius: 14.r,
+                                  child: Icon(Icons.edit,
+                                      color: Colors.white, size: 14.sp),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(12.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.cloud_upload_outlined,
+                                  color: ColorManager.secondaryColor,
+                                  size: 32.sp,
+                                ),
+                              ),
+                              SizedBox(height: 12.h),
+                              Text(
+                                'Click to upload screenshot',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                'JPEG, PNG files are allowed',
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  color: Colors.grey[400],
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ],
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildOrderSummary(double subtotal, double delivery, double total) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Order Summary',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-            ),
-          ),
-          SizedBox(height: 16),
-          _buildSummaryRow('Subtotal', '${subtotal.toStringAsFixed(2)} EGP'),
-          SizedBox(height: 8),
-          _buildSummaryRow('Delivery', '${delivery.toStringAsFixed(2)} EGP'),
-          SizedBox(height: 16),
-          Divider(),
-          SizedBox(height: 16),
-          _buildSummaryRow('Total', '${total.toStringAsFixed(2)} EGP',
-              isTotal: true),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPaymentSummary(double subtotal, double delivery, double total) {
     return Container(
-      padding: EdgeInsets.all(6),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Payment Summary',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-            ),
+          _buildSmallSummaryRow(
+              'Subtotal', '${subtotal.toStringAsFixed(0)} EGP'),
+          SizedBox(height: 6.h),
+          _buildSmallSummaryRow(
+              'Delivery', '${delivery.toStringAsFixed(0)} EGP'),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.h),
+            child: Divider(height: 1, color: Colors.grey[300]),
           ),
-          SizedBox(height: 4),
           _buildSmallSummaryRow(
-              'Subtotal', '${subtotal.toStringAsFixed(2)} EGP'),
-          _buildSmallSummaryRow(
-              'Delivery', '${delivery.toStringAsFixed(2)} EGP'),
-          Divider(),
-          _buildSmallSummaryRow('Total', '${total.toStringAsFixed(2)} EGP',
-              isTotal: true),
+            'Total',
+            '${total.toStringAsFixed(0)} EGP',
+            isTotal: true,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildSmallSummaryRow(String label, String value,
-      {bool isTotal = false}) {
+      {bool isTotal = false, Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: isTotal ? 16 : 14,
+            fontSize: isTotal ? 15.sp : 13.sp,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: Colors.grey[800],
+            color: Colors.grey[700],
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: isTotal ? 16 : 14,
+            fontSize: isTotal ? 15.sp : 13.sp,
             fontWeight: FontWeight.bold,
-            color: isTotal ? ColorManager.secondaryColor : Colors.grey[800],
+            color: valueColor ??
+                (isTotal ? ColorManager.secondaryColor : Colors.grey[700]),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
+  Widget _buildOrderSummary(double subtotal, double delivery, double total) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Order Summary',
+            style: TextStyles.settingItemTitle,
+          ),
+          SizedBox(height: 12.h),
+          _buildSummaryRow('Subtotal', '${subtotal.toStringAsFixed(0)} EGP'),
+          SizedBox(height: 6.h),
+          _buildSummaryRow('Delivery', '${delivery.toStringAsFixed(0)} EGP'),
+          SizedBox(height: 12.h),
+          Divider(height: 1, color: Colors.grey[300]),
+          SizedBox(height: 12.h),
+          _buildSummaryRow(
+            'Total',
+            '${total.toStringAsFixed(0)} EGP',
+            isTotal: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value,
+      {bool isTotal = false, Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: isTotal ? 18 : 16,
+            fontSize: isTotal ? 16.sp : 14.sp,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: Colors.grey[800],
+            color: Colors.grey[700],
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: isTotal ? 18 : 16,
+            fontSize: isTotal ? 16.sp : 14.sp,
             fontWeight: FontWeight.bold,
-            color: isTotal ? ColorManager.secondaryColor : Colors.grey[800],
+            color: valueColor ??
+                (isTotal ? ColorManager.secondaryColor : Colors.grey[700]),
           ),
         ),
       ],
@@ -700,9 +1083,9 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   }
 
   Widget _buildActionButton() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 52.h,
       child: ElevatedButton(
         onPressed: _handleNextStep,
         style: ElevatedButton.styleFrom(
@@ -710,7 +1093,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
         ),
         child: Row(
@@ -719,13 +1102,13 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
             Text(
               _getButtonText(),
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
             if (currentPage < 2) ...[
-              SizedBox(width: 8),
-              Icon(Icons.arrow_forward, size: 20),
+              SizedBox(width: 8.w),
+              Icon(Icons.arrow_forward, size: 18.sp),
             ],
           ],
         ),
@@ -754,22 +1137,43 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     double delivery =
         selectedShipping >= 0 ? shippingPrices[selectedShipping] : 0;
     double total = subtotal + delivery;
+
     if (currentPage == 0) {
       if (selectedShipping == -1) {
-        _showErrorSnackBar('Please select a delivery method');
+        showCustomBar(context, 'Please select a delivery method',
+            type: MessageType.warning);
         return;
       }
       _goToNextPage();
     } else if (currentPage == 1) {
-      if (addressFormKey.currentState?.validate() != true) {
+      if (!addressFormKey.currentState!.validate()) {
         return;
       }
+
+      // Update field values
+      fullName = fullNameController.text.trim();
+      email = emailController.text.trim();
+      address = addressController.text.trim();
+      city = cityController.text.trim();
+      apartment = apartmentController.text.trim();
+      phone = phoneController.text.trim();
+
       _goToNextPage();
     } else if (currentPage == 2) {
       if (selectedPayment == -1) {
-        _showErrorSnackBar('Please select a payment method');
+        showCustomBar(context, 'Please select a payment method',
+            type: MessageType.warning);
         return;
       }
+
+      // Check if wallet payment requires phone number
+      if (paymentOptions[selectedPayment]['requiresInput'] == true &&
+          walletPhone.trim().isEmpty) {
+        showCustomBar(context, 'Please enter your wallet phone number',
+            type: MessageType.warning);
+        return;
+      }
+
       // Show order summary bottom sheet before completing the order
       _showOrderSummaryBottomSheet(subtotal, delivery, total);
     }
@@ -780,19 +1184,6 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       currentPage + 1,
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-    );
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red[600],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
     );
   }
 
@@ -810,72 +1201,96 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            left: 24,
-            right: 24,
-            top: 24,
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Address details header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Delivery Details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24.h,
+              left: 20.w,
+              right: 20.w,
+              top: 20.h,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
-                  TextButton.icon(
+                ),
+                SizedBox(height: 20.h),
+                // Address details header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Order Confirmation',
+                      style: TextStyles.bold24Black,
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _updateAddressFields();
+                        pageController.animateToPage(
+                          1,
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      icon: Icon(Icons.edit,
+                          size: 16.sp, color: ColorManager.secondaryColor),
+                      label: Text('Edit',
+                          style: TextStyle(color: ColorManager.secondaryColor)),
+                    )
+                  ],
+                ),
+                SizedBox(height: 16.h),
+                _buildDetailsCard(),
+                SizedBox(height: 16.h),
+                _buildOrderSummary(subtotal, delivery, total),
+                SizedBox(height: 20.h),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52.h,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorManager.secondaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
                     onPressed: () {
                       Navigator.pop(context);
-                      _updateAddressFields();
-                      pageController.animateToPage(
-                        1,
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
+                      _completeOrder();
                     },
-                    icon: Icon(Icons.edit, size: 16),
-                    label: Text('Edit'),
-                  )
-                ],
-              ),
-              SizedBox(height: 12),
-              _buildDetailsCard(),
-              SizedBox(height: 24),
-              _buildOrderSummary(subtotal, delivery, total),
-              SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.secondaryColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    child: Text(
+                      'Confirm & Place Order',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _completeOrder();
-                  },
-                  child: Text('Confirm Order'),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -883,55 +1298,65 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   }
 
   Widget _buildDetailRow(String label, String value) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80.w,
+            child: Text(
               label,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 13.sp,
                 color: Colors.grey[600],
               ),
             ),
-            Flexible(
-              child: Text(
-                value.isEmpty ? '-' : value,
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
-                ),
+          ),
+          Expanded(
+            child: Text(
+              value.isEmpty ? '-' : value,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+                color: ColorManager.blackColor,
               ),
             ),
-          ],
-        ),
-        SizedBox(height: 8),
-        Divider(height: 1),
-        SizedBox(height: 8),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildDetailsCard() {
+    String paymentMethod = selectedPayment >= 0
+        ? paymentOptions[selectedPayment]['title']
+        : 'Not selected';
+
+    if (selectedPayment >= 0 &&
+        paymentOptions[selectedPayment]['requiresInput'] == true) {
+      paymentMethod += '\n$walletPhone';
+    }
+
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildDetailRow('Name', fullName),
-          SizedBox(height: 8),
-          _buildDetailRow('Email', email),
-          SizedBox(height: 8),
-          _buildDetailRow('Address', '$address, $city, $apartment'),
-          SizedBox(height: 8),
           _buildDetailRow('Phone', phone),
+          _buildDetailRow('Address', '$address, $city'),
+          if (apartment.isNotEmpty) _buildDetailRow('Apt', apartment),
+          _buildDetailRow('Payment', paymentMethod),
+          _buildDetailRow(
+              'Delivery',
+              selectedShipping >= 0
+                  ? shippingTitles[selectedShipping]
+                  : 'Not selected'),
         ],
       ),
     );
@@ -943,11 +1368,14 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(24),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -955,12 +1383,12 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                 valueColor:
                     AlwaysStoppedAnimation<Color>(ColorManager.secondaryColor),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
-                'Creating your order...',
+                'Processing your order...',
                 style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[800],
+                  fontSize: 14.sp,
+                  color: Colors.grey[700],
                 ),
               ),
             ],
@@ -996,11 +1424,12 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       // Create order in Firebase
       final orderId = await orderService.createOrderFromCart(
         cartItems: cartEntity.cartItems,
-        payWithCash: selectedPayment == 0, // Assuming 0 is cash payment
+        payWithCash: selectedPayment == 0, // Cash on Delivery
         shippingAddress: shippingAddress,
         subtotal: subtotal,
         deliveryFee: delivery,
         totalAmount: total,
+        paymentProofUrl: paymentProofUrl,
       );
 
       // Clear the cart cubit
@@ -1009,152 +1438,29 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       // Close loading dialog
       Navigator.of(context).pop();
 
-      // Show success dialog
-      showDialog(
-        context: context,
-        builder: (context) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green[100],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check,
-                    color: Colors.green[600],
-                    size: 48,
-                  ),
-                ),
-                SizedBox(height: 24),
-                Text(
-                  'Order Successful!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Order ID: $orderId',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Thank you for your order. We\'ll send you a confirmation email shortly.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        'MyHomePage',
-                        (route) => false,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorManager.secondaryColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text('Continue Shopping'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      // Show success bottom sheet
+      showSuccessBottomSheet(
+        context,
+        'Your order #$orderId has been placed successfully!\n\nWe\'ll send you a confirmation shortly.',
+        () {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            'MyHomePage',
+            (route) => false,
+          );
+        },
+        isDismissible: false,
+        enableDrag: false,
+        buttonText: 'Continue Shopping',
       );
     } catch (e) {
       // Close loading dialog
       Navigator.of(context).pop();
 
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (context) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red[100],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.error,
-                    color: Colors.red[600],
-                    size: 48,
-                  ),
-                ),
-                SizedBox(height: 24),
-                Text(
-                  'Order Failed',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'There was an error creating your order. Please try again.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorManager.secondaryColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text('OK'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      // Show error snackbar
+      showCustomBar(
+        context,
+        'Failed to create order. Please try again.',
+        type: MessageType.error,
       );
     }
   }
