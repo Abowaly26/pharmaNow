@@ -263,12 +263,13 @@ class MedicineListViewItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
+        Navigator.pushNamed(
           context,
-          MaterialPageRoute(
-            builder: (context) =>
-                MedicineDetailsView(medicineEntity: medicineEntity),
-          ),
+          MedicineDetailsView.routeName,
+          arguments: {
+            'medicineEntity': medicineEntity,
+            'fromFavorites': true,
+          },
         );
       },
       child: Padding(
@@ -451,7 +452,7 @@ class MedicineListViewItem extends StatelessWidget {
             SizedBox(height: 8.h),
             Row(
               children: [
-                Flexible(
+                Expanded(
                   child: Text(
                     medicineEntity.name,
                     maxLines: 1,
@@ -459,8 +460,11 @@ class MedicineListViewItem extends StatelessWidget {
                     style: TextStyles.listView_product_name,
                   ),
                 ),
-                SizedBox(width: 16.w),
-                _buildQuantityStatus(),
+                SizedBox(width: 6.w),
+                Padding(
+                  padding: EdgeInsets.only(right: 4.r),
+                  child: _buildQuantityStatus(),
+                ),
               ],
             ),
             Text(

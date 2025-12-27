@@ -16,10 +16,14 @@ class MedicineDetailsView extends StatelessWidget {
   static const String routeName = "ProductView";
 
   final MedicineEntity? medicineEntity;
+  final bool fromCart;
+  final bool fromFavorites;
 
   const MedicineDetailsView({
     super.key,
     this.medicineEntity,
+    this.fromCart = false,
+    this.fromFavorites = false,
   });
 
   @override
@@ -37,7 +41,11 @@ class MedicineDetailsView extends StatelessWidget {
           ),
           leading: IconButton(
             onPressed: () {
-              Navigator.pushReplacementNamed(context, MainView.routeName);
+              if (fromCart || fromFavorites) {
+                Navigator.pop(context);
+              } else {
+                Navigator.pushReplacementNamed(context, MainView.routeName);
+              }
             },
             icon: SvgPicture.asset(
               Assets.arrowLeft,
@@ -50,6 +58,8 @@ class MedicineDetailsView extends StatelessWidget {
         body: medicineEntity != null
             ? MedicineDetailsViewBody(
                 medicineEntity: medicineEntity!,
+                fromCart: fromCart,
+                fromFavorites: fromFavorites,
               )
             : Center(child: Text('Medicine details not available')),
       ),

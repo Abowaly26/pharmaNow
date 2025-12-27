@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/features/order/presentation/views/cart_view.dart';
 
 import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
@@ -128,8 +129,25 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
       );
 
     case MedicineDetailsView.routeName:
+      final args = setting.arguments;
+      MedicineEntity? entity;
+      bool fromCart = false;
+      bool fromFavorites = false;
+
+      if (args is MedicineEntity) {
+        entity = args;
+      } else if (args is Map<String, dynamic>) {
+        entity = args['medicineEntity'] as MedicineEntity?;
+        fromCart = args['fromCart'] as bool? ?? false;
+        fromFavorites = args['fromFavorites'] as bool? ?? false;
+      }
+
       return MaterialPageRoute(
-        builder: (context) => MedicineDetailsView(),
+        builder: (context) => MedicineDetailsView(
+          medicineEntity: entity,
+          fromCart: fromCart,
+          fromFavorites: fromFavorites,
+        ),
         settings: setting,
       );
 

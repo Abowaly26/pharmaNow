@@ -46,16 +46,10 @@ class CartViewBody extends StatelessWidget {
 
         return Column(
           children: [
+            const CartHeader(),
             Expanded(
               child: CustomScrollView(
                 slivers: [
-                  SliverToBoxAdapter(
-                    child: Column(
-                      children: const [
-                        CartHeader(),
-                      ],
-                    ),
-                  ),
                   CartItemsList(cartItems: cartEntity.cartItems),
                   SliverToBoxAdapter(
                     child: SizedBox(height: 24.h),

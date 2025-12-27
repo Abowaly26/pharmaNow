@@ -51,12 +51,13 @@ class CartItem extends StatelessWidget {
       builder: (context, state) {
         return InkWell(
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MedicineDetailsView(
-                  medicineEntity: cartItemEntity.medicineEntity,
-                ),
-              ),
+            Navigator.pushNamed(
+              context,
+              MedicineDetailsView.routeName,
+              arguments: {
+                'medicineEntity': cartItemEntity.medicineEntity,
+                'fromCart': true,
+              },
             );
           },
           child: Padding(
@@ -194,22 +195,25 @@ class CartItem extends StatelessWidget {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(top: 8.r),
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            cartItemEntity.medicineEntity.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyles.listView_product_name,
+                      padding: EdgeInsets.only(top: 8.r),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              cartItemEntity.medicineEntity.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyles.listView_product_name,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8.w),
-                        _buildQuantityStatus(),
-                      ],
-                    ),
-                  ),
+                          SizedBox(width: 8.w),
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(right: 4.0, top: 4.0),
+                            child: _buildQuantityStatus(),
+                          ),
+                        ],
+                      )),
                 ),
                 GestureDetector(
                   onTap: () {

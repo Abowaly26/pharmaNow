@@ -16,9 +16,13 @@ class MedicineDetailsViewBody extends StatefulWidget {
   const MedicineDetailsViewBody({
     super.key,
     required this.medicineEntity,
+    this.fromCart = false,
+    this.fromFavorites = false,
   });
 
   final MedicineEntity medicineEntity;
+  final bool fromCart;
+  final bool fromFavorites;
 
   @override
   State<MedicineDetailsViewBody> createState() =>
@@ -101,9 +105,12 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
             // Product Card Section
             _buildProductCardSection(context, height, width),
 
-            SizedBox(height: 160.h),
+            SizedBox(
+                height:
+                    (widget.fromCart || widget.fromFavorites) ? 20.h : 160.h),
             // Completely Separated Add to Cart Button Section
-            _buildAddToCartButton(context),
+            if (!widget.fromCart && !widget.fromFavorites)
+              _buildAddToCartButton(context),
 
             SizedBox(height: 16.h), // Bottom padding
           ],
@@ -117,7 +124,8 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
       BuildContext context, double height, double width) {
     return Container(
       constraints: BoxConstraints(
-        minHeight: height * 0.6,
+        minHeight:
+            height * ((widget.fromCart || widget.fromFavorites) ? 0.4 : 0.6),
         maxHeight: height * 0.8,
       ),
       child: Stack(
@@ -148,10 +156,12 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                   borderRadius: BorderRadius.circular(24.r),
                 ),
                 constraints: BoxConstraints(
-                  minHeight: 0.65 * height,
-                  maxHeight: 0.73 * height,
+                  minHeight: height *
+                      ((widget.fromCart || widget.fromFavorites) ? 0.2 : 0.65),
+                  maxHeight: height * 0.73,
                 ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 0.22 * height), // Space for image
@@ -205,55 +215,64 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 8.h),
                     _buildQuantityStatus(),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 8.h),
                     Row(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Color(0xFFF2F4F9),
-                            borderRadius: BorderRadius.all(Radius.circular(32)),
-                          ),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  if (_counter > 1) {
-                                    setState(() {
-                                      _counter--;
-                                    });
-                                  }
-                                },
-                                icon: Icon(
-                                  Icons.remove,
-                                  size: 24.sp,
-                                ),
-                              ),
-                              SizedBox(width: 0.05 * width),
-                              Text(
-                                "$_counter",
+                        (widget.fromCart || widget.fromFavorites)
+                            ? Text(
+                                "Description",
                                 style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 20.sp,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              )
+                            : Container(
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFF2F4F9),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        if (_counter > 1) {
+                                          setState(() {
+                                            _counter--;
+                                          });
+                                        }
+                                      },
+                                      icon: Icon(
+                                        Icons.remove,
+                                        size: 24.sp,
+                                      ),
+                                    ),
+                                    SizedBox(width: 0.05 * width),
+                                    Text(
+                                      "$_counter",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 20.sp,
+                                      ),
+                                    ),
+                                    SizedBox(width: 0.05 * width),
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _counter++;
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.add_circle_outlined,
+                                        size: 32.sp,
+                                        color: ColorManager.secondaryColor,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              SizedBox(width: 0.05 * width),
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _counter++;
-                                  });
-                                },
-                                icon: Icon(
-                                  Icons.add_circle_outlined,
-                                  size: 32.sp,
-                                  color: ColorManager.secondaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                         Spacer(),
                         Column(
                           children: [
@@ -283,16 +302,19 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                         )
                       ],
                     ),
-                    SizedBox(height: 20.h),
-                    Text(
-                      "Description",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+                    if (!widget.fromCart && !widget.fromFavorites) ...[
+                      SizedBox(height: 10.h),
+                      Text(
+                        "Description",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
+                    ],
                     SizedBox(height: 10.h),
-                    Expanded(
+                    Flexible(
+                      fit: FlexFit.loose,
                       child: ScrollConfiguration(
                         behavior: SmoothScrollBehavior(),
                         child: SingleChildScrollView(

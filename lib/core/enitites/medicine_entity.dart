@@ -53,6 +53,11 @@ class MedicineEntity extends Equatable {
   // Create from JSON from Firestore
   factory MedicineEntity.fromJson(Map<String, dynamic> json) =>
       _$MedicineEntityFromJson(json);
+
+  @override
+  String toString() {
+    return 'MedicineEntity(code: $code, name: $name, pharmcyAddress: $pharmcyAddress)';
+  }
 }
 
 // class MedicineEntity {
