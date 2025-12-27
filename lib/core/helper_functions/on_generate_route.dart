@@ -22,6 +22,8 @@ import '../../features/profile/presentation/views/profile_view.dart';
 import '../../features/profile/presentation/views/widgets/profile_tab/edit_profile_view.dart';
 import '../../features/profile/presentation/views/widgets/profile_tab/notification_view.dart';
 import '../../features/profile/presentation/views/widgets/profile_tab/change_password_view.dart';
+import '../../features/profile/presentation/views/widgets/profile_tab/terms_of_service_view.dart';
+import '../../features/profile/presentation/views/widgets/profile_tab/help_support_view.dart';
 import '../../features/search/presentation/views/search_view.dart';
 import '../../features/medical_assistant/chat_bot.dart';
 
@@ -166,6 +168,18 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case ChatPage.routeName:
       return MaterialPageRoute(
         builder: (context) => const ChatPage(),
+        settings: setting,
+      );
+
+    case TermsOfServiceView.routeName:
+      return MaterialPageRoute(
+        builder: (context) => const TermsOfServiceView(),
+        settings: setting,
+      );
+
+    case HelpSupportView.routeName:
+      return MaterialPageRoute(
+        builder: (context) => const HelpSupportView(),
         settings: setting,
       );
 

@@ -17,6 +17,8 @@ import '../../../../../core/helper_functions/build_error_bar.dart';
 import '../../../../../core/errors/exceptions.dart';
 import '../../../../../core/widgets/password_field.dart';
 import 'profile_tab/notification_view.dart';
+import 'profile_tab/terms_of_service_view.dart';
+import 'profile_tab/help_support_view.dart';
 
 // ArcPainter and SettingItem remain the same
 class ArcPainter extends CustomPainter {
@@ -235,7 +237,7 @@ class ProfileViewBody extends StatelessWidget {
                 icon: Icons.security,
                 title: "Terms of Service", // Terms of service
                 onTap: () {
-                  // ... (Existing code for displaying terms of service)
+                  Navigator.pushNamed(context, TermsOfServiceView.routeName);
                 },
               ),
               SizedBox(height: 0.01 * height),
@@ -252,7 +254,7 @@ class ProfileViewBody extends StatelessWidget {
                 icon: Icons.help_outlined,
                 title: "Help & Support", // Help & support
                 onTap: () {
-                  // ... (Existing code for displaying help & support)
+                  Navigator.pushNamed(context, HelpSupportView.routeName);
                 },
               ),
               SizedBox(height: 0.01 * height),
