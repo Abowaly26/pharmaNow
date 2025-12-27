@@ -105,12 +105,9 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
             // Product Card Section
             _buildProductCardSection(context, height, width),
 
-            SizedBox(
-                height:
-                    (widget.fromCart || widget.fromFavorites) ? 20.h : 160.h),
+            SizedBox(height: widget.fromCart ? 20.h : 160.h),
             // Completely Separated Add to Cart Button Section
-            if (!widget.fromCart && !widget.fromFavorites)
-              _buildAddToCartButton(context),
+            if (!widget.fromCart) _buildAddToCartButton(context),
 
             SizedBox(height: 16.h), // Bottom padding
           ],
@@ -124,8 +121,7 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
       BuildContext context, double height, double width) {
     return Container(
       constraints: BoxConstraints(
-        minHeight:
-            height * ((widget.fromCart || widget.fromFavorites) ? 0.4 : 0.6),
+        minHeight: height * (widget.fromCart ? 0.4 : 0.6),
         maxHeight: height * 0.8,
       ),
       child: Stack(
@@ -156,8 +152,7 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                   borderRadius: BorderRadius.circular(24.r),
                 ),
                 constraints: BoxConstraints(
-                  minHeight: height *
-                      ((widget.fromCart || widget.fromFavorites) ? 0.2 : 0.65),
+                  minHeight: height * (widget.fromCart ? 0.2 : 0.65),
                   maxHeight: height * 0.73,
                 ),
                 child: Column(
@@ -220,7 +215,7 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                     SizedBox(height: 8.h),
                     Row(
                       children: [
-                        (widget.fromCart || widget.fromFavorites)
+                        widget.fromCart
                             ? Text(
                                 "Description",
                                 style: TextStyle(
@@ -302,7 +297,7 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                         )
                       ],
                     ),
-                    if (!widget.fromCart && !widget.fromFavorites) ...[
+                    if (!widget.fromCart) ...[
                       SizedBox(height: 10.h),
                       Text(
                         "Description",

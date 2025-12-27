@@ -7,6 +7,7 @@ import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../home/presentation/views/main_view.dart';
 import '../cubit/cubit/search_cubit.dart';
 import 'widgets/search_view_body.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 class SearchView extends StatelessWidget {
   const SearchView({super.key});
@@ -15,9 +16,12 @@ class SearchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the SearchCubit from the service locator
-    return BlocProvider(
-      create: (context) => GetIt.instance<SearchCubit>(),
+    // Get the SearchCubit and CartCubit from the service locator
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => GetIt.instance<SearchCubit>()),
+        BlocProvider.value(value: GetIt.instance<CartCubit>()),
+      ],
       child: Scaffold(
         backgroundColor: ColorManager.primaryColor,
         appBar: PreferredSize(

@@ -14,6 +14,7 @@ import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 import '../../cubit/cubit/search_cubit.dart';
 import '../../cubit/cubit/search_state.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
+import '../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 class SearchViewBody extends StatelessWidget {
   const SearchViewBody({super.key});
@@ -414,50 +415,73 @@ class SearchMedicinesListViewItem extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            Padding(
-              padding: EdgeInsets.only(bottom: 8.r, right: 8.r),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Show the original price with strikethrough if there's a discount
-                      if (medicineEntity.discountRating > 0)
-                        Text(
-                          '${medicineEntity.price} EGP',
-                          style: TextStyles.listView_product_name.copyWith(
-                            fontSize: 10.sp,
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      // Show discounted price or regular price
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Show the original price with strikethrough if there's a discount
+                    if (medicineEntity.discountRating > 0)
                       Text(
-                        medicineEntity.discountRating > 0
-                            ? '${_calculateDiscountedPrice(medicineEntity.price.toDouble(), medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
-                            : '${medicineEntity.price} EGP',
+                        '${medicineEntity.price} EGP',
                         style: TextStyles.listView_product_name.copyWith(
-                          fontSize: 11.sp,
-                          color: const Color(0xFF20B83A),
+                          fontSize: 10.sp,
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
                         ),
                       ),
-                      SizedBox(height: 4.h),
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Add to cart functionality
-                    },
-                    child: SvgPicture.asset(
-                      Assets.cart,
-                      width: 32.w,
-                      height: 32.h,
+                    // Show discounted price or regular price
+                    Text(
+                      medicineEntity.discountRating > 0
+                          ? '${_calculateDiscountedPrice(medicineEntity.price.toDouble(), medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
+                          : '${medicineEntity.price} EGP',
+                      style: TextStyles.listView_product_name.copyWith(
+                        fontSize: 11.sp,
+                        color: const Color(0xFF20B83A),
+                      ),
                     ),
+                    SizedBox(height: 4.h),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () {
+                    // Add to cart functionality
+                    context.read<CartCubit>().addMedicineToCart(medicineEntity);
+
+                    // Show success message
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Added to cart',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 12),
+                        ),
+                        backgroundColor:
+                            const Color.fromARGB(255, 109, 193, 111),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(42),
+                        ),
+                        margin: EdgeInsets.only(
+                          left: screenWidth * 0.3,
+                          right: screenWidth * 0.3,
+                          bottom: 20.h,
+                        ),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  child: SvgPicture.asset(
+                    Assets.cart,
+                    width: 32.w,
+                    height: 32.h,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
