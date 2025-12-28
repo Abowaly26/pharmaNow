@@ -49,14 +49,23 @@ class ProfileAvatar extends StatelessWidget {
     final String initialLetter = _getInitialLetter();
     final Color bgColor = backgroundColor ?? ColorManager.secondaryColor;
 
-    Widget avatar = isLoading
-        ? _buildLoadingAvatar(bgColor)
-        : imageUrl != null && imageUrl!.isNotEmpty
-            ? _buildImageAvatar()
-            : _buildInitialAvatar(initialLetter, bgColor);
+    Widget avatar;
+
+    if (isLoading) {
+      // Return a simple circle that Skeletonizer will treat as a bone
+      avatar = CircleAvatar(
+        radius: radius,
+        backgroundColor: Colors.grey[300],
+      );
+    } else if (imageUrl != null && imageUrl!.isNotEmpty) {
+      avatar = _buildImageAvatar();
+    } else {
+      avatar = _buildInitialAvatar(initialLetter, bgColor);
+    }
 
     // Wrap with arc if needed
-    if (showArc) {
+    // Hide arc when loading for a cleaner skeleton look
+    if (showArc && !isLoading) {
       avatar = Stack(
         alignment: Alignment.center,
         children: [
@@ -71,7 +80,8 @@ class ProfileAvatar extends StatelessWidget {
     }
 
     // Add edit overlay if needed
-    if (showEditOverlay) {
+    // Hide overlay when loading for a cleaner look
+    if (showEditOverlay && !isLoading) {
       return Stack(
         children: [
           avatar,
@@ -112,22 +122,7 @@ class ProfileAvatar extends StatelessWidget {
     if (userName != null && userName!.isNotEmpty) {
       return userName![0].toUpperCase();
     }
-    return '?';
-  }
-
-  Widget _buildLoadingAvatar(Color bgColor) {
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: bgColor.withOpacity(0.3),
-      child: SizedBox(
-        width: radius * 0.6,
-        height: radius * 0.6,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(bgColor),
-        ),
-      ),
-    );
+    return ''; // Return empty string instead of '?' to allow skeletonizer to show better placeholder or look cleaner
   }
 
   Widget _buildImageAvatar() {
@@ -139,7 +134,7 @@ class ProfileAvatar extends StatelessWidget {
       ),
       placeholder: (context, url) => CircleAvatar(
         radius: radius,
-        backgroundColor: ColorManager.secondaryColor.withOpacity(0.3),
+        backgroundColor: ColorManager.secondaryColor.withOpacity(0.1),
         child: SizedBox(
           width: radius * 0.5,
           height: radius * 0.5,

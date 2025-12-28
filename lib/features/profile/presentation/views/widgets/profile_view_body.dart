@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/widgets/profile_avatar.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
@@ -17,7 +18,6 @@ import 'package:provider/provider.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 
 import '../../../../../core/helper_functions/build_error_bar.dart';
-import '../../../../../core/errors/exceptions.dart';
 import '../../../../../core/widgets/password_field.dart';
 import 'profile_tab/notification_view.dart';
 import 'profile_tab/terms_of_service_view.dart';
@@ -272,213 +272,188 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     final avatarRadius = width * 0.15;
 
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              SizedBox(height: 0.03 * height),
-              // Profile Avatar with edit capability
-              Consumer<ProfileProvider>(
-                builder: (context, provider, child) {
-                  return ProfileAvatar(
-                    imageUrl: provider.currentUser?.profileImageUrl,
-                    userName: provider.currentUser?.name,
-                    radius: avatarRadius,
-                    showArc: true,
-                    showEditOverlay: true,
-                    isLoading: provider.isLoading,
-                    onEditTap: _showImagePickerOptions,
-                  );
-                },
-              ),
-              SizedBox(height: 0.01 * height),
-              Consumer<ProfileProvider>(
-                builder: (context, provider, child) {
-                  if (provider.status == ProfileStatus.loading &&
-                      provider.currentUser == null) {
-                    return Text(
-                      "Loading...",
+      child: Consumer<ProfileProvider>(
+        builder: (context, provider, child) {
+          final isExitLoading = provider.isNavigatingOut;
+          final user = provider.currentUser;
+
+          log('ProfileViewBody: build - isExitLoading: $isExitLoading, status: ${provider.status}',
+              name: 'ProfileViewBody');
+
+          return Skeletonizer(
+            enabled: isExitLoading,
+            effect: ShimmerEffect(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.white,
+              duration: const Duration(seconds: 2),
+            ),
+            child: SingleChildScrollView(
+              child: Center(
+                child: Column(
+                  children: [
+                    SizedBox(height: 0.02 * height),
+                    ProfileAvatar(
+                      imageUrl: user?.profileImageUrl,
+                      userName: user?.name,
+                      radius: avatarRadius,
+                      showArc: true,
+                      showEditOverlay: true,
+                      isLoading: isExitLoading,
+                      onEditTap: _showImagePickerOptions,
+                    ),
+                    SizedBox(height: 0.01 * height),
+                    Text(
+                      user?.name ?? "User Name Placeholder",
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    );
-                  }
-                  final firebaseUser = FirebaseAuth.instance.currentUser;
-                  final userName = provider.currentUser?.name ??
-                      firebaseUser?.displayName ??
-                      firebaseUser?.email?.split('@')[0] ??
-                      "User";
-                  return Text(
-                    userName.isNotEmpty ? userName : "User",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  );
-                },
-              ),
-              SizedBox(height: 0.01 * height),
-              Consumer<ProfileProvider>(
-                builder: (context, provider, child) {
-                  if (provider.status == ProfileStatus.loading &&
-                      provider.currentUser == null) {
-                    return Text(
-                      "Loading email...",
+                    ),
+                    SizedBox(height: 0.01 * height),
+                    Text(
+                      user?.email ?? "user.email@example.com",
                       style: TextStyle(fontSize: 16, color: Color(0xff718096)),
-                    );
-                  }
-                  final userEmail = provider.currentUser?.email ?? "";
-                  return Text(
-                    userEmail,
-                    style: TextStyle(fontSize: 16, color: Color(0xff718096)),
-                  );
-                },
-              ),
-              SizedBox(height: 0.04 * height),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 0.056 * width),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Account Settings',
-                    style: TextStyles.settingItemTitle
-                        .copyWith(color: Color(0xFF4F5159)),
-                  ),
-                ),
-              ),
-              SettingItem(
-                icon: Icons.person,
-                title: "Edit Profile",
-                onTap: () {
-                  Navigator.pushNamed(context, EditProfile.routeName);
-                },
-              ),
-              SettingItem(
-                icon: Icons.notifications,
-                title: "Notifications",
-                onTap: () {
-                  Navigator.pushNamed(context, Notifications.routeName);
-                },
-              ),
-              SizedBox(height: 0.01 * height),
-              SettingItem(
-                icon: Icons.security,
-                title: "Terms of Service",
-                onTap: () {
-                  Navigator.pushNamed(context, TermsOfServiceView.routeName);
-                },
-              ),
-              SizedBox(height: 0.01 * height),
-              SettingItem(
-                icon: Icons.lock,
-                title: "Change Password",
-                onTap: () {
-                  Navigator.pushNamed(context, ChangePasswordView.routeName);
-                },
-              ),
-              SizedBox(height: 0.01 * height),
-              SettingItem(
-                icon: Icons.help_outlined,
-                title: "Help & Support",
-                onTap: () {
-                  Navigator.pushNamed(context, HelpSupportView.routeName);
-                },
-              ),
-              SizedBox(height: 0.01 * height),
-              SettingItem(
-                icon: Icons.delete_forever,
-                title: "Delete Account",
-                onTap: () {
-                  _showReAuthDialog(context,
-                      Provider.of<ProfileProvider>(context, listen: false));
-                },
-              ),
-              SettingItem(
-                icon: Icons.logout,
-                title: "Log Out",
-                onTap: () {
-                  showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: ColorManager.primaryColor,
-                      content: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.0.w),
+                    ),
+                    SizedBox(height: 0.04 * height),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 0.056 * width),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
                         child: Text(
-                          'Are you sure you want to log out?',
-                          style: TextStyles.skip.copyWith(color: Colors.black),
-                          textAlign: TextAlign.center,
+                          'Account Settings',
+                          style: TextStyles.settingItemTitle
+                              .copyWith(color: Color(0xFF4F5159)),
                         ),
                       ),
-                      actions: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(left: 10.0.w),
-                              child: Consumer<ProfileProvider>(
-                                builder: (context, provider, child) {
-                                  return SizedBox(
-                                    width: 100.w,
-                                    child: TextButton(
-                                      onPressed: provider.status ==
-                                              ProfileStatus.loading
-                                          ? null
-                                          : () async {
-                                              try {
-                                                final profileProvider = Provider
-                                                    .of<ProfileProvider>(
-                                                        context,
-                                                        listen: false);
-                                                await profileProvider.logout();
-                                              } catch (e) {
-                                                if (context.mounted) {
-                                                  showCustomBar(
-                                                      context, e.toString());
-                                                  log('Logout error: $e',
-                                                      name: 'ProfileViewBody');
-                                                }
-                                              }
-                                            },
-                                      child: provider.status ==
-                                              ProfileStatus.loading
-                                          ? SizedBox(
-                                              width: 20.w,
-                                              height: 20.w,
-                                              child: CircularProgressIndicator(
-                                                color: ColorManager.redColorF5,
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : Text('Logout',
-                                              style: TextStyles.buttonLabel
-                                                  .copyWith(
-                                                      color: ColorManager
-                                                          .redColorF5)),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(right: 10.0.w),
-                              child: ElevatedButton(
-                                style: ButtonStyles.smallButton,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text('Cancel',
-                                    style: TextStyles.buttonLabel.copyWith(
-                                        color: ColorManager.primaryColor)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
                     ),
-                  );
-                },
+                    SettingItem(
+                      icon: Icons.person,
+                      title: "Edit Profile",
+                      onTap: () {
+                        Navigator.pushNamed(context, EditProfile.routeName);
+                      },
+                    ),
+                    SettingItem(
+                      icon: Icons.notifications,
+                      title: "Notifications",
+                      onTap: () {
+                        Navigator.pushNamed(context, Notifications.routeName);
+                      },
+                    ),
+                    SizedBox(height: 0.01 * height),
+                    SettingItem(
+                      icon: Icons.security,
+                      title: "Terms of Service",
+                      onTap: () {
+                        Navigator.pushNamed(
+                            context, TermsOfServiceView.routeName);
+                      },
+                    ),
+                    SizedBox(height: 0.01 * height),
+                    SettingItem(
+                      icon: Icons.lock,
+                      title: "Change Password",
+                      onTap: () {
+                        Navigator.pushNamed(
+                            context, ChangePasswordView.routeName);
+                      },
+                    ),
+                    SizedBox(height: 0.01 * height),
+                    SettingItem(
+                      icon: Icons.help_outlined,
+                      title: "Help & Support",
+                      onTap: () {
+                        Navigator.pushNamed(context, HelpSupportView.routeName);
+                      },
+                    ),
+                    SizedBox(height: 0.01 * height),
+                    SettingItem(
+                      icon: Icons.delete_forever,
+                      title: "Delete Account",
+                      onTap: () {
+                        _showReAuthDialog(
+                            context,
+                            Provider.of<ProfileProvider>(context,
+                                listen: false));
+                      },
+                    ),
+                    SettingItem(
+                      icon: Icons.logout,
+                      title: "Log Out",
+                      onTap: () {
+                        showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            backgroundColor: ColorManager.primaryColor,
+                            content: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20.0.w),
+                              child: Text(
+                                'Are you sure you want to log out?',
+                                style: TextStyles.skip
+                                    .copyWith(color: Colors.black),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            actions: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 10.0.w),
+                                    child: TextButton(
+                                      onPressed: () async {
+                                        try {
+                                          final profileProvider =
+                                              Provider.of<ProfileProvider>(
+                                                  context,
+                                                  listen: false);
+                                          // Pop dialog immediately to show background skeleton
+                                          Navigator.of(context).pop();
+                                          await profileProvider.logout();
+                                        } catch (e) {
+                                          if (context.mounted) {
+                                            showCustomBar(
+                                                context, e.toString());
+                                            log('Logout error: $e',
+                                                name: 'ProfileViewBody');
+                                          }
+                                        }
+                                      },
+                                      child: Text('Logout',
+                                          style: TextStyles.buttonLabel
+                                              .copyWith(
+                                                  color:
+                                                      ColorManager.redColorF5)),
+                                    ),
+                                  ),
+                                  SizedBox(width: 28.w),
+                                  Padding(
+                                    padding: EdgeInsets.only(right: 10.0.w),
+                                    child: ElevatedButton(
+                                      style: ButtonStyles.smallButton,
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text('Cancel',
+                                          style: TextStyles.buttonLabel
+                                              .copyWith(
+                                                  color: ColorManager
+                                                      .primaryColor)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
               ),
-              SizedBox(height: 20),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -529,9 +504,6 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
             ),
             Consumer<ProfileProvider>(
               builder: (context, provider, child) {
-                if (provider.status == ProfileStatus.loading) {
-                  return CircularProgressIndicator(color: Colors.red);
-                }
                 return ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   onPressed: () async {
@@ -544,10 +516,10 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                       final passwordToSend =
                           shouldShowPassword ? passwordController.text : null;
 
+                      // Pop dialog immediately to show background skeleton
+                      Navigator.of(context).pop();
+
                       await provider.reauthenticateAndDelete(passwordToSend);
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                      }
                     } catch (e) {
                       if (context.mounted) {
                         showCustomBar(context, e.toString());

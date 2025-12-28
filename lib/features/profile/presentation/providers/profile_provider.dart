@@ -26,15 +26,18 @@ class ProfileProvider extends ChangeNotifier {
   String _errorMessage = '';
   UserEntity? _currentUser;
   bool _isLoading = false;
+  bool _isNavigatingOut = false;
 
   ProfileStatus get status => _status;
   String get errorMessage => _errorMessage;
   UserEntity? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
-  // Removed profileImageUrl getter
+  bool get isNavigatingOut => _isNavigatingOut;
 
   ProfileProvider() {
-    _loadUserDataFromFirebase(FirebaseAuth.instance.currentUser!.uid);
+    if (FirebaseAuth.instance.currentUser != null) {
+      _loadUserDataFromFirebase(FirebaseAuth.instance.currentUser!.uid);
+    }
     _listenToAuthChanges();
   }
 
@@ -42,23 +45,28 @@ class ProfileProvider extends ChangeNotifier {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
         _status = ProfileStatus.loading;
-        notifyListeners(); // Notify the UI that loading has started
+        notifyListeners();
         _loadUserDataFromFirebase(user.uid);
       } else {
-        clearUserData();
+        if (!_isNavigatingOut) {
+          clearUserData();
+        } else {
+          _currentUser = null;
+          log('Silently cleared user data during navigation out',
+              name: 'ProfileProvider');
+        }
       }
     });
   }
 
   Future<void> _loadUserDataFromFirebase(String uid) async {
     log('Loading user data for UID: $uid', name: 'ProfileProvider');
+    _isNavigatingOut = false; // Reset navigation flag when loading new data
 
-    // 1. Try to load from local storage first for immediate feedback
     try {
       String? localUserJson = prefs.getString(kUserData);
       if (localUserJson != null) {
         Map<String, dynamic> localUserMap = jsonDecode(localUserJson);
-        // Verify it belongs to the current user
         if (localUserMap['uId'] == uid) {
           _currentUser = UserModel.fromJson(localUserMap);
           _status = ProfileStatus.success;
@@ -82,50 +90,31 @@ class ProfileProvider extends ChangeNotifier {
               await _profileRepository.getUserProfile(uid);
 
           if (userDataFromFirestore != null) {
-            // Check if user is signed in with Google
             bool isGoogleUser = firebaseUser.providerData
                 .any((userInfo) => userInfo.providerId == 'google.com');
 
-            // Sync Google profile image if missing or different in Firestore
             if (isGoogleUser &&
                 firebaseUser.photoURL != null &&
                 firebaseUser.photoURL !=
                     userDataFromFirestore.profileImageUrl) {
-              log('🔄 Syncing Google profile image to Firestore in ProfileProvider',
-                  name: 'ProfileProvider');
               userDataFromFirestore = userDataFromFirestore.copyWith(
                   profileImageUrl: firebaseUser.photoURL);
               await _profileRepository.updateUserProfile(userDataFromFirestore);
             }
 
-            // Sync Auth displayName with Firestore name to ensure consistency
             if (firebaseUser.displayName != userDataFromFirestore.name) {
               try {
                 await firebaseUser
                     .updateDisplayName(userDataFromFirestore.name);
                 await firebaseUser.reload();
-                log('Synced Auth displayName with Firestore name: ${userDataFromFirestore.name}',
-                    name: 'ProfileProvider');
               } catch (e) {
                 log('Failed to sync displayName: $e', name: 'ProfileProvider');
               }
             }
 
-            // Update current user and persist to local storage
             _currentUser = userDataFromFirestore;
             await _saveUserToLocal(_currentUser!);
-
-            // If the user is a Google user but has a different name in Firestore,
-            // we still prioritize the Firestore name (the registered name)
-            if (isGoogleUser &&
-                firebaseUser.displayName != null &&
-                firebaseUser.displayName != userDataFromFirestore.name) {
-              log('Google display name (${firebaseUser.displayName}) differs from registered name (${userDataFromFirestore.name}). Using registered name.',
-                  name: 'ProfileProvider');
-            }
           } else {
-            // User does NOT exist in Firestore (New User or broken state)
-            // Reload user to get the latest displayName
             await firebaseUser.reload();
             final updatedUser = FirebaseAuth.instance.currentUser;
 
@@ -137,23 +126,22 @@ class ProfileProvider extends ChangeNotifier {
               name: nameToUse,
               email: firebaseUser.email ?? '',
               uId: firebaseUser.uid,
+              profileImageUrl:
+                  firebaseUser.photoURL, // Capture Google profile image
             );
             await _profileRepository.updateUserProfile(_currentUser!);
-            log('Created new user profile in Firestore',
+            log('Created new user profile in Firestore with image: ${firebaseUser.photoURL}',
                 name: 'ProfileProvider');
           }
           _status = ProfileStatus.success;
-          break; // Exit loop on success
+          _isLoading = false;
+          break;
         } else {
-          log('No valid Firebase user found during retry $retryCount',
-              name: 'ProfileProvider');
           await clearUserData();
           return;
         }
       } catch (e) {
         retryCount++;
-        log('Error loading user data (attempt $retryCount): $e',
-            name: 'ProfileProvider');
         if (retryCount >= maxRetries) {
           _errorMessage =
               'Failed to load user data after $maxRetries attempts: ${e.toString()}';
@@ -161,8 +149,7 @@ class ProfileProvider extends ChangeNotifier {
           _currentUser = null;
           break;
         }
-        await Future.delayed(
-            Duration(milliseconds: 500)); // Wait before retrying
+        await Future.delayed(Duration(milliseconds: 500));
       }
     }
     notifyListeners();
@@ -179,8 +166,6 @@ class ProfileProvider extends ChangeNotifier {
     _status = ProfileStatus.loading;
     notifyListeners();
     try {
-      // When updating the profile, we only update the name here.
-      // Email should come from the authentication source.
       final updatedUser = UserModel(
         name: name,
         email: _currentUser!.email,
@@ -189,11 +174,8 @@ class ProfileProvider extends ChangeNotifier {
       );
       await _profileRepository.updateUserProfile(updatedUser);
       _currentUser = updatedUser;
-
-      // Persist to local storage
       await _saveUserToLocal(updatedUser);
 
-      // Also update displayName in Firebase Auth if the name has changed
       User? firebaseUser = FirebaseAuth.instance.currentUser;
       if (firebaseUser != null && firebaseUser.displayName != name) {
         await firebaseUser.updateDisplayName(name);
@@ -208,8 +190,6 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// Updates the user's profile image
-  /// Upload to Supabase and save URL to Firestore
   Future<void> updateProfileImage(File imageFile) async {
     if (_currentUser == null) {
       _errorMessage = 'No user currently logged in';
@@ -223,15 +203,9 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      log('Uploading profile image...', name: 'ProfileProvider');
-
-      // Upload and get URL
       final String imageUrl =
           await _profileRepository.updateUserProfileImage(imageFile);
 
-      log('Profile image uploaded. URL: $imageUrl', name: 'ProfileProvider');
-
-      // Update current user with new image URL
       _currentUser = UserModel(
         name: _currentUser!.name,
         email: _currentUser!.email,
@@ -239,13 +213,9 @@ class ProfileProvider extends ChangeNotifier {
         profileImageUrl: imageUrl,
       );
 
-      // Persist to local storage
       await _saveUserToLocal(_currentUser!);
-
       _status = ProfileStatus.success;
-      log('Profile image updated successfully', name: 'ProfileProvider');
     } catch (e) {
-      log('Error uploading profile image: $e', name: 'ProfileProvider');
       _errorMessage = 'Failed to upload profile image: ${e.toString()}';
       _status = ProfileStatus.error;
     } finally {
@@ -254,7 +224,6 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// Removes the user's profile image
   Future<void> removeProfileImage() async {
     if (_currentUser == null) {
       _errorMessage = 'No user currently logged in';
@@ -268,11 +237,8 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      log('Removing profile image...', name: 'ProfileProvider');
-
       await _profileRepository.removeUserProfileImage();
 
-      // Update current user to remove image URL
       _currentUser = UserModel(
         name: _currentUser!.name,
         email: _currentUser!.email,
@@ -280,14 +246,10 @@ class ProfileProvider extends ChangeNotifier {
         profileImageUrl: null,
       );
 
-      // Persist to local storage
       await _saveUserToLocal(_currentUser!);
-
       _status = ProfileStatus.success;
-      log('Profile image removed successfully', name: 'ProfileProvider');
     } catch (e) {
-      log('Error removing profile image: $e', name: 'ProfileProvider');
-      _errorMessage = 'Failed to remove profile image: ${e.toString()}';
+      _errorMessage = 'Failed to remove profile photo: ${e.toString()}';
       _status = ProfileStatus.error;
     } finally {
       _isLoading = false;
@@ -313,26 +275,25 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   Future<void> clearUserData() async {
-    log('Clearing user data: $_currentUser', name: 'ProfileProvider');
+    log('Clearing user data', name: 'ProfileProvider');
     _currentUser = null;
     _status = ProfileStatus.initial;
     _errorMessage = '';
     _isLoading = false;
+    _isNavigatingOut = false; // Reset navigation flag when clearing data
     notifyListeners();
   }
 
   Future<void> reauthenticateAndDelete(String? password) async {
     _isLoading = true;
     _status = ProfileStatus.loading;
+    _isNavigatingOut = true; // Trigger skeleton immediately
     notifyListeners();
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('No user found');
 
       AuthCredential? credential;
-
-      // Check provider to decide on re-auth strategy
-      // Check for Google provider FIRST (higher priority)
       bool isGoogleUser = user.providerData
           .any((userInfo) => userInfo.providerId == 'google.com');
 
@@ -340,7 +301,6 @@ class ProfileProvider extends ChangeNotifier {
           .any((userInfo) => userInfo.providerId == 'password');
 
       if (isGoogleUser) {
-        // For Google users, re-authenticate with Google Sign In
         try {
           final GoogleSignIn googleSignIn = GoogleSignIn();
           final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -367,11 +327,6 @@ class ProfileProvider extends ChangeNotifier {
         credential = EmailAuthProvider.credential(
             email: user.email!, password: password);
         await user.reauthenticateWithCredential(credential);
-      } else {
-        // For Google or others, we attempt delete directly.
-        // If it fails with 'requires-recent-login', we can't easily re-auth
-        // without popping a Google Sign In flow, which defines a different UX.
-        // For now, we proceed to delete.
       }
 
       await deleteAccount();
@@ -387,33 +342,40 @@ class ProfileProvider extends ChangeNotifier {
       }
       _errorMessage = msg;
       _status = ProfileStatus.error;
-      notifyListeners();
-      throw msg; // Throw just the message string for clearer UI display
-    } catch (e) {
-      _errorMessage = e.toString();
-      _status = ProfileStatus.error;
-      notifyListeners();
-      rethrow;
-    } finally {
+      _isNavigatingOut = false;
       _isLoading = false;
       notifyListeners();
+      throw msg;
+    } catch (e) {
+      _isNavigatingOut = false;
+      _errorMessage = e.toString();
+      _status = ProfileStatus.error;
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
     }
   }
 
   Future<void> logout() async {
+    log('ProfileProvider: Starting logout flow...', name: 'ProfileProvider');
     _status = ProfileStatus.loading;
+    _isNavigatingOut = true;
     notifyListeners();
     try {
-      // Use the service to set the flag before signing out
+      log('ProfileProvider: Delaying for 3 seconds to show skeleton...',
+          name: 'ProfileProvider');
+      await Future.delayed(const Duration(seconds: 3));
+
+      log('ProfileProvider: Proceeding with normalLogout...',
+          name: 'ProfileProvider');
       final authService = FirebaseAuthService();
       await authService.normalLogout(); // This calls signOut internally
 
-      await clearUserData();
-      // Clear any other local state if needed
-      // For example, if you have a favorites provider:
-      // final favoritesProvider = Provider.of<FavoritesProvider>(context, listen: false);
-      // favoritesProvider.clearFavorites();
+      // Don't reset status here, let navigation happen while in loading state
+      _currentUser = null;
+      // We don't call notifyListeners() or reset status to prevent reshowing
     } catch (e) {
+      _isNavigatingOut = false;
       log('Logout error: $e', name: 'ProfileProvider');
       _errorMessage = 'Logout failed: ${e.toString()}';
       _status = ProfileStatus.error;
@@ -423,16 +385,26 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   Future<void> deleteAccount() async {
+    log('ProfileProvider: Starting account deletion flow...',
+        name: 'ProfileProvider');
     _isLoading = true;
     _status = ProfileStatus.loading;
+    _isNavigatingOut = true;
     notifyListeners();
     try {
+      log('ProfileProvider: Delaying for 3 seconds to show skeleton...',
+          name: 'ProfileProvider');
+      await Future.delayed(const Duration(seconds: 3));
+
+      log('ProfileProvider: Deleting account...', name: 'ProfileProvider');
       FirebaseAuthService().setUserDeleted(true);
       await _profileRepository.deleteUserAccount();
-      await clearUserData();
+
+      _currentUser = null;
       _status = ProfileStatus.success;
     } catch (e) {
-      // Propagate specific exceptions like RequiresRecentLoginException
+      _isNavigatingOut = false;
+      _isLoading = false;
       if (e is RequiresRecentLoginException) {
         rethrow;
       }
@@ -440,9 +412,6 @@ class ProfileProvider extends ChangeNotifier {
       _status = ProfileStatus.error;
       notifyListeners();
       rethrow;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
@@ -450,7 +419,6 @@ class ProfileProvider extends ChangeNotifier {
     try {
       final userModel = UserModel.fromEntity(user);
       await prefs.setString(kUserData, jsonEncode(userModel.toMap()));
-      log('User data saved to SharedPreferences', name: 'ProfileProvider');
     } catch (e) {
       log('Failed to save user data to SharedPreferences: $e',
           name: 'ProfileProvider');
@@ -460,6 +428,7 @@ class ProfileProvider extends ChangeNotifier {
   void resetStatus() {
     _status = ProfileStatus.initial;
     _errorMessage = '';
+    _isNavigatingOut = false; // Reset navigation flag
     notifyListeners();
   }
 }

@@ -7,12 +7,10 @@ import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cu
 import 'package:pharma_now/features/home/presentation/views/widgets/custom_bottom_navigation_bar.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/home_appbar.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/main_view_body_bloc_consummer.dart';
+import 'package:provider/provider.dart';
+import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 
-import '../../../order/presentation/views/cart_view.dart';
 import '../../../../core/utils/color_manger.dart';
-import '../../../favorites/presentation/views/favorites.dart';
-import '../../../profile/presentation/views/profile_view.dart';
-import 'widgets/main_view_body.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -30,26 +28,35 @@ class _MainViewState extends State<MainView> {
 
     return BlocProvider.value(
       value: cartCubit,
-      child: Scaffold(
-        extendBody: true,
-        backgroundColor: ColorManager.primaryColor,
-        appBar: CurrentViewIndex == 0
-            ? PreferredSize(
-                preferredSize: Size.fromHeight(80.h),
-                child: HomeAppbar(),
-              )
-            : null,
-        bottomNavigationBar: CustomBottomNavigationBar(
-          onItemTapped: (int value) {
-            CurrentViewIndex = value;
-            setState(() {});
-          },
-        ),
-        body: SafeArea(
-          child: MainViewBodyBlocConsummer(
-            CurrentViewIndex: CurrentViewIndex,
-          ),
-        ),
+      child: Consumer<ProfileProvider>(
+        builder: (context, profileProvider, child) {
+          final isNavigatingOut = profileProvider.isNavigatingOut;
+          debugPrint('MainView: build - isNavigatingOut: $isNavigatingOut');
+
+          return Scaffold(
+            extendBody: true,
+            backgroundColor: ColorManager.primaryColor,
+            appBar: CurrentViewIndex == 0
+                ? PreferredSize(
+                    preferredSize: Size.fromHeight(80.h),
+                    child: HomeAppbar(),
+                  )
+                : null,
+            bottomNavigationBar: isNavigatingOut
+                ? null
+                : CustomBottomNavigationBar(
+                    onItemTapped: (int value) {
+                      CurrentViewIndex = value;
+                      setState(() {});
+                    },
+                  ),
+            body: SafeArea(
+              child: MainViewBodyBlocConsummer(
+                CurrentViewIndex: CurrentViewIndex,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
