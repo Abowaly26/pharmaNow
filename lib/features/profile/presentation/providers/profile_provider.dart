@@ -86,8 +86,17 @@ class ProfileProvider extends ChangeNotifier {
             bool isGoogleUser = firebaseUser.providerData
                 .any((userInfo) => userInfo.providerId == 'google.com');
 
-            // Use Firestore name as the primary source of truth regardless of auth method
-            _currentUser = userDataFromFirestore;
+            // Sync Google profile image if missing or different in Firestore
+            if (isGoogleUser &&
+                firebaseUser.photoURL != null &&
+                firebaseUser.photoURL !=
+                    userDataFromFirestore.profileImageUrl) {
+              log('🔄 Syncing Google profile image to Firestore in ProfileProvider',
+                  name: 'ProfileProvider');
+              userDataFromFirestore = userDataFromFirestore.copyWith(
+                  profileImageUrl: firebaseUser.photoURL);
+              await _profileRepository.updateUserProfile(userDataFromFirestore);
+            }
 
             // Sync Auth displayName with Firestore name to ensure consistency
             if (firebaseUser.displayName != userDataFromFirestore.name) {
@@ -101,6 +110,10 @@ class ProfileProvider extends ChangeNotifier {
                 log('Failed to sync displayName: $e', name: 'ProfileProvider');
               }
             }
+
+            // Update current user and persist to local storage
+            _currentUser = userDataFromFirestore;
+            await _saveUserToLocal(_currentUser!);
 
             // If the user is a Google user but has a different name in Firestore,
             // we still prioritize the Firestore name (the registered name)
@@ -176,6 +189,10 @@ class ProfileProvider extends ChangeNotifier {
       );
       await _profileRepository.updateUserProfile(updatedUser);
       _currentUser = updatedUser;
+
+      // Persist to local storage
+      await _saveUserToLocal(updatedUser);
+
       // Also update displayName in Firebase Auth if the name has changed
       User? firebaseUser = FirebaseAuth.instance.currentUser;
       if (firebaseUser != null && firebaseUser.displayName != name) {
@@ -222,6 +239,9 @@ class ProfileProvider extends ChangeNotifier {
         profileImageUrl: imageUrl,
       );
 
+      // Persist to local storage
+      await _saveUserToLocal(_currentUser!);
+
       _status = ProfileStatus.success;
       log('Profile image updated successfully', name: 'ProfileProvider');
     } catch (e) {
@@ -259,6 +279,9 @@ class ProfileProvider extends ChangeNotifier {
         uId: _currentUser!.uId,
         profileImageUrl: null,
       );
+
+      // Persist to local storage
+      await _saveUserToLocal(_currentUser!);
 
       _status = ProfileStatus.success;
       log('Profile image removed successfully', name: 'ProfileProvider');
@@ -420,6 +443,17 @@ class ProfileProvider extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> _saveUserToLocal(UserEntity user) async {
+    try {
+      final userModel = UserModel.fromEntity(user);
+      await prefs.setString(kUserData, jsonEncode(userModel.toMap()));
+      log('User data saved to SharedPreferences', name: 'ProfileProvider');
+    } catch (e) {
+      log('Failed to save user data to SharedPreferences: $e',
+          name: 'ProfileProvider');
     }
   }
 

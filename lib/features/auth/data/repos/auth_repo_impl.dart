@@ -178,7 +178,16 @@ class AuthRepoImpl extends AuthRepo {
       if (dataExistsForCurrentUid) {
         // User has signed in with Google before
         log('📂 Found existing data for UID: $newUid');
-        final userEntity = await getUserData(uid: newUid);
+        var userEntity = await getUserData(uid: newUid);
+
+        // SYNC: Update profile image if it's missing or if Google has a new one
+        if (user.photoURL != null &&
+            user.photoURL != userEntity.profileImageUrl) {
+          log('🔄 Syncing Google profile image for returning user');
+          userEntity = userEntity.copyWith(profileImageUrl: user.photoURL);
+          await addUserData(user: userEntity); // Updates Firestore
+        }
+
         await saveUserData(user: userEntity);
         return right(userEntity);
       }
@@ -191,23 +200,19 @@ class AuthRepoImpl extends AuthRepo {
         // Found old data from password account
         log('📦 Found old data for email $email, migrating to new UID');
 
-        // Create user entity with old data but new UID
+        // Create user entity with old data but new UID and update image from Google
         final userEntity = UserEntity(
           name: oldUserData.name,
           email: email,
           uId: newUid, // Use new Google UID
+          profileImageUrl: user.photoURL ?? oldUserData.profileImageUrl,
         );
 
         // Save to new UID
         await addUserData(user: userEntity);
         await saveUserData(user: userEntity);
 
-        // Optional: Delete old UID data
-        // Note: This will break password login
-        // Uncomment the line below if you want to remove old data
-        // await databaseService.deleteUserData(oldUserData.uId);
-
-        log('✅ Data migrated successfully to UID: $newUid');
+        log('✅ Data migrated successfully to UID: $newUid with profile image sync');
         return right(userEntity);
       }
 

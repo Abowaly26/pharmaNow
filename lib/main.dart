@@ -23,7 +23,7 @@ import 'core/services/custom_bloc_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await SupabaseStorageService.initSupabase();
+  await SupabaseStorageService.initSupabase();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
