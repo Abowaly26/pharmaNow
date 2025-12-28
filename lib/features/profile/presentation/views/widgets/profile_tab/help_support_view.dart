@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
-import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HelpSupportView extends StatelessWidget {
   static const String routeName = "HelpSupport";
@@ -37,7 +40,7 @@ class HelpSupportView extends StatelessWidget {
               icon: Icons.email_outlined,
               title: 'Email Support',
               subtitle: 'waly20691@gmail.com',
-              onTap: () => _launchEmail('support@pharmanow.com'),
+              onTap: () => _launchEmail('waly20691@gmail.com'),
             ),
             SizedBox(height: 12.h),
 
@@ -50,13 +53,19 @@ class HelpSupportView extends StatelessWidget {
             SizedBox(height: 12.h),
 
             _buildContactCard(
-              icon: Icons.chat_bubble_outline,
-              title: 'Live Chat',
-              subtitle: 'Available 24/7',
-              onTap: () {
-                // Navigate to chat or show coming soon
-                _showComingSoonDialog(context);
-              },
+              iconPath: Assets.whatsappIcon,
+              title: 'WhatsApp',
+              subtitle: 'Chat with us on WhatsApp',
+              onTap: () => _launchWhatsApp('+201024941746'),
+            ),
+            SizedBox(height: 12.h),
+
+            _buildContactCard(
+              iconPath: Assets.facebookIcon,
+              title: 'Facebook',
+              subtitle: 'Follow us on Facebook',
+              onTap: () => _launchFacebook(
+                  'https://www.facebook.com/profile.php?id=100072882292717&locale=ar_AR'),
             ),
 
             SizedBox(height: 32.h),
@@ -193,67 +202,84 @@ class HelpSupportView extends StatelessWidget {
   }
 
   Widget _buildContactCard({
-    required IconData icon,
+    IconData? icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    Color? iconColor,
+    String? iconPath,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12.r),
-      child: Container(
-        padding: EdgeInsets.all(16.r),
-        decoration: BoxDecoration(
-          color: ColorManager.buttom_info,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: ColorManager.colorLines,
-            width: 1.w,
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorManager.buttom_info,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: Offset(0, 4),
           ),
+        ],
+        border: Border.all(
+          color: ColorManager.colorLines.withOpacity(0.5),
+          width: 1.w,
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(12.r),
-              decoration: BoxDecoration(
-                color: Color(0xFFDBEAFE),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: ColorManager.secondaryColor,
-                size: 24.sp,
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyles.sectionTitle.copyWith(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16.r),
+          child: Padding(
+            padding: EdgeInsets.all(16.r),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12.r),
+                  decoration: BoxDecoration(
+                    color: (iconColor ?? ColorManager.secondaryColor)
+                        .withOpacity(0.05),
+                    shape: BoxShape.circle,
                   ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    subtitle,
-                    style: TextStyles.description.copyWith(
-                      fontSize: 12.sp,
-                      color: ColorManager.greyColor,
-                    ),
+                  child: iconPath != null
+                      ? SvgPicture.asset(iconPath, width: 26.sp, height: 26.sp)
+                      : Icon(
+                          icon,
+                          color: iconColor ?? ColorManager.secondaryColor,
+                          size: 26.sp,
+                        ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyles.sectionTitle.copyWith(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        subtitle,
+                        style: TextStyles.description.copyWith(
+                          fontSize: 12.sp,
+                          color: ColorManager.greyColor.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14.sp,
+                  color: ColorManager.colorOfArrows.withOpacity(0.5),
+                ),
+              ],
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16.sp,
-              color: ColorManager.colorOfArrows,
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -354,52 +380,39 @@ class HelpSupportView extends StatelessWidget {
   }
 
   void _launchEmail(String email) async {
-    await Clipboard.setData(ClipboardData(text: email));
-    // Show a snackbar or dialog to inform user
-    _showCopiedDialog('Email copied to clipboard: $email');
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      query: 'subject=Pharma Now Support Request',
+    );
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri);
+    } else {
+      await Clipboard.setData(ClipboardData(text: email));
+    }
   }
 
   void _launchPhone(String phone) async {
-    await Clipboard.setData(ClipboardData(text: phone));
-    _showCopiedDialog('Phone number copied to clipboard: $phone');
+    final Uri phoneUri = Uri(scheme: 'tel', path: phone);
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    } else {
+      await Clipboard.setData(ClipboardData(text: phone));
+    }
   }
 
-  void _showCopiedDialog(String message) {
-    // This would need a BuildContext, so we'll handle it differently
-    // For now, we'll just copy to clipboard
+  void _launchWhatsApp(String phone) async {
+    final Uri whatsappUri = Uri.parse("https://wa.me/$phone");
+    if (await canLaunchUrl(whatsappUri)) {
+      await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+    }
   }
 
-  void _showComingSoonDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: ColorManager.primaryColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          'Coming Soon',
-          style: TextStyles.sectionTitle,
-        ),
-        content: Text(
-          'Live chat feature will be available soon!',
-          style: TextStyles.description.copyWith(
-            color: ColorManager.greyColor,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'OK',
-              style: TextStyles.buttonLabel.copyWith(
-                color: ColorManager.secondaryColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _launchFacebook(String url) async {
+    final Uri fbUri = Uri.parse(url);
+    if (await canLaunchUrl(fbUri)) {
+      await launchUrl(fbUri, mode: LaunchMode.externalApplication);
+    }
   }
 
   void _showInfoDialog(BuildContext context, String title, String content) {

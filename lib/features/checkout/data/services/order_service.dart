@@ -47,8 +47,11 @@ class OrderService {
         pharmacyWalletNumber: pharmacyWalletNumber,
       );
 
+      // Map user ID to the order
+      final orderWithUserId = order.copyWith(userId: currentUserId);
+
       // Convert order to JSON
-      final orderData = order.toJson();
+      final orderData = orderWithUserId.toJson();
 
       // Add Firestore timestamp
       orderData['createdAt'] = FieldValue.serverTimestamp();
@@ -60,7 +63,14 @@ class OrderService {
           .doc(currentUserId)
           .collection('orders');
 
-      final docRef = await userOrdersRef.add(orderData);
+      // Generate a new document reference to get the ID first
+      final docRef = userOrdersRef.doc();
+      orderData['orderId'] = docRef.id; // Store the ID in the document
+
+      // Also ensure the order entity's orderId field is set in JSON
+      // (toJson might have it as null if the entity didn't have it)
+
+      await docRef.set(orderData);
 
       // Also save to general orders collection for admin access
       await _firestore.collection('orders').doc(docRef.id).set({

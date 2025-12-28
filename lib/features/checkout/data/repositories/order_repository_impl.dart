@@ -36,8 +36,12 @@ class OrderRepositoryImpl implements OrderRepository {
       // Add timestamp for Firestore
       orderData['createdAt'] = FieldValue.serverTimestamp();
 
+      // Generate a new document reference to get the ID first
+      final docRef = _userOrdersRef.doc();
+      orderData['orderId'] = docRef.id; // Store the ID in the document
+
       // Create the order document
-      final docRef = await _userOrdersRef.add(orderData);
+      await docRef.set(orderData);
 
       // Also save to a general orders collection for admin access
       await _firestore.collection('orders').doc(docRef.id).set({
