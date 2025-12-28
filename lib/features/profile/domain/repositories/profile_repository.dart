@@ -3,15 +3,16 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
+import 'package:pharma_now/core/services/supabase_storage.dart';
 import 'package:pharma_now/features/auth/data/models/user_model.dart';
 import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 import 'firebase_profile_error_handler.dart';
 
 abstract class ProfileRepository {
   Future<void> updateUserProfile(UserEntity userEntity);
-  Future<void> updateUserProfileImage(File imageFile);
+  Future<String> updateUserProfileImage(File imageFile);
+  Future<void> removeUserProfileImage();
   Future<void> changePassword(String currentPassword, String newPassword);
   Future<void> logoutUser();
   Future<void> deleteUserAccount();
@@ -21,7 +22,7 @@ abstract class ProfileRepository {
 class FirebaseProfileRepository implements ProfileRepository {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final SupabaseStorageService _supabaseStorage = SupabaseStorageService();
 
   @override
   Future<void> updateUserProfile(UserEntity userEntity) async {
@@ -36,15 +37,27 @@ class FirebaseProfileRepository implements ProfileRepository {
     log('Updating user profile for UID: ${currentUser.uid}',
         name: 'FirebaseProfileRepository');
     await currentUser.updateDisplayName(userEntity.name);
-    await _firestore.collection('users').doc(currentUser.uid).set({
+
+    final Map<String, dynamic> updateData = {
       'name': userEntity.name,
       'email': userEntity.email,
-    }, SetOptions(merge: true)); // Use set with merge to avoid overwriting
+      'uId': currentUser.uid,
+    };
+
+    // Only include profileImageUrl if it's not null
+    if (userEntity.profileImageUrl != null) {
+      updateData['profileImageUrl'] = userEntity.profileImageUrl;
+    }
+
+    await _firestore.collection('users').doc(currentUser.uid).set(
+          updateData,
+          SetOptions(merge: true),
+        );
     log('User profile updated in Firestore', name: 'FirebaseProfileRepository');
   }
 
   @override
-  Future<void> updateUserProfileImage(File imageFile) async {
+  Future<String> updateUserProfileImage(File imageFile) async {
     final User? currentUser = _firebaseAuth.currentUser;
 
     if (currentUser == null) {
@@ -52,24 +65,66 @@ class FirebaseProfileRepository implements ProfileRepository {
     }
 
     try {
-      // Upload image to Firebase Storage
-      final storageRef =
-          _storage.ref().child('profile_images/${currentUser.uid}');
-      final uploadTask = storageRef.putFile(imageFile);
-      final snapshot = await uploadTask;
+      log('Uploading profile image to Supabase for UID: ${currentUser.uid}',
+          name: 'FirebaseProfileRepository');
 
-      // Get download URL
-      final downloadUrl = await snapshot.ref.getDownloadURL();
+      // Upload image to Supabase Storage
+      final String downloadUrl = await _supabaseStorage.uploadProfileImage(
+        imageFile,
+        currentUser.uid,
+      );
 
-      // Update photoURL in Auth
+      log('Profile image uploaded. URL: $downloadUrl',
+          name: 'FirebaseProfileRepository');
+
+      // Update photoURL in Firebase Auth
       await currentUser.updatePhotoURL(downloadUrl);
 
       // Update user data in Firestore
-      await _firestore.collection('users').doc(currentUser.uid).update({
+      await _firestore.collection('users').doc(currentUser.uid).set({
         'profileImageUrl': downloadUrl,
-      });
+      }, SetOptions(merge: true));
+
+      log('Profile image URL saved to Firestore',
+          name: 'FirebaseProfileRepository');
+
+      return downloadUrl;
     } catch (e) {
+      log('Error uploading profile image: $e',
+          name: 'FirebaseProfileRepository');
       throw Exception('Failed to update profile image: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> removeUserProfileImage() async {
+    final User? currentUser = _firebaseAuth.currentUser;
+
+    if (currentUser == null) {
+      throw Exception('No user is currently logged in');
+    }
+
+    try {
+      log('Removing profile image for UID: ${currentUser.uid}',
+          name: 'FirebaseProfileRepository');
+
+      // Delete image from Supabase Storage
+      await _supabaseStorage.deleteProfileImage(currentUser.uid);
+
+      // Clear photoURL in Firebase Auth
+      await currentUser.updatePhotoURL(null);
+
+      // Remove profileImageUrl from Firestore
+      await _firestore.collection('users').doc(currentUser.uid).update({
+        'profileImageUrl': FieldValue.delete(),
+      });
+
+      log('Profile image removed successfully',
+          name: 'FirebaseProfileRepository');
+    } catch (e) {
+      log('Error removing profile image: $e',
+          name: 'FirebaseProfileRepository');
+      throw Exception('Failed to remove profile image: ${e.toString()}');
     }
   }
 
@@ -110,14 +165,6 @@ class FirebaseProfileRepository implements ProfileRepository {
     try {
       // Clear local state
       await _firebaseAuth.signOut();
-
-      // Clear any local storage or cache if needed
-      // This would depend on your app's specific requirements
-
-      // Clear any other providers or streams
-      // For example, if you have a user provider:
-      // final userProvider = Provider.of<UserProvider>(context, listen: false);
-      // userProvider.clearUser();
     } catch (e) {
       log('Logout error: $e', name: 'FirebaseProfileRepository');
       throw CustomException(message: 'Failed to log out: ${e.toString()}');
@@ -136,14 +183,13 @@ class FirebaseProfileRepository implements ProfileRepository {
       // Delete user data from Firestore
       await _firestore.collection('users').doc(currentUser.uid).delete();
 
-      // Delete profile image from Storage if exists
+      // Delete profile image from Supabase Storage if exists
       try {
-        await _storage
-            .ref()
-            .child('profile_images/${currentUser.uid}')
-            .delete();
+        await _supabaseStorage.deleteProfileImage(currentUser.uid);
       } catch (e) {
         // Ignore if no profile image exists
+        log('No profile image to delete or error: $e',
+            name: 'FirebaseProfileRepository');
       }
 
       // Delete user from Authentication
@@ -166,9 +212,12 @@ class FirebaseProfileRepository implements ProfileRepository {
       final docSnapshot =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
       if (docSnapshot.exists) {
-        log('User profile found in Firestore',
+        final data = docSnapshot.data()!;
+        // Ensure uId is included in the data
+        data['uId'] = uid;
+        log('User profile found in Firestore with profileImageUrl: ${data['profileImageUrl']}',
             name: 'FirebaseProfileRepository');
-        return UserModel.fromJson(docSnapshot.data()!);
+        return UserModel.fromJson(data);
       }
       log('No user profile found in Firestore',
           name: 'FirebaseProfileRepository');
@@ -199,6 +248,7 @@ class FirebaseProfileRepository implements ProfileRepository {
         name: data['name'] ?? '',
         email: data['email'] ?? '',
         uId: currentUser.uid,
+        profileImageUrl: data['profileImageUrl'],
       );
     });
   }

@@ -1,10 +1,13 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
+import 'package:pharma_now/core/widgets/profile_avatar.dart';
 
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
@@ -19,31 +22,6 @@ import '../../../../../core/widgets/password_field.dart';
 import 'profile_tab/notification_view.dart';
 import 'profile_tab/terms_of_service_view.dart';
 import 'profile_tab/help_support_view.dart';
-
-// ArcPainter and SettingItem remain the same
-class ArcPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()
-      ..color = Colors.blue.withOpacity(0.3) // Example arc color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8;
-    canvas.drawArc(
-      Rect.fromCircle(
-          center: Offset(size.width / 2, size.height / 2),
-          radius: size.width / 2),
-      0,
-      3.14 * 2,
-      false,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
-}
 
 class SettingItem extends StatelessWidget {
   final IconData icon;
@@ -64,7 +42,7 @@ class SettingItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap ?? () {}, // Add required parameter
+      onTap: onTap ?? () {},
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
         child: Row(
@@ -72,12 +50,12 @@ class SettingItem extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Color(0xFFDBEAFE), // Icon background color
+                color: Color(0xFFDBEAFE),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                color: iconColor ?? Color(0xFF3638DA), // Icon color
+                color: iconColor ?? Color(0xFF3638DA),
                 size: 20,
               ),
             ),
@@ -87,12 +65,12 @@ class SettingItem extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: textColor ?? Color(0xff4F5A69), // Text color
+                  color: textColor ?? Color(0xff4F5A69),
                 ),
               ),
             ),
             Icon(Icons.arrow_forward_ios,
-                size: 14, color: ColorManager.colorOfArrows), // Arrow color
+                size: 14, color: ColorManager.colorOfArrows),
           ],
         ),
       ),
@@ -100,8 +78,191 @@ class SettingItem extends StatelessWidget {
   }
 }
 
-class ProfileViewBody extends StatelessWidget {
+class ProfileViewBody extends StatefulWidget {
   const ProfileViewBody({super.key});
+
+  @override
+  State<ProfileViewBody> createState() => _ProfileViewBodyState();
+}
+
+class _ProfileViewBodyState extends State<ProfileViewBody> {
+  final ImagePicker _imagePicker = ImagePicker();
+
+  Future<void> _showImagePickerOptions() async {
+    final provider = Provider.of<ProfileProvider>(context, listen: false);
+    final hasProfileImage = provider.currentUser?.profileImageUrl != null &&
+        provider.currentUser!.profileImageUrl!.isNotEmpty;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: ColorManager.primaryColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 20.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40.w,
+                  height: 4.h,
+                  margin: EdgeInsets.only(bottom: 20.h),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                Text(
+                  'Change Profile Photo',
+                  style: TextStyles.settingItemTitle.copyWith(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                _buildOptionTile(
+                  icon: Icons.camera_alt_outlined,
+                  title: 'Take Photo',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.camera);
+                  },
+                ),
+                _buildOptionTile(
+                  icon: Icons.photo_library_outlined,
+                  title: 'Choose from Gallery',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.gallery);
+                  },
+                ),
+                if (hasProfileImage)
+                  _buildOptionTile(
+                    icon: Icons.delete_outline,
+                    title: 'Remove Photo',
+                    iconColor: Colors.red,
+                    textColor: Colors.red,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _removeProfileImage();
+                    },
+                  ),
+                SizedBox(height: 10.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: ColorManager.secondaryColor,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color? iconColor,
+    Color? textColor,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: EdgeInsets.all(10.r),
+        decoration: BoxDecoration(
+          color: (iconColor ?? ColorManager.secondaryColor).withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: iconColor ?? ColorManager.secondaryColor,
+          size: 24.sp,
+        ),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.sp,
+          color: textColor ?? Colors.black87,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        final File imageFile = File(pickedFile.path);
+        final provider = Provider.of<ProfileProvider>(context, listen: false);
+        await provider.updateProfileImage(imageFile);
+
+        if (mounted) {
+          if (provider.status == ProfileStatus.error) {
+            showCustomBar(context, provider.errorMessage);
+          } else {
+            showCustomBar(
+              context,
+              'Profile photo updated successfully',
+              type: MessageType.success,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      log('Error picking image: $e', name: 'ProfileViewBody');
+      if (mounted) {
+        showCustomBar(context, 'Failed to pick image');
+      }
+    }
+  }
+
+  Future<void> _removeProfileImage() async {
+    try {
+      final provider = Provider.of<ProfileProvider>(context, listen: false);
+      await provider.removeProfileImage();
+
+      if (mounted) {
+        if (provider.status == ProfileStatus.error) {
+          showCustomBar(context, provider.errorMessage);
+        } else {
+          showCustomBar(
+            context,
+            'Profile photo removed',
+            type: MessageType.success,
+          );
+        }
+      }
+    } catch (e) {
+      log('Error removing image: $e', name: 'ProfileViewBody');
+      if (mounted) {
+        showCustomBar(context, 'Failed to remove profile photo');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,53 +277,18 @@ class ProfileViewBody extends StatelessWidget {
           child: Column(
             children: [
               SizedBox(height: 0.03 * height),
+              // Profile Avatar with edit capability
               Consumer<ProfileProvider>(
                 builder: (context, provider, child) {
-                  Widget avatarContent;
-                  if (provider.status == ProfileStatus.loading &&
-                      provider.currentUser == null) {
-                    avatarContent = CircleAvatar(
-                      radius: avatarRadius,
-                      backgroundColor: Colors.grey[300],
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    );
-                  } else if (provider.currentUser != null &&
-                      provider.currentUser!.name.isNotEmpty) {
-                    avatarContent = CircleAvatar(
-                      radius: avatarRadius,
-                      backgroundColor: Colors.purple,
-                      child: Text(
-                        provider.currentUser!.name[0].toUpperCase(),
-                        style: TextStyle(
-                          fontSize: avatarRadius * 0.8,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                  } else {
-                    final firebaseUser = FirebaseAuth.instance.currentUser;
-                    final fallbackName = firebaseUser?.displayName ??
-                        firebaseUser?.email?.split('@')[0] ??
-                        '?';
-                    avatarContent = CircleAvatar(
-                      radius: avatarRadius,
-                      backgroundColor: Colors.deepPurple,
-                      child: Text(
-                        fallbackName.isNotEmpty
-                            ? fallbackName[0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          fontSize: avatarRadius * 0.8,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                  }
-                  return avatarContent;
+                  return ProfileAvatar(
+                    imageUrl: provider.currentUser?.profileImageUrl,
+                    userName: provider.currentUser?.name,
+                    radius: avatarRadius,
+                    showArc: true,
+                    showEditOverlay: true,
+                    isLoading: provider.isLoading,
+                    onEditTap: _showImagePickerOptions,
+                  );
                 },
               ),
               SizedBox(height: 0.01 * height),
@@ -193,11 +319,10 @@ class ProfileViewBody extends StatelessWidget {
                   if (provider.status == ProfileStatus.loading &&
                       provider.currentUser == null) {
                     return Text(
-                      "Loading email...", // Loading state text for email
+                      "Loading email...",
                       style: TextStyle(fontSize: 16, color: Color(0xff718096)),
                     );
                   }
-                  // Use email from Provider, or empty value if not available
                   final userEmail = provider.currentUser?.email ?? "";
                   return Text(
                     userEmail,
@@ -211,7 +336,7 @@ class ProfileViewBody extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Account Settings', // Account settings title
+                    'Account Settings',
                     style: TextStyles.settingItemTitle
                         .copyWith(color: Color(0xFF4F5159)),
                   ),
@@ -219,23 +344,22 @@ class ProfileViewBody extends StatelessWidget {
               ),
               SettingItem(
                 icon: Icons.person,
-                title: "Edit Profile", // Edit profile
+                title: "Edit Profile",
                 onTap: () {
                   Navigator.pushNamed(context, EditProfile.routeName);
                 },
               ),
               SettingItem(
                 icon: Icons.notifications,
-                title: "Notifications", // Notifications
+                title: "Notifications",
                 onTap: () {
                   Navigator.pushNamed(context, Notifications.routeName);
-                  // Navigator.pushNamed(context, Notifications.routeName); // Ensure this route exists
                 },
               ),
               SizedBox(height: 0.01 * height),
               SettingItem(
                 icon: Icons.security,
-                title: "Terms of Service", // Terms of service
+                title: "Terms of Service",
                 onTap: () {
                   Navigator.pushNamed(context, TermsOfServiceView.routeName);
                 },
@@ -243,16 +367,15 @@ class ProfileViewBody extends StatelessWidget {
               SizedBox(height: 0.01 * height),
               SettingItem(
                 icon: Icons.lock,
-                title: "Change Password", // Change password
+                title: "Change Password",
                 onTap: () {
                   Navigator.pushNamed(context, ChangePasswordView.routeName);
-                  // Navigator.pushNamed(context, ChangePasswordView.routeName); // Ensure this route exists
                 },
               ),
               SizedBox(height: 0.01 * height),
               SettingItem(
                 icon: Icons.help_outlined,
-                title: "Help & Support", // Help & support
+                title: "Help & Support",
                 onTap: () {
                   Navigator.pushNamed(context, HelpSupportView.routeName);
                 },
@@ -299,14 +422,11 @@ class ProfileViewBody extends StatelessWidget {
                                           ? null
                                           : () async {
                                               try {
-                                                // Perform logout using the profile provider
                                                 final profileProvider = Provider
                                                     .of<ProfileProvider>(
                                                         context,
                                                         listen: false);
                                                 await profileProvider.logout();
-
-                                                // Navigation is handled by main.dart listener
                                               } catch (e) {
                                                 if (context.mounted) {
                                                   showCustomBar(
@@ -367,12 +487,10 @@ class ProfileViewBody extends StatelessWidget {
     final TextEditingController passwordController = TextEditingController();
     final user = FirebaseAuth.instance.currentUser;
 
-    // Check for Google provider first (higher priority)
     bool isGoogleUser = user?.providerData
             .any((userInfo) => userInfo.providerId == 'google.com') ??
         false;
 
-    // Only show password field if NOT Google user AND has password provider
     bool shouldShowPassword = !isGoogleUser &&
         (user?.providerData
                 .any((userInfo) => userInfo.providerId == 'password') ??
@@ -380,7 +498,7 @@ class ProfileViewBody extends StatelessWidget {
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dismissing by tapping outside
+      barrierDismissible: false,
       builder: (context) => StatefulBuilder(builder: (context, setState) {
         return AlertDialog(
           backgroundColor: ColorManager.primaryColor,
@@ -423,17 +541,14 @@ class ProfileViewBody extends StatelessWidget {
                     }
 
                     try {
-                      // Pass null for Google users, password text for email users
                       final passwordToSend =
                           shouldShowPassword ? passwordController.text : null;
 
                       await provider.reauthenticateAndDelete(passwordToSend);
                       if (context.mounted) {
-                        Navigator.of(context).pop(); // Close only on success
+                        Navigator.of(context).pop();
                       }
                     } catch (e) {
-                      // Error is already handled in provider to throw a user-friendly message
-                      // kept dialog open
                       if (context.mounted) {
                         showCustomBar(context, e.toString());
                       }

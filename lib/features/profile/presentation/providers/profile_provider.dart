@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:convert';
+import 'dart:io';
 import 'package:pharma_now/constants.dart';
 import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -97,14 +98,14 @@ class ProfileProvider extends ChangeNotifier {
                 log('Synced Auth displayName with Firestore name: ${userDataFromFirestore.name}',
                     name: 'ProfileProvider');
               } catch (e) {
-                log('Failed to sync displayName: $e',
-                    name: 'ProfileProvider');
+                log('Failed to sync displayName: $e', name: 'ProfileProvider');
               }
             }
 
             // If the user is a Google user but has a different name in Firestore,
             // we still prioritize the Firestore name (the registered name)
-            if (isGoogleUser && firebaseUser.displayName != null &&
+            if (isGoogleUser &&
+                firebaseUser.displayName != null &&
                 firebaseUser.displayName != userDataFromFirestore.name) {
               log('Google display name (${firebaseUser.displayName}) differs from registered name (${userDataFromFirestore.name}). Using registered name.',
                   name: 'ProfileProvider');
@@ -169,11 +170,12 @@ class ProfileProvider extends ChangeNotifier {
       // Email should come from the authentication source.
       final updatedUser = UserModel(
         name: name,
-        email: _currentUser!.email, // Retain current email from Provider
+        email: _currentUser!.email,
         uId: _currentUser!.uId,
+        profileImageUrl: _currentUser!.profileImageUrl,
       );
       await _profileRepository.updateUserProfile(updatedUser);
-      _currentUser = updatedUser; // Update current user in Provider
+      _currentUser = updatedUser;
       // Also update displayName in Firebase Auth if the name has changed
       User? firebaseUser = FirebaseAuth.instance.currentUser;
       if (firebaseUser != null && firebaseUser.displayName != name) {
@@ -189,8 +191,86 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  // Removed updateProfileImage function entirely
-  // Future<void> updateProfileImage(File imageFile) async { ... }
+  /// Updates the user's profile image
+  /// Upload to Supabase and save URL to Firestore
+  Future<void> updateProfileImage(File imageFile) async {
+    if (_currentUser == null) {
+      _errorMessage = 'No user currently logged in';
+      _status = ProfileStatus.error;
+      notifyListeners();
+      return;
+    }
+
+    _isLoading = true;
+    _status = ProfileStatus.loading;
+    notifyListeners();
+
+    try {
+      log('Uploading profile image...', name: 'ProfileProvider');
+
+      // Upload and get URL
+      final String imageUrl =
+          await _profileRepository.updateUserProfileImage(imageFile);
+
+      log('Profile image uploaded. URL: $imageUrl', name: 'ProfileProvider');
+
+      // Update current user with new image URL
+      _currentUser = UserModel(
+        name: _currentUser!.name,
+        email: _currentUser!.email,
+        uId: _currentUser!.uId,
+        profileImageUrl: imageUrl,
+      );
+
+      _status = ProfileStatus.success;
+      log('Profile image updated successfully', name: 'ProfileProvider');
+    } catch (e) {
+      log('Error uploading profile image: $e', name: 'ProfileProvider');
+      _errorMessage = 'Failed to upload profile image: ${e.toString()}';
+      _status = ProfileStatus.error;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Removes the user's profile image
+  Future<void> removeProfileImage() async {
+    if (_currentUser == null) {
+      _errorMessage = 'No user currently logged in';
+      _status = ProfileStatus.error;
+      notifyListeners();
+      return;
+    }
+
+    _isLoading = true;
+    _status = ProfileStatus.loading;
+    notifyListeners();
+
+    try {
+      log('Removing profile image...', name: 'ProfileProvider');
+
+      await _profileRepository.removeUserProfileImage();
+
+      // Update current user to remove image URL
+      _currentUser = UserModel(
+        name: _currentUser!.name,
+        email: _currentUser!.email,
+        uId: _currentUser!.uId,
+        profileImageUrl: null,
+      );
+
+      _status = ProfileStatus.success;
+      log('Profile image removed successfully', name: 'ProfileProvider');
+    } catch (e) {
+      log('Error removing profile image: $e', name: 'ProfileProvider');
+      _errorMessage = 'Failed to remove profile image: ${e.toString()}';
+      _status = ProfileStatus.error;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> changePassword(
       String currentPassword, String newPassword) async {

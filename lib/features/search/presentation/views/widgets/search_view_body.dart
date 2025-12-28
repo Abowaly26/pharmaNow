@@ -46,38 +46,41 @@ class SearchViewBody extends StatelessWidget {
                 // No results
                 if (state.products.isEmpty) {
                   return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          Assets.search_ups_icon1,
-                          width: 160.sp,
-                          height: 160.sp,
-                          // color: ColorManager.textInputColor,
-                        ),
-                        // Icon(
-                        //   Icons.search_off,
-                        //   size: 90.sp,
-                        //   color: ColorManager.textInputColor,
-                        // ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          'Ups!... no results found for "${state.searchQuery}"',
-                          textAlign: TextAlign.center,
-                          style: TextStyles.sectionTitle.copyWith(
-                            color: ColorManager.blackColor,
-                            fontSize: 18.sp,
+                    child: Padding(
+                      padding: EdgeInsets.all(16.r),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            Assets.search_ups_icon1,
+                            width: 160.sp,
+                            height: 160.sp,
+                            // color: ColorManager.textInputColor,
                           ),
-                        ),
-                        Text(
-                          'Please try another search',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: ColorManager.textInputColor,
+                          // Icon(
+                          //   Icons.search_off,
+                          //   size: 90.sp,
+                          //   color: ColorManager.textInputColor,
+                          // ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            'Ups!... no results found for "${state.searchQuery}"',
+                            textAlign: TextAlign.center,
+                            style: TextStyles.sectionTitle.copyWith(
+                              color: ColorManager.blackColor,
+                              fontSize: 18.sp,
+                            ),
                           ),
-                        ),
-                      ],
+                          Text(
+                            'Please try another search',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              color: ColorManager.textInputColor,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }

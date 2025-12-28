@@ -4,6 +4,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pharma_now/core/services/supabase_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_now/core/helper_functions/on_generate_route.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
@@ -22,6 +23,8 @@ import 'core/services/custom_bloc_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // await SupabaseStorageService.initSupabase();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

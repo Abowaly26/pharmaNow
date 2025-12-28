@@ -1,11 +1,12 @@
 import 'dart:developer';
-import 'dart:io'; // Can be removed if no longer used in this file
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
-// import 'package:image_picker/image_picker.dart'; // Removed
+import 'package:pharma_now/core/widgets/profile_avatar.dart';
 import 'package:provider/provider.dart';
 import '../../../../../../core/utils/app_images.dart';
 import '../../../../../../core/utils/button_style.dart';
@@ -22,10 +23,8 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> {
   final TextEditingController _nameController = TextEditingController();
-  // File? _selectedImage; // Removed
-  // bool _isUploading = false; // Removed
+  final ImagePicker _imagePicker = ImagePicker();
 
-  @override
   @override
   void initState() {
     super.initState();
@@ -51,11 +50,181 @@ class _EditProfileState extends State<EditProfile> {
     super.dispose();
   }
 
-  // Removed _selectImage function
-  // Future<void> _selectImage() async { ... }
+  Future<void> _showImagePickerOptions() async {
+    final provider = Provider.of<ProfileProvider>(context, listen: false);
+    final hasProfileImage = provider.currentUser?.profileImageUrl != null &&
+        provider.currentUser!.profileImageUrl!.isNotEmpty;
 
-  // Removed _uploadProfileImage function
-  // Future<void> _uploadProfileImage() async { ... }
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: ColorManager.primaryColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 20.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40.w,
+                  height: 4.h,
+                  margin: EdgeInsets.only(bottom: 20.h),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                Text(
+                  'Change Profile Photo',
+                  style: TextStyles.settingItemTitle.copyWith(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                _buildOptionTile(
+                  icon: Icons.camera_alt_outlined,
+                  title: 'Take Photo',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.camera);
+                  },
+                ),
+                _buildOptionTile(
+                  icon: Icons.photo_library_outlined,
+                  title: 'Choose from Gallery',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.gallery);
+                  },
+                ),
+                if (hasProfileImage)
+                  _buildOptionTile(
+                    icon: Icons.delete_outline,
+                    title: 'Remove Photo',
+                    iconColor: Colors.red,
+                    textColor: Colors.red,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _removeProfileImage();
+                    },
+                  ),
+                SizedBox(height: 10.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: ColorManager.secondaryColor,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color? iconColor,
+    Color? textColor,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: EdgeInsets.all(10.r),
+        decoration: BoxDecoration(
+          color: (iconColor ?? ColorManager.secondaryColor).withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: iconColor ?? ColorManager.secondaryColor,
+          size: 24.sp,
+        ),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.sp,
+          color: textColor ?? Colors.black87,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        final File imageFile = File(pickedFile.path);
+        final provider = Provider.of<ProfileProvider>(context, listen: false);
+        await provider.updateProfileImage(imageFile);
+
+        if (mounted) {
+          if (provider.status == ProfileStatus.error) {
+            showCustomBar(context, provider.errorMessage);
+          } else {
+            showCustomBar(
+              context,
+              'Profile photo updated successfully',
+              type: MessageType.success,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      log('Error picking image: $e', name: 'EditProfile');
+      if (mounted) {
+        showCustomBar(context, 'Failed to pick image');
+      }
+    }
+  }
+
+  Future<void> _removeProfileImage() async {
+    try {
+      final provider = Provider.of<ProfileProvider>(context, listen: false);
+      await provider.removeProfileImage();
+
+      if (mounted) {
+        if (provider.status == ProfileStatus.error) {
+          showCustomBar(context, provider.errorMessage);
+        } else {
+          showCustomBar(
+            context,
+            'Profile photo removed',
+            type: MessageType.success,
+          );
+        }
+      }
+    } catch (e) {
+      log('Error removing image: $e', name: 'EditProfile');
+      if (mounted) {
+        showCustomBar(context, 'Failed to remove profile photo');
+      }
+    }
+  }
 
   Future<void> _updateProfile() async {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
@@ -91,8 +260,7 @@ class _EditProfileState extends State<EditProfile> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(48.sp),
         child: PharmaAppBar(
-          // Ensure PharmaAppBar is defined correctly
-          title: 'Edit Profile', // App bar title
+          title: 'Edit Profile',
           isBack: true,
           onPressed: () => Navigator.pop(context),
         ),
@@ -104,32 +272,22 @@ class _EditProfileState extends State<EditProfile> {
             child: Column(
               children: [
                 SizedBox(height: 0.03 * height),
-                // Display avatar (initial letter only)
+                // Profile Avatar with edit capability
                 Consumer<ProfileProvider>(
-                  // Use Consumer to get the latest Provider data
                   builder: (context, currentProviderState, child) {
-                    String initialLetter = '?';
-                    if (currentProviderState.currentUser != null &&
-                        currentProviderState.currentUser!.name.isNotEmpty) {
-                      initialLetter = currentProviderState.currentUser!.name[0]
-                          .toUpperCase();
-                    }
-                    return CircleAvatar(
+                    return ProfileAvatar(
+                      imageUrl:
+                          currentProviderState.currentUser?.profileImageUrl,
+                      userName: currentProviderState.currentUser?.name,
                       radius: avatarRadius,
-                      backgroundColor: Colors.purple, // Avatar background color
-                      child: Text(
-                        initialLetter,
-                        style: TextStyle(
-                          fontSize: avatarRadius * 0.8,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      showArc: true,
+                      showEditOverlay: true,
+                      isLoading: currentProviderState.isLoading,
+                      onEditTap: _showImagePickerOptions,
                     );
                   },
                 ),
-                // Removed Stack and Positioned for camera
-                SizedBox(height: 0.01 * height),
+                SizedBox(height: 0.02 * height),
                 Consumer<ProfileProvider>(
                   builder: (context, providerData, _) {
                     String userName = providerData.currentUser?.name ?? '';
@@ -161,30 +319,23 @@ class _EditProfileState extends State<EditProfile> {
                 ),
                 SizedBox(height: 0.04 * height),
                 CustomTextField(
-                  // Ensure CustomTextField is defined correctly
                   controller: _nameController,
                   textInputType: TextInputType.name,
-                  lable: 'Name', // Name field label
-                  icon: Assets.nameIcon, // Ensure Assets.nameIcon is defined
-                  hint: 'Enter your name', // Hint text for name field
-                  // You can add onChanged here if you want to update the Consumer for name immediately
-                  // onChanged: (value) {
-                  //   // setState(() {}); // Simple way to rebuild the Consumer for name
-                  // }
+                  lable: 'Name',
+                  icon: Assets.nameIcon,
+                  hint: 'Enter your name',
                 ),
                 SizedBox(height: 0.05 * height),
                 ElevatedButton(
-                  style: ButtonStyles
-                      .primaryButton, // Ensure ButtonStyles.primaryButton is defined
+                  style: ButtonStyles.primaryButton,
                   onPressed: provider.isLoading ||
                           provider.status == ProfileStatus.loading
                       ? null
-                      : _updateProfile, // Disable button during loading
+                      : _updateProfile,
                   child: provider.isLoading ||
                           provider.status == ProfileStatus.loading
                       ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Save Changes',
-                          style: TextStyles.buttonLabel), // Save button text
+                      : Text('Save Changes', style: TextStyles.buttonLabel),
                 ),
                 SizedBox(height: 0.02 * height),
               ],

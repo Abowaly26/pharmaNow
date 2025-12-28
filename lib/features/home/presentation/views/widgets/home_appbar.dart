@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pharma_now/core/widgets/profile_avatar.dart';
 import 'package:pharma_now/features/medical_assistant/chat_bot.dart';
 
 import 'package:provider/provider.dart';
@@ -68,27 +69,14 @@ class HomeAppbar extends StatelessWidget {
             padding: EdgeInsets.only(left: 8.w),
             child: Consumer<ProfileProvider>(
               builder: (context, provider, child) {
-                return Consumer<ProfileProvider>(
-                    builder: (context, currentProviderState, child) {
-                  String initialLetter = '?';
-                  if (currentProviderState.currentUser != null &&
-                      currentProviderState.currentUser!.name.isNotEmpty) {
-                    initialLetter =
-                        currentProviderState.currentUser!.name[0].toUpperCase();
-                  }
-                  return CircleAvatar(
-                    radius: 20.r,
-                    backgroundColor: Colors.purple,
-                    child: Text(
-                      initialLetter,
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  );
-                });
+                return ProfileAvatar(
+                  imageUrl: provider.currentUser?.profileImageUrl,
+                  userName: provider.currentUser?.name,
+                  radius: 20.r,
+                  showArc: false,
+                  showEditOverlay: false,
+                  isLoading: false,
+                );
               },
             ),
           ),

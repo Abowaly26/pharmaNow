@@ -36,7 +36,7 @@ class HelpSupportView extends StatelessWidget {
             _buildContactCard(
               icon: Icons.email_outlined,
               title: 'Email Support',
-              subtitle: 'support@pharmanow.com',
+              subtitle: 'waly20691@gmail.com',
               onTap: () => _launchEmail('support@pharmanow.com'),
             ),
             SizedBox(height: 12.h),
@@ -44,8 +44,8 @@ class HelpSupportView extends StatelessWidget {
             _buildContactCard(
               icon: Icons.phone_outlined,
               title: 'Phone Support',
-              subtitle: '+20 123 456 7890',
-              onTap: () => _launchPhone('+201234567890'),
+              subtitle: '+20 10 24941746',
+              onTap: () => _launchPhone('+201024941746'),
             ),
             SizedBox(height: 12.h),
 
