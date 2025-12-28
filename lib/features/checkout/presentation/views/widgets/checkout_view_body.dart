@@ -351,10 +351,6 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                         }
                         return null;
                       },
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'[a-zA-Z\s\u0600-\u06FF]')),
-                      ],
                     ),
                     SizedBox(height: 14.h),
                     _buildModernTextField(
