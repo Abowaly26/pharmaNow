@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
 import 'package:pharma_now/core/services/supabase_storage.dart';
 import 'package:pharma_now/features/auth/data/models/user_model.dart';
@@ -22,7 +23,8 @@ abstract class ProfileRepository {
 class FirebaseProfileRepository implements ProfileRepository {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final SupabaseStorageService _supabaseStorage = SupabaseStorageService();
+  final SupabaseStorageService _supabaseStorage =
+      GetIt.instance<SupabaseStorageService>();
 
   @override
   Future<void> updateUserProfile(UserEntity userEntity) async {
@@ -61,38 +63,43 @@ class FirebaseProfileRepository implements ProfileRepository {
     final User? currentUser = _firebaseAuth.currentUser;
 
     if (currentUser == null) {
-      throw Exception('No user is currently logged in');
+      throw Exception('User authentication required (User is null)');
     }
 
+    String downloadUrl;
     try {
-      log('Uploading profile image to Supabase for UID: ${currentUser.uid}',
+      log('Step 1: Uploading to Supabase...',
           name: 'FirebaseProfileRepository');
-
-      // Upload image to Supabase Storage
-      final String downloadUrl = await _supabaseStorage.uploadProfileImage(
+      downloadUrl = await _supabaseStorage.uploadProfileImage(
         imageFile,
         currentUser.uid,
       );
+    } catch (e) {
+      log('Supabase Upload Failed: $e', name: 'FirebaseProfileRepository');
+      throw Exception('Supabase Storage Error: ${e.toString()}');
+    }
 
-      log('Profile image uploaded. URL: $downloadUrl',
+    try {
+      log('Step 2: Updating Firebase Auth photoURL...',
           name: 'FirebaseProfileRepository');
-
-      // Update photoURL in Firebase Auth
       await currentUser.updatePhotoURL(downloadUrl);
+    } catch (e) {
+      log('Firebase Auth Update Failed: $e', name: 'FirebaseProfileRepository');
+      // We don't throw here as the primary goal (upload & firestore) might still succeed
+    }
 
-      // Update user data in Firestore
+    try {
+      log('Step 3: Updating Firestore...', name: 'FirebaseProfileRepository');
       await _firestore.collection('users').doc(currentUser.uid).set({
         'profileImageUrl': downloadUrl,
       }, SetOptions(merge: true));
 
-      log('Profile image URL saved to Firestore',
+      log('Profile update completed successfully',
           name: 'FirebaseProfileRepository');
-
       return downloadUrl;
     } catch (e) {
-      log('Error uploading profile image: $e',
-          name: 'FirebaseProfileRepository');
-      throw Exception('Failed to update profile image: ${e.toString()}');
+      log('Firestore Update Failed: $e', name: 'FirebaseProfileRepository');
+      throw Exception('Firestore Database Error: ${e.toString()}');
     }
   }
 

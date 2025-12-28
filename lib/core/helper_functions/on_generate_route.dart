@@ -10,6 +10,7 @@ import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 import '../../features/auth/presentation/views/forget_password_view.dart';
 import '../../features/auth/presentation/views/verification_view_signup.dart';
 import '../../features/checkout/presentation/views/checkout_view.dart';
+import '../../features/checkout/presentation/views/order_confirmation_view.dart';
 import '../../features/favorites/presentation/views/favorites.dart';
 import '../../features/home/presentation/views/main_view.dart';
 import '../../features/home/presentation/views/medicine_details_view.dart';
@@ -38,6 +39,13 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case CheckoutView.routeName:
       return MaterialPageRoute(
         builder: (context) => const CheckoutView(),
+        settings: setting,
+      );
+
+    case OrderConfirmationView.routeName:
+      final args = setting.arguments as Map<String, dynamic>;
+      return MaterialPageRoute(
+        builder: (context) => OrderConfirmationView(orderData: args),
         settings: setting,
       );
 

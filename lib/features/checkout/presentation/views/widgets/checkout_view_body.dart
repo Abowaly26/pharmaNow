@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:ui';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
@@ -10,15 +11,18 @@ import 'package:pharma_now/core/widgets/bottom_pop_up.dart';
 import 'package:pharma_now/features/checkout/data/services/order_service.dart';
 import 'package:pharma_now/features/checkout/domain/entites/shipingadressentity.dart';
 import 'package:pharma_now/features/checkout/presentation/views/widgets/checkout_steps.dart';
+import 'package:pharma_now/features/checkout/presentation/views/order_confirmation_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
+import 'package:pharma_now/core/services/supabase_storage.dart';
 
 class CheckoutViewBody extends StatefulWidget {
-  const CheckoutViewBody({super.key});
+  final Function(bool) onProcessingChanged;
+  const CheckoutViewBody({super.key, required this.onProcessingChanged});
 
   @override
   State<CheckoutViewBody> createState() => _CheckoutViewBodyState();
@@ -48,6 +52,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   String? selectedImagePath; // To show preview
   bool isUploadingImage = false;
   File? paymentProofFile;
+  bool _isPickerActive = false;
 
   // Dynamic shipping options
   final List<String> shippingTitles = [
@@ -150,14 +155,20 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   }
 
   Future<void> _pickPaymentProof() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (_isPickerActive) return;
+    _isPickerActive = true;
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      setState(() {
-        paymentProofFile = File(pickedFile.path);
-        selectedImagePath = pickedFile.path;
-      });
+      if (pickedFile != null) {
+        setState(() {
+          paymentProofFile = File(pickedFile.path);
+          selectedImagePath = pickedFile.path;
+        });
+      }
+    } finally {
+      _isPickerActive = false;
     }
   }
 
@@ -228,24 +239,24 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                 ),
                 // Bottom section with button
                 Container(
-                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 4.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 12.h),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: Offset(0, -2),
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 20,
+                        offset: Offset(0, -5),
                       ),
                     ],
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24.r),
+                    ),
                   ),
                   child: SafeArea(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (currentPage == 2)
-                          _buildPaymentSummary(subtotal, delivery, total),
-                        if (currentPage == 2) SizedBox(height: 12.h),
                         _buildActionButton(),
                       ],
                     ),
@@ -768,197 +779,6 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                   ],
                 ),
               ),
-              if (paymentOptions[index]['showWalletNumber'] == true) ...[
-                // Vodafone Cash or InstaPay Professional Card
-                SizedBox(height: 16.h),
-                Container(
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: ColorManager.secondaryColor.withOpacity(0.3),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 8,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Transfer to Account:',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 4.h),
-                              Text(
-                                paymentOptions[index]['walletNumber'],
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: ColorManager.blackColor,
-                                  letterSpacing: 1.2,
-                                  fontFamily: 'Courier', // Professional look
-                                ),
-                              ),
-                            ],
-                          ),
-                          Material(
-                            color: ColorManager.secondaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8.r),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(8.r),
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(
-                                    text: paymentOptions[index]
-                                        ['walletNumber']));
-                                showCustomBar(
-                                  context,
-                                  'Number copied to clipboard!',
-                                  type: MessageType.success,
-                                );
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.all(8.w),
-                                child: Icon(
-                                  Icons.copy_rounded,
-                                  color: ColorManager.secondaryColor,
-                                  size: 20.sp,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 10.w, vertical: 8.h),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[50],
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline,
-                                color: ColorManager.secondaryColor,
-                                size: 16.sp),
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: Text(
-                                'Step 1: Transfer total amount to this number.\nStep 2: Take a screenshot and upload it below.',
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  color: Colors.grey[700],
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Text(
-                  'Upload Payment Proof',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: ColorManager.blackColor,
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                GestureDetector(
-                  onTap: _pickPaymentProof,
-                  child: Container(
-                    width: double.infinity,
-                    height: 140.h,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(
-                        color: Colors.grey[300]!,
-                        width: 1.5,
-                        style: BorderStyle.solid,
-                      ),
-                    ),
-                    child: selectedImagePath != null
-                        ? Stack(
-                            children: [
-                              Positioned.fill(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  child: Image.file(
-                                    File(selectedImagePath!),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 8.h,
-                                right: 8.w,
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.black54,
-                                  radius: 14.r,
-                                  child: Icon(Icons.edit,
-                                      color: Colors.white, size: 14.sp),
-                                ),
-                              ),
-                            ],
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(12.w),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.cloud_upload_outlined,
-                                  color: ColorManager.secondaryColor,
-                                  size: 32.sp,
-                                ),
-                              ),
-                              SizedBox(height: 12.h),
-                              Text(
-                                'Click to upload screenshot',
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                'JPEG, PNG files are allowed',
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  color: Colors.grey[400],
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
-              ],
             ],
           ],
         ),
@@ -966,122 +786,20 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     );
   }
 
-  Widget _buildPaymentSummary(double subtotal, double delivery, double total) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSmallSummaryRow(
-              'Subtotal', '${subtotal.toStringAsFixed(0)} EGP'),
-          SizedBox(height: 6.h),
-          _buildSmallSummaryRow(
-              'Delivery', '${delivery.toStringAsFixed(0)} EGP'),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.h),
-            child: Divider(height: 1, color: Colors.grey[300]),
-          ),
-          _buildSmallSummaryRow(
-            'Total',
-            '${total.toStringAsFixed(0)} EGP',
-            isTotal: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSmallSummaryRow(String label, String value,
-      {bool isTotal = false, Color? valueColor}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isTotal ? 15.sp : 13.sp,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: Colors.grey[700],
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isTotal ? 15.sp : 13.sp,
-            fontWeight: FontWeight.bold,
-            color: valueColor ??
-                (isTotal ? ColorManager.secondaryColor : Colors.grey[700]),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOrderSummary(double subtotal, double delivery, double total) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Order Summary',
-            style: TextStyles.settingItemTitle,
-          ),
-          SizedBox(height: 12.h),
-          _buildSummaryRow('Subtotal', '${subtotal.toStringAsFixed(0)} EGP'),
-          SizedBox(height: 6.h),
-          _buildSummaryRow('Delivery', '${delivery.toStringAsFixed(0)} EGP'),
-          SizedBox(height: 12.h),
-          Divider(height: 1, color: Colors.grey[300]),
-          SizedBox(height: 12.h),
-          _buildSummaryRow(
-            'Total',
-            '${total.toStringAsFixed(0)} EGP',
-            isTotal: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(String label, String value,
-      {bool isTotal = false, Color? valueColor}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isTotal ? 16.sp : 14.sp,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: Colors.grey[700],
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isTotal ? 16.sp : 14.sp,
-            fontWeight: FontWeight.bold,
-            color: valueColor ??
-                (isTotal ? ColorManager.secondaryColor : Colors.grey[700]),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildActionButton() {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      height: 52.h,
+      height: 54.h,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: ColorManager.secondaryColor.withOpacity(0.3),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
       child: ElevatedButton(
         onPressed: _handleNextStep,
         style: ElevatedButton.styleFrom(
@@ -1089,24 +807,39 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(16.r),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _getButtonText(),
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
               ),
-            ),
-            if (currentPage < 2) ...[
-              SizedBox(width: 8.w),
-              Icon(Icons.arrow_forward, size: 18.sp),
+            );
+          },
+          child: Row(
+            key: ValueKey<int>(currentPage),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _getButtonText(),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Icon(Icons.arrow_forward_rounded, size: 20.sp),
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -1119,14 +852,14 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       case 1:
         return 'Continue to Payment';
       case 2:
-        return 'Complete Order';
+        return 'Review Order';
       default:
         return 'Next';
     }
   }
 
   void _handleNextStep() {
-    // Calculate totals for potential bottom sheet usage
+    // Calculate totals for navigation to confirmation screen
     final cartState = context.read<CartCubit>().state;
     final cartEntity = (cartState as dynamic).cartEntity as CartEntity;
     double subtotal = cartEntity.calculateTotalPrice();
@@ -1170,8 +903,35 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         return;
       }
 
-      // Show order summary bottom sheet before completing the order
-      _showOrderSummaryBottomSheet(subtotal, delivery, total);
+      // Navigate to full-screen confirmation instead of bottom sheet
+      bool needsProof = selectedPayment >= 0 &&
+          paymentOptions[selectedPayment]['requiresInput'] == true;
+
+      Navigator.pushNamed(
+        context,
+        OrderConfirmationView.routeName,
+        arguments: {
+          'name': fullName,
+          'phone': phone,
+          'address':
+              '$address, $city${apartment.isNotEmpty ? ', $apartment' : ''}',
+          'paymentMethod': paymentOptions[selectedPayment]['title'],
+          'senderPhone': walletPhone.isNotEmpty ? walletPhone : phone,
+          'walletNumber': paymentOptions[selectedPayment]['walletNumber'],
+          'needsProof': needsProof,
+          'subtotal': subtotal,
+          'delivery': delivery,
+          'total': total,
+        },
+      ).then((value) {
+        if (value != null) {
+          if (value is File) {
+            paymentProofFile = value;
+            selectedImagePath = value.path;
+          }
+          _completeOrder();
+        }
+      });
     }
   }
 
@@ -1183,228 +943,53 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     );
   }
 
-  void _updateAddressFields() {
-    fullNameController.text = fullName;
-    emailController.text = email;
-    addressController.text = address;
-    cityController.text = city;
-    apartmentController.text = apartment;
-    phoneController.text = phone;
-  }
-
-  void _showOrderSummaryBottomSheet(
-      double subtotal, double delivery, double total) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 24.h,
-              left: 20.w,
-              right: 20.w,
-              top: 20.h,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Handle bar
-                Center(
-                  child: Container(
-                    width: 40.w,
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2.r),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                // Address details header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Order Confirmation',
-                      style: TextStyles.bold24Black,
-                    ),
-                    TextButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _updateAddressFields();
-                        pageController.animateToPage(
-                          1,
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      icon: Icon(Icons.edit,
-                          size: 16.sp, color: ColorManager.secondaryColor),
-                      label: Text('Edit',
-                          style: TextStyle(color: ColorManager.secondaryColor)),
-                    )
-                  ],
-                ),
-                SizedBox(height: 16.h),
-                _buildDetailsCard(),
-                SizedBox(height: 16.h),
-                _buildOrderSummary(subtotal, delivery, total),
-                SizedBox(height: 20.h),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52.h,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorManager.secondaryColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _completeOrder();
-                    },
-                    child: Text(
-                      'Confirm & Place Order',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80.w,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: Colors.grey[600],
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value.isEmpty ? '-' : value,
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w500,
-                color: ColorManager.blackColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailsCard() {
-    String paymentMethod = selectedPayment >= 0
-        ? paymentOptions[selectedPayment]['title']
-        : 'Not selected';
-
-    if (selectedPayment >= 0 &&
-        paymentOptions[selectedPayment]['requiresInput'] == true) {
-      paymentMethod += '\n$walletPhone';
-    }
-
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildDetailRow('Name', fullName),
-          _buildDetailRow('Phone', phone),
-          _buildDetailRow('Address', '$address, $city'),
-          if (apartment.isNotEmpty) _buildDetailRow('Apt', apartment),
-          _buildDetailRow('Payment', paymentMethod),
-          _buildDetailRow(
-              'Delivery',
-              selectedShipping >= 0
-                  ? shippingTitles[selectedShipping]
-                  : 'Not selected'),
-        ],
-      ),
-    );
-  }
-
   void _completeOrder() async {
-    // Show loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: Container(
-          padding: EdgeInsets.all(24.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(ColorManager.secondaryColor),
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                'Processing your order...',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.grey[700],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    widget.onProcessingChanged(true);
 
     try {
-      // Get cart data
+      // 1. Check if we need to upload payment proof first
+      String? uploadedProofUrl;
+      final needsProof = selectedPayment >= 0 &&
+          paymentOptions[selectedPayment]['requiresInput'] == true;
+
+      if (needsProof) {
+        if (paymentProofFile == null) {
+          // This should be caught by validation before calling this method,
+          // but good as a safety check
+          Navigator.of(context).pop();
+          showCustomBar(
+            context,
+            'Please upload your payment proof',
+            type: MessageType.warning,
+          );
+          return;
+        }
+
+        // Get user ID
+        final user = context.read<ProfileProvider>().currentUser;
+        if (user == null) {
+          throw Exception('User authentication required');
+        }
+
+        // Upload proof
+        // Note: You need to ensure SupabaseStorageService.uploadPaymentProof exists
+        // as implemented in the previous step
+        final supabaseService = GetIt.I<SupabaseStorageService>();
+        uploadedProofUrl = await supabaseService.uploadPaymentProof(
+            paymentProofFile!, user.uId); // Assuming uId is the field name
+      }
+
+      // 2. Get cart data
       final cartState = context.read<CartCubit>().state;
       final cartEntity = (cartState as dynamic).cartEntity as CartEntity;
 
-      // Calculate totals
+      // 3. Calculate totals
       double subtotal = cartEntity.calculateTotalPrice();
       double delivery =
           selectedShipping >= 0 ? shippingPrices[selectedShipping] : 0;
       double total = subtotal + delivery;
 
-      // Create shipping address entity
+      // 4. Create shipping address entity
       final shippingAddress = ShippingAddressEntity(
         namee: fullName,
         email: email,
@@ -1414,10 +999,10 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         phoneNumber: phone,
       );
 
-      // Get order service
+      // 5. Get order service
       final orderService = GetIt.I<OrderService>();
 
-      // Create order in Firebase
+      // 6. Create order in Firebase
       final orderId = await orderService.createOrderFromCart(
         cartItems: cartEntity.cartItems,
         payWithCash: selectedPayment == 0, // Cash on Delivery
@@ -1425,16 +1010,19 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         subtotal: subtotal,
         deliveryFee: delivery,
         totalAmount: total,
-        paymentProofUrl: paymentProofUrl,
+        paymentProofUrl: uploadedProofUrl,
+        paymentMethodName: paymentOptions[selectedPayment]['title'],
+        senderWalletPhone: walletPhone.isNotEmpty ? walletPhone : phone,
+        pharmacyWalletNumber: paymentOptions[selectedPayment]['walletNumber'],
       );
 
-      // Clear the cart cubit
+      // 7. Clear the cart cubit
       context.read<CartCubit>().clearCart();
 
-      // Close loading dialog
-      Navigator.of(context).pop();
+      // 8. Stop processing state
+      widget.onProcessingChanged(false);
 
-      // Show success bottom sheet
+      // 9. Show success bottom sheet
       showSuccessBottomSheet(
         context,
         'Your order #$orderId has been placed successfully!\n\nWe\'ll send you a confirmation shortly.',
@@ -1449,15 +1037,24 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         buttonText: 'Continue Shopping',
       );
     } catch (e) {
-      // Close loading dialog
-      Navigator.of(context).pop();
+      // Stop processing state
+      widget.onProcessingChanged(false);
 
       // Show error snackbar
+      String errorMessage = 'Failed to create order. Please try again.';
+      if (e.toString().contains('User authentication')) {
+        errorMessage = 'Please sign in to place an order';
+      } else {
+        // Pass the actual error message for diagnostics on real device
+        errorMessage = e.toString().replaceAll('Exception:', '').trim();
+      }
+
       showCustomBar(
         context,
-        'Failed to create order. Please try again.',
+        errorMessage,
         type: MessageType.error,
       );
+      print('Order Error: $e');
     }
   }
 }

@@ -23,6 +23,9 @@ class OrderService {
     required double deliveryFee,
     required double totalAmount,
     String? paymentProofUrl,
+    String? paymentMethodName,
+    String? senderWalletPhone,
+    String? pharmacyWalletNumber,
   }) async {
     if (!isUserLoggedIn) {
       throw Exception('You must be logged in to create an order');
@@ -39,6 +42,9 @@ class OrderService {
         totalAmount: totalAmount,
         userId: currentUserId,
         paymentProofUrl: paymentProofUrl,
+        paymentMethodName: paymentMethodName,
+        senderWalletPhone: senderWalletPhone,
+        pharmacyWalletNumber: pharmacyWalletNumber,
       );
 
       // Convert order to JSON

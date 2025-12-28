@@ -18,6 +18,9 @@ class OrderEntity extends Equatable {
   final DateTime createdAt;
   final String? userId;
   final String? paymentProofUrl;
+  final String? paymentMethodName;
+  final String? senderWalletPhone;
+  final String? pharmacyWalletNumber;
 
   OrderEntity({
     this.orderId,
@@ -31,6 +34,9 @@ class OrderEntity extends Equatable {
     DateTime? createdAt,
     this.userId,
     this.paymentProofUrl,
+    this.paymentMethodName,
+    this.senderWalletPhone,
+    this.pharmacyWalletNumber,
   }) : createdAt = createdAt ?? DateTime.now();
 
   @override
@@ -46,14 +52,29 @@ class OrderEntity extends Equatable {
         createdAt,
         userId,
         paymentProofUrl,
+        paymentMethodName,
+        senderWalletPhone,
+        pharmacyWalletNumber,
       ];
 
   // Convert to JSON for Firestore
-  Map<String, dynamic> toJson() => _$OrderEntityToJson(this);
+  Map<String, dynamic> toJson() {
+    final json = _$OrderEntityToJson(this);
+    json['paymentMethodName'] = paymentMethodName;
+    json['senderWalletPhone'] = senderWalletPhone;
+    json['pharmacyWalletNumber'] = pharmacyWalletNumber;
+    return json;
+  }
 
   // Create from JSON from Firestore
-  factory OrderEntity.fromJson(Map<String, dynamic> json) =>
-      _$OrderEntityFromJson(json);
+  factory OrderEntity.fromJson(Map<String, dynamic> json) {
+    final entity = _$OrderEntityFromJson(json);
+    return entity.copyWith(
+      paymentMethodName: json['paymentMethodName'] as String?,
+      senderWalletPhone: json['senderWalletPhone'] as String?,
+      pharmacyWalletNumber: json['pharmacyWalletNumber'] as String?,
+    );
+  }
 
   OrderEntity copyWith({
     String? orderId,
@@ -67,6 +88,9 @@ class OrderEntity extends Equatable {
     DateTime? createdAt,
     String? userId,
     String? paymentProofUrl,
+    String? paymentMethodName,
+    String? senderWalletPhone,
+    String? pharmacyWalletNumber,
     String? promoCode,
     double? discountAmount,
   }) {
@@ -83,6 +107,9 @@ class OrderEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       userId: userId ?? this.userId,
       paymentProofUrl: paymentProofUrl ?? this.paymentProofUrl,
+      paymentMethodName: paymentMethodName ?? this.paymentMethodName,
+      senderWalletPhone: senderWalletPhone ?? this.senderWalletPhone,
+      pharmacyWalletNumber: pharmacyWalletNumber ?? this.pharmacyWalletNumber,
     );
   }
 }

@@ -22,6 +22,7 @@ OrderEntity _$OrderEntityFromJson(Map<String, dynamic> json) => OrderEntity(
           ? null
           : DateTime.parse(json['createdAt'] as String),
       userId: json['userId'] as String?,
+      paymentProofUrl: json['paymentProofUrl'] as String?,
     );
 
 Map<String, dynamic> _$OrderEntityToJson(OrderEntity instance) =>
@@ -36,4 +37,5 @@ Map<String, dynamic> _$OrderEntityToJson(OrderEntity instance) =>
       'orderStatus': instance.orderStatus,
       'createdAt': instance.createdAt.toIso8601String(),
       'userId': instance.userId,
+      'paymentProofUrl': instance.paymentProofUrl,
     };

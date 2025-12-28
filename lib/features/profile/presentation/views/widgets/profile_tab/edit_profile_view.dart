@@ -24,6 +24,7 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   final TextEditingController _nameController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+  bool _isPickerActive = false;
 
   @override
   void initState() {
@@ -169,6 +170,8 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    if (_isPickerActive) return;
+    _isPickerActive = true;
     try {
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: source,
@@ -199,6 +202,8 @@ class _EditProfileState extends State<EditProfile> {
       if (mounted) {
         showCustomBar(context, 'Failed to pick image');
       }
+    } finally {
+      _isPickerActive = false;
     }
   }
 

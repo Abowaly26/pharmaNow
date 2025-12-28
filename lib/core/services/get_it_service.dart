@@ -3,6 +3,7 @@ import 'package:pharma_now/core/repos/medicine_repo/medicine_repo.dart';
 import 'package:pharma_now/core/services/database_service.dart';
 import 'package:pharma_now/core/services/firebase_auth_service.dart';
 import 'package:pharma_now/core/services/firestore_sevice.dart';
+import 'package:pharma_now/core/services/supabase_storage.dart';
 import 'package:pharma_now/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
 import 'package:pharma_now/features/cart/di/cart_injection.dart';
@@ -26,6 +27,10 @@ void setupGetit() {
 
   // Register SearchCubit
   getIt.registerFactory<SearchCubit>(() => SearchCubit(getIt<MedicineRepo>()));
+
+  // Register SupabaseStorageService
+  getIt.registerLazySingleton<SupabaseStorageService>(
+      () => SupabaseStorageService());
 
   // Initialize Favorites dependencies
   FavoritesInjection.init();

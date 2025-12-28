@@ -232,7 +232,9 @@ class ProfileProvider extends ChangeNotifier {
       await _saveUserToLocal(_currentUser!);
       _status = ProfileStatus.success;
     } catch (e) {
-      _errorMessage = 'Failed to upload profile image: ${e.toString()}';
+      // Clean up the error message for the UI
+      String errorMsg = e.toString().replaceAll('Exception:', '').trim();
+      _errorMessage = 'Failed to upload profile image: $errorMsg';
       _status = ProfileStatus.error;
     } finally {
       _isLoading = false;
