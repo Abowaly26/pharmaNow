@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/features/checkout/presentation/views/widgets/checkout_view_body.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,7 +40,13 @@ class _CheckoutViewState extends State<CheckoutView> {
               child: PharmaAppBar(
                 title: 'Checkout',
                 isBack: !_isProcessing,
-                onPressed: _isProcessing ? null : () => Navigator.pop(context),
+                onPressed: _isProcessing
+                    ? null
+                    : () {
+                        SystemChannels.textInput.invokeMethod('TextInput.hide');
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        Navigator.pop(context);
+                      },
               ),
             ),
             body: CheckoutViewBody(

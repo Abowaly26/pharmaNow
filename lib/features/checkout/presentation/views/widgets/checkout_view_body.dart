@@ -907,6 +907,8 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       bool needsProof = selectedPayment >= 0 &&
           paymentOptions[selectedPayment]['requiresInput'] == true;
 
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+      FocusScope.of(context).requestFocus(FocusNode());
       Navigator.pushNamed(
         context,
         OrderConfirmationView.routeName,
@@ -944,6 +946,8 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   }
 
   void _completeOrder() async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    FocusScope.of(context).requestFocus(FocusNode());
     widget.onProcessingChanged(true);
 
     try {
@@ -1021,6 +1025,8 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
 
       // 8. Stop processing state
       widget.onProcessingChanged(false);
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+      FocusScope.of(context).requestFocus(FocusNode());
 
       // 9. Show success bottom sheet
       showSuccessBottomSheet(

@@ -99,7 +99,13 @@ class _OrderConfirmationViewState extends State<OrderConfirmationView> {
             child: PharmaAppBar(
               title: 'Order Confirmation',
               isBack: !_isProcessing,
-              onPressed: _isProcessing ? null : () => Navigator.pop(context),
+              onPressed: _isProcessing
+                  ? null
+                  : () {
+                      SystemChannels.textInput.invokeMethod('TextInput.hide');
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      Navigator.pop(context);
+                    },
             ),
           ),
           body: Column(
@@ -692,6 +698,8 @@ class _OrderConfirmationViewState extends State<OrderConfirmationView> {
   }
 
   void _confirmOrder() {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    FocusScope.of(context).requestFocus(FocusNode());
     setState(() => _isProcessing = true);
     // Return the picked file to the caller (CheckoutViewBody)
     Future.delayed(const Duration(milliseconds: 100), () {

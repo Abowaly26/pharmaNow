@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
@@ -14,6 +15,8 @@ void showSuccessBottomSheet(
   bool enableDrag = true,
   String buttonText = 'Ok',
 }) {
+  SystemChannels.textInput.invokeMethod('TextInput.hide');
+  FocusScope.of(context).requestFocus(FocusNode());
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
@@ -80,6 +83,9 @@ void showSuccessBottomSheet(
                           child: ElevatedButton(
                             style: ButtonStyles.primaryButton,
                             onPressed: () {
+                              SystemChannels.textInput
+                                  .invokeMethod('TextInput.hide');
+                              FocusScope.of(context).requestFocus(FocusNode());
                               // Close the bottom sheet first
                               Navigator.of(context).pop();
                               // Then execute the provided action (e.g., navigation)
