@@ -53,10 +53,6 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> _showImagePickerOptions() async {
-    final provider = Provider.of<ProfileProvider>(context, listen: false);
-    final hasProfileImage = provider.currentUser?.profileImageUrl != null &&
-        provider.currentUser!.profileImageUrl!.isNotEmpty;
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -104,17 +100,6 @@ class _EditProfileState extends State<EditProfile> {
                     _pickImage(ImageSource.gallery);
                   },
                 ),
-                if (hasProfileImage)
-                  _buildOptionTile(
-                    icon: Icons.delete_outline,
-                    title: 'Remove Photo',
-                    iconColor: Colors.red,
-                    textColor: Colors.red,
-                    onTap: () {
-                      Navigator.pop(context);
-                      _removeProfileImage();
-                    },
-                  ),
                 SizedBox(height: 10.h),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -223,30 +208,6 @@ class _EditProfileState extends State<EditProfile> {
       }
     } finally {
       _isPickerActive = false;
-    }
-  }
-
-  Future<void> _removeProfileImage() async {
-    try {
-      final provider = Provider.of<ProfileProvider>(context, listen: false);
-      await provider.removeProfileImage();
-
-      if (mounted) {
-        if (provider.status == ProfileStatus.error) {
-          showCustomBar(context, provider.errorMessage);
-        } else {
-          showCustomBar(
-            context,
-            'Profile photo removed',
-            type: MessageType.success,
-          );
-        }
-      }
-    } catch (e) {
-      log('Error removing image: $e', name: 'EditProfile');
-      if (mounted) {
-        showCustomBar(context, 'Failed to remove profile photo');
-      }
     }
   }
 

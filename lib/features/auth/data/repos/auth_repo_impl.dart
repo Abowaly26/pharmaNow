@@ -180,10 +180,11 @@ class AuthRepoImpl extends AuthRepo {
         log('📂 Found existing data for UID: $newUid');
         var userEntity = await getUserData(uid: newUid);
 
-        // SYNC: Update profile image if it's missing or if Google has a new one
+        // SYNC: Update profile image IF IT IS MISSING and Google has one
         if (user.photoURL != null &&
-            user.photoURL != userEntity.profileImageUrl) {
-          log('🔄 Syncing Google profile image for returning user');
+            (userEntity.profileImageUrl == null ||
+                userEntity.profileImageUrl!.isEmpty)) {
+          log('🔄 Syncing Google profile image for returning user (no existing image)');
           userEntity = userEntity.copyWith(profileImageUrl: user.photoURL);
           await addUserData(user: userEntity); // Updates Firestore
         }
@@ -200,12 +201,12 @@ class AuthRepoImpl extends AuthRepo {
         // Found old data from password account
         log('📦 Found old data for email $email, migrating to new UID');
 
-        // Create user entity with old data but new UID and update image from Google
+        // Create user entity with old data but new UID and update image from Google if old image is missing
         final userEntity = UserEntity(
           name: oldUserData.name,
           email: email,
           uId: newUid, // Use new Google UID
-          profileImageUrl: user.photoURL ?? oldUserData.profileImageUrl,
+          profileImageUrl: oldUserData.profileImageUrl ?? user.photoURL,
         );
 
         // Save to new UID

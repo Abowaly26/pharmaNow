@@ -66,6 +66,15 @@ class FirebaseProfileRepository implements ProfileRepository {
       throw Exception('User authentication required (User is null)');
     }
 
+    try {
+      log('Step 0: Deleting old profile image if exists...',
+          name: 'FirebaseProfileRepository');
+      await removeUserProfileImage();
+    } catch (e) {
+      log('Initial cleanup failed (probably no image exists): $e',
+          name: 'FirebaseProfileRepository');
+    }
+
     String downloadUrl;
     try {
       log('Step 1: Uploading to Supabase...',

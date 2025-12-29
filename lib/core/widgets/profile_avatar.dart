@@ -51,7 +51,13 @@ class ProfileAvatar extends StatelessWidget {
 
     Widget avatar;
 
-    if (isLoading) {
+    // If we are loading and have no data, show skeleton
+    // If we are loading and HAVE data, we'll show the avatar with an overlay
+    final bool isInitialLoading = isLoading &&
+        imageUrl == null &&
+        (userName == null || userName!.isEmpty);
+
+    if (isInitialLoading) {
       // Return a simple circle that Skeletonizer will treat as a bone
       avatar = CircleAvatar(
         radius: radius,
@@ -61,6 +67,34 @@ class ProfileAvatar extends StatelessWidget {
       avatar = _buildImageAvatar();
     } else {
       avatar = _buildInitialAvatar(initialLetter, bgColor);
+    }
+
+    // Add loading overlay if we are loading but already have data (e.g. uploading/updating)
+    if (isLoading && !isInitialLoading) {
+      avatar = Stack(
+        alignment: Alignment.center,
+        children: [
+          avatar,
+          Container(
+            width: radius * 2,
+            height: radius * 2,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.4),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: SizedBox(
+                width: radius * 0.4,
+                height: radius * 0.4,
+                child: const CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
     }
 
     // Wrap with arc if needed

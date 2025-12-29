@@ -97,8 +97,8 @@ class ProfileProvider extends ChangeNotifier {
 
             if (isGoogleUser &&
                 firebaseUser.photoURL != null &&
-                firebaseUser.photoURL !=
-                    userDataFromFirestore.profileImageUrl) {
+                (userDataFromFirestore.profileImageUrl == null ||
+                    userDataFromFirestore.profileImageUrl!.isEmpty)) {
               userDataFromFirestore = userDataFromFirestore.copyWith(
                   profileImageUrl: firebaseUser.photoURL);
               await _profileRepository.updateUserProfile(userDataFromFirestore);
@@ -234,9 +234,8 @@ class ProfileProvider extends ChangeNotifier {
       await _saveUserToLocal(_currentUser!);
       _status = ProfileStatus.success;
     } catch (e) {
-      // Clean up the error message for the UI
-      String errorMsg = e.toString().replaceAll('Exception:', '').trim();
-      _errorMessage = 'Failed to upload profile image: $errorMsg';
+      log('Original upload error: $e', name: 'ProfileProvider');
+      _errorMessage = 'error in upload image';
       _status = ProfileStatus.error;
     } finally {
       _isLoading = false;
