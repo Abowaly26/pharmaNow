@@ -119,10 +119,15 @@ class ProfileAvatar extends StatelessWidget {
   }
 
   String _getInitialLetter() {
-    if (userName != null && userName!.isNotEmpty) {
-      return userName![0].toUpperCase();
+    if (userName != null && userName!.trim().isNotEmpty) {
+      final List<String> names = userName!.trim().split(' ');
+      if (names.length > 1) {
+        // Get first letter of first two words
+        return (names[0][0] + names[1][0]).toUpperCase();
+      }
+      return names[0][0].toUpperCase();
     }
-    return ''; // Return empty string instead of '?' to allow skeletonizer to show better placeholder or look cleaner
+    return ''; // Return empty string instead of '?' to allow skeletonizer to show better placeholder
   }
 
   Widget _buildImageAvatar() {
@@ -153,13 +158,16 @@ class ProfileAvatar extends StatelessWidget {
   }
 
   Widget _buildInitialAvatar(String letter, Color bgColor) {
+    // Dynamic font size based on number of initials
+    final double fontSize = letter.length > 1 ? radius * 0.5 : radius * 0.8;
+
     return CircleAvatar(
       radius: radius,
       backgroundColor: bgColor,
       child: Text(
         letter,
         style: TextStyle(
-          fontSize: radius * 0.8,
+          fontSize: fontSize,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),

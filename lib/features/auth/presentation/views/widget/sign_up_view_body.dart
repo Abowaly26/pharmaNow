@@ -6,13 +6,16 @@ import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/app_validation.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
+import 'package:pharma_now/core/widgets/custom_check_box.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
 
+import '../../../../../core/helper_functions/build_error_bar.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/widgets/password_field.dart';
 import '../../cubits/sinup_cubit/signup_cubit.dart';
+import 'terms_and_conditions_widget.dart';
 
 class SingnUpBody extends StatefulWidget {
   const SingnUpBody({super.key});
@@ -32,6 +35,7 @@ class _SingnUpBodyState extends State<SingnUpBody> {
   final FocusNode emailFocus = FocusNode();
   final FocusNode passwordFocus = FocusNode();
   final FocusNode confirmPasswordFocus = FocusNode();
+  bool isTermsAccepted = false;
 
   @override
   void dispose() {
@@ -68,9 +72,9 @@ class _SingnUpBodyState extends State<SingnUpBody> {
                 userName = p0!;
               },
               validator: AppValidation.validateUserName,
-              lable: 'Name',
+              lable: 'Full Name',
               icon: Assets.nameIcon,
-              hint: 'Enter your name',
+              hint: 'Enter your first and last name',
               textInputType: TextInputType.name,
             ),
             SizedBox(
@@ -134,21 +138,37 @@ class _SingnUpBodyState extends State<SingnUpBody> {
             SizedBox(
               height: 24.h,
             ),
+            TermsAndConditionsWidget(
+              onChanged: (value) {
+                setState(() {
+                  isTermsAccepted = value;
+                });
+              },
+              value: isTermsAccepted,
+            ),
+            SizedBox(
+              height: 24.h,
+            ),
             ElevatedButton(
               style: ButtonStyles.primaryButton,
               onPressed: () {
                 if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-                  context.read<SignupCubit>().createUserWithEmailAndPassword(
-                      email, password, userName);
+                  if (isTermsAccepted) {
+                    formKey.currentState!.save();
+                    context.read<SignupCubit>().createUserWithEmailAndPassword(
+                        email, password, userName);
+                  } else {
+                    showCustomBar(
+                      context,
+                      'Please accept the Terms and Conditions',
+                      type: MessageType.warning,
+                    );
+                  }
                 } else {
                   setState(() {
                     autovalidateMode = AutovalidateMode.always;
                   });
                 }
-
-                // Navigator.pushReplacementNamed(
-                //     context, VerificationView.routeName);
               },
               child: Text(
                 'Sign Up',

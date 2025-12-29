@@ -101,4 +101,5 @@ class Assets {
   static const String whatsappIcon = "assets/images/WhatsAppIcon.svg";
   static const String emptyNotific = "assets/images/empty_notific.svg";
   static const String facebookIcon = "assets/images/FacebookIcon.svg";
+  static const String checkMark = "assets/images/check_mark.svg";
 }

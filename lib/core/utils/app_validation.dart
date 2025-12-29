@@ -2,12 +2,21 @@ import 'app_regex.dart';
 
 class AppValidation {
   static String? validateUserName(String? value) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return 'Name is required';
     }
+
+    // Trim and split by whitespace
+    final names = value.trim().split(RegExp(r'\s+'));
+
+    if (names.length < 2) {
+      return 'Please enter both your first and last name';
+    }
+
     if (value.length < 3) {
       return 'Name must be at least 3 characters';
     }
+
     if (!AppRegex.isNameValid(value)) {
       return 'Name must contain letters only';
     }
@@ -22,10 +31,11 @@ class AppValidation {
   }
 
   static String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return 'Email is required';
     }
-    if (!AppRegex.isEmailValid(value)) {
+    final trimmedValue = value.trim();
+    if (!AppRegex.isEmailValid(trimmedValue)) {
       return 'Please enter a valid email address';
     }
     return null;
