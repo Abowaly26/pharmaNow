@@ -319,7 +319,11 @@ class ProfileProvider extends ChangeNotifier {
       bool isPasswordProvider = user.providerData
           .any((userInfo) => userInfo.providerId == 'password');
 
-      if (isGoogleUser) {
+      if (password != null && password.isNotEmpty) {
+        credential = EmailAuthProvider.credential(
+            email: user.email!, password: password);
+        await user.reauthenticateWithCredential(credential);
+      } else if (isGoogleUser) {
         try {
           final GoogleSignIn googleSignIn = GoogleSignIn();
           final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -337,15 +341,11 @@ class ProfileProvider extends ChangeNotifier {
 
           await user.reauthenticateWithCredential(credential);
         } catch (e) {
+          if (e == 'Google sign-in cancelled') rethrow;
           throw 'Failed to re-authenticate with Google. Please try again.';
         }
       } else if (isPasswordProvider) {
-        if (password == null || password.isEmpty) {
-          throw 'Please enter your password';
-        }
-        credential = EmailAuthProvider.credential(
-            email: user.email!, password: password);
-        await user.reauthenticateWithCredential(credential);
+        throw 'Please enter your password';
       }
 
       await deleteAccount();

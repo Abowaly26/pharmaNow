@@ -353,14 +353,17 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                     },
                   ),
                   SizedBox(height: 0.01 * height),
-                  SettingItem(
-                    icon: Icons.lock,
-                    title: "Change Password",
-                    onTap: () {
-                      Navigator.pushNamed(
-                          context, ChangePasswordView.routeName);
-                    },
-                  ),
+                  if (FirebaseAuth.instance.currentUser?.providerData.any(
+                          (userInfo) => userInfo.providerId == 'password') ??
+                      false)
+                    SettingItem(
+                      icon: Icons.lock,
+                      title: "Change Password",
+                      onTap: () {
+                        Navigator.pushNamed(
+                            context, ChangePasswordView.routeName);
+                      },
+                    ),
                   SizedBox(height: 0.01 * height),
                   SettingItem(
                     icon: Icons.help_outlined,
@@ -488,14 +491,9 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     final TextEditingController passwordController = TextEditingController();
     final user = FirebaseAuth.instance.currentUser;
 
-    bool isGoogleUser = user?.providerData
-            .any((userInfo) => userInfo.providerId == 'google.com') ??
+    bool shouldShowPassword = user?.providerData
+            .any((userInfo) => userInfo.providerId == 'password') ??
         false;
-
-    bool shouldShowPassword = !isGoogleUser &&
-        (user?.providerData
-                .any((userInfo) => userInfo.providerId == 'password') ??
-            false);
 
     showDialog(
       context: context,
