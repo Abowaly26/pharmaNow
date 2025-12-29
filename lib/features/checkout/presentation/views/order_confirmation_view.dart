@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/helper_functions/show_custom_bar.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
+import 'package:pharma_now/core/widgets/custom_loading_overlay.dart';
 import 'dart:ui';
 
 class OrderConfirmationView extends StatefulWidget {
@@ -90,165 +91,61 @@ class _OrderConfirmationViewState extends State<OrderConfirmationView> {
     final double delivery = widget.orderData['delivery'] ?? 0;
     final double total = widget.orderData['total'] ?? 0;
 
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: Colors.grey[50],
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(48.sp),
-            child: PharmaAppBar(
-              title: 'Order Confirmation',
-              isBack: !_isProcessing,
-              onPressed: _isProcessing
-                  ? null
-                  : () {
-                      SystemChannels.textInput.invokeMethod('TextInput.hide');
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      Navigator.pop(context);
-                    },
-            ),
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionTitle('Delivery & Payment'),
-                      SizedBox(height: 16.h),
-                      _buildDetailsCard(),
-                      if (needsProof) ...[
-                        SizedBox(height: 28.h),
-                        _buildSectionTitle('Payment Instructions'),
-                        SizedBox(height: 16.h),
-                        _buildPaymentInstructionCard(),
-                        SizedBox(height: 28.h),
-                        _buildSectionTitle('Upload Proof'),
-                        SizedBox(height: 16.h),
-                        _buildUploadProofArea(),
-                      ],
-                      SizedBox(height: 28.h),
-                      _buildSectionTitle('Order Summary'),
-                      SizedBox(height: 16.h),
-                      _buildSummaryCard(subtotal, delivery, total),
-                      SizedBox(height: 40.h),
-                    ],
-                  ),
-                ),
-              ),
-              _buildBottomActionButton(needsProof),
-            ],
+    return CustomLoadingOverlay(
+      isLoading: _isProcessing,
+      title: 'Processing Order',
+      subtitle: 'Securely verifying your details and placing your order...',
+      icon: Icons.shopping_cart_outlined,
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(48.sp),
+          child: PharmaAppBar(
+            title: 'Order Confirmation',
+            isBack: !_isProcessing,
+            onPressed: _isProcessing
+                ? null
+                : () {
+                    SystemChannels.textInput.invokeMethod('TextInput.hide');
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    Navigator.pop(context);
+                  },
           ),
         ),
-        if (_isProcessing)
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-              child: Container(
-                color: Colors.black.withOpacity(0.12),
-                child: Center(
-                  child: Material(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24.r),
-                    elevation: 10,
-                    child: Container(
-                      width: 280.w,
-                      padding: EdgeInsets.symmetric(
-                          vertical: 32.h, horizontal: 24.w),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                height: 64.h,
-                                width: 64.h,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    ColorManager.secondaryColor
-                                        .withOpacity(0.2),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 64.h,
-                                width: 64.h,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      ColorManager.secondaryColor),
-                                ),
-                              ),
-                              Icon(
-                                Icons.shopping_cart_outlined,
-                                color: ColorManager.secondaryColor,
-                                size: 24.sp,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 24.h),
-                          Text(
-                            'Processing Order',
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                              letterSpacing: 0.5,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          Text(
-                            'Securely verifying your details and placing your order...',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              height: 1.5,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w400,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12.w, vertical: 6.h),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(20.r),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.lock_outline,
-                                    size: 14.sp, color: Colors.grey[400]),
-                                SizedBox(width: 6.w),
-                                Text(
-                                  'Secure Checkout',
-                                  style: TextStyle(
-                                    fontSize: 10.sp,
-                                    color: Colors.grey[400],
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.none,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle('Delivery & Payment'),
+                    SizedBox(height: 16.h),
+                    _buildDetailsCard(),
+                    if (needsProof) ...[
+                      SizedBox(height: 28.h),
+                      _buildSectionTitle('Payment Instructions'),
+                      SizedBox(height: 16.h),
+                      _buildPaymentInstructionCard(),
+                      SizedBox(height: 28.h),
+                      _buildSectionTitle('Upload Proof'),
+                      SizedBox(height: 16.h),
+                      _buildUploadProofArea(),
+                    ],
+                    SizedBox(height: 28.h),
+                    _buildSectionTitle('Order Summary'),
+                    SizedBox(height: 16.h),
+                    _buildSummaryCard(subtotal, delivery, total),
+                    SizedBox(height: 40.h),
+                  ],
                 ),
               ),
             ),
-          ),
-      ],
+            _buildBottomActionButton(needsProof),
+          ],
+        ),
+      ),
     );
   }
 

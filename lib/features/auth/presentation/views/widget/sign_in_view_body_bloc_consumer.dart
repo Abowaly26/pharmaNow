@@ -21,13 +21,15 @@ class SigninViewBodyBlocConsumer extends StatefulWidget {
 class _SigninViewBodyBlocConsumerState
     extends State<SigninViewBodyBlocConsumer> {
   bool _hasShownAccountDeletedBar = false;
+  bool _hasShownLoggedOutBar = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final accountDeleted = args?['accountDeleted'] ?? false;
+    final Map<dynamic, dynamic>? args =
+        ModalRoute.of(context)?.settings.arguments as Map<dynamic, dynamic>?;
+    final accountDeleted = args?['accountDeleted'] == true;
+    final loggedOut = args?['loggedOut'] == true;
     final reason = args?['reason'] as String?;
 
     if (accountDeleted && !_hasShownAccountDeletedBar) {
@@ -45,6 +47,17 @@ class _SigninViewBodyBlocConsumerState
           context,
           message,
           type: MessageType.warning,
+        );
+      });
+    }
+
+    if (loggedOut && !_hasShownLoggedOutBar) {
+      _hasShownLoggedOutBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showCustomBar(
+          context,
+          'Logged out successfully.',
+          type: MessageType.success,
         );
       });
     }

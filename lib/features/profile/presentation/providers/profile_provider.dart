@@ -51,9 +51,11 @@ class ProfileProvider extends ChangeNotifier {
         if (!_isNavigatingOut) {
           clearUserData();
         } else {
-          _currentUser = null;
-          log('Silently cleared user data during navigation out',
+          // Keep _currentUser to prevent background data from changing or showing placeholders
+          // during the intentional logout/deletion transition/animation.
+          log('Keeping user data during intentional navigation out',
               name: 'ProfileProvider');
+          notifyListeners();
         }
       }
     });
@@ -380,18 +382,11 @@ class ProfileProvider extends ChangeNotifier {
     _isNavigatingOut = true;
     notifyListeners();
     try {
-      log('ProfileProvider: Delaying for 3 seconds to show skeleton...',
-          name: 'ProfileProvider');
-      await Future.delayed(const Duration(seconds: 3));
-
-      log('ProfileProvider: Proceeding with normalLogout...',
-          name: 'ProfileProvider');
       final authService = FirebaseAuthService();
       await authService.normalLogout(); // This calls signOut internally
 
       // Don't reset status here, let navigation happen while in loading state
-      _currentUser = null;
-      // We don't call notifyListeners() or reset status to prevent reshowing
+      // We keep _currentUser until the navigation happens or auth state changes
     } catch (e) {
       _isNavigatingOut = false;
       log('Logout error: $e', name: 'ProfileProvider');
@@ -410,15 +405,10 @@ class ProfileProvider extends ChangeNotifier {
     _isNavigatingOut = true;
     notifyListeners();
     try {
-      log('ProfileProvider: Delaying for 3 seconds to show skeleton...',
-          name: 'ProfileProvider');
-      await Future.delayed(const Duration(seconds: 3));
-
-      log('ProfileProvider: Deleting account...', name: 'ProfileProvider');
       FirebaseAuthService().setUserDeleted(true);
       await _profileRepository.deleteUserAccount();
 
-      _currentUser = null;
+      // Status will be handled by navigation or success state
       _status = ProfileStatus.success;
     } catch (e) {
       _isNavigatingOut = false;

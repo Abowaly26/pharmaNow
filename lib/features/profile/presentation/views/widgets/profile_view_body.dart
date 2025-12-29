@@ -8,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/widgets/profile_avatar.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
@@ -274,182 +273,191 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     return SafeArea(
       child: Consumer<ProfileProvider>(
         builder: (context, provider, child) {
-          final isExitLoading = provider.isNavigatingOut;
           final user = provider.currentUser;
 
-          log('ProfileViewBody: build - isExitLoading: $isExitLoading, status: ${provider.status}',
-              name: 'ProfileViewBody');
-
-          return Skeletonizer(
-            enabled: isExitLoading,
-            effect: ShimmerEffect(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.white,
-              duration: const Duration(seconds: 2),
-            ),
-            child: SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  children: [
-                    SizedBox(height: 0.02 * height),
-                    ProfileAvatar(
-                      imageUrl: user?.profileImageUrl,
-                      userName: user?.name,
-                      radius: avatarRadius,
-                      showArc: true,
-                      showEditOverlay: true,
-                      isLoading: isExitLoading,
-                      onEditTap: _showImagePickerOptions,
-                    ),
-                    SizedBox(height: 0.01 * height),
-                    Text(
-                      user?.name ?? "User Name Placeholder",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 0.01 * height),
-                    Text(
-                      user?.email ?? "user.email@example.com",
-                      style: TextStyle(fontSize: 16, color: Color(0xff718096)),
-                    ),
-                    SizedBox(height: 0.04 * height),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 0.056 * width),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Account Settings',
-                          style: TextStyles.settingItemTitle
-                              .copyWith(color: Color(0xFF4F5159)),
-                        ),
+          return SingleChildScrollView(
+            child: Center(
+              child: Column(
+                children: [
+                  SizedBox(height: 0.02 * height),
+                  ProfileAvatar(
+                    imageUrl: user?.profileImageUrl,
+                    userName: user?.name,
+                    radius: avatarRadius,
+                    showArc: true,
+                    showEditOverlay: true,
+                    isLoading: false, // Keep background stable
+                    onEditTap: _showImagePickerOptions,
+                  ),
+                  SizedBox(height: 0.01 * height),
+                  Text(
+                    user?.name ?? "User Name Placeholder",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 0.01 * height),
+                  Text(
+                    user?.email ?? "user.email@example.com",
+                    style: TextStyle(fontSize: 16, color: Color(0xff718096)),
+                  ),
+                  SizedBox(height: 0.04 * height),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 0.056 * width),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Account Settings',
+                        style: TextStyles.settingItemTitle
+                            .copyWith(color: Color(0xFF4F5159)),
                       ),
                     ),
-                    SettingItem(
-                      icon: Icons.person,
-                      title: "Edit Profile",
-                      onTap: () {
-                        Navigator.pushNamed(context, EditProfile.routeName);
-                      },
-                    ),
-                    SettingItem(
-                      icon: Icons.notifications,
-                      title: "Notifications",
-                      onTap: () {
-                        Navigator.pushNamed(context, Notifications.routeName);
-                      },
-                    ),
-                    SizedBox(height: 0.01 * height),
-                    SettingItem(
-                      icon: Icons.security,
-                      title: "Terms of Service",
-                      onTap: () {
-                        Navigator.pushNamed(
-                            context, TermsOfServiceView.routeName);
-                      },
-                    ),
-                    SizedBox(height: 0.01 * height),
-                    SettingItem(
-                      icon: Icons.lock,
-                      title: "Change Password",
-                      onTap: () {
-                        Navigator.pushNamed(
-                            context, ChangePasswordView.routeName);
-                      },
-                    ),
-                    SizedBox(height: 0.01 * height),
-                    SettingItem(
-                      icon: Icons.help_outlined,
-                      title: "Help & Support",
-                      onTap: () {
-                        Navigator.pushNamed(context, HelpSupportView.routeName);
-                      },
-                    ),
-                    SizedBox(height: 0.01 * height),
-                    SettingItem(
-                      icon: Icons.delete_forever,
-                      title: "Delete Account",
-                      onTap: () {
-                        _showReAuthDialog(
-                            context,
-                            Provider.of<ProfileProvider>(context,
-                                listen: false));
-                      },
-                    ),
-                    SettingItem(
-                      icon: Icons.logout,
-                      title: "Log Out",
-                      onTap: () {
-                        showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: ColorManager.primaryColor,
-                            content: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20.0.w),
-                              child: Text(
-                                'Are you sure you want to log out?',
-                                style: TextStyles.skip
-                                    .copyWith(color: Colors.black),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            actions: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 10.0.w),
-                                    child: TextButton(
-                                      onPressed: () async {
-                                        try {
-                                          final profileProvider =
-                                              Provider.of<ProfileProvider>(
-                                                  context,
-                                                  listen: false);
-                                          // Pop dialog immediately to show background skeleton
-                                          Navigator.of(context).pop();
-                                          await profileProvider.logout();
-                                        } catch (e) {
-                                          if (context.mounted) {
-                                            showCustomBar(
-                                                context, e.toString());
-                                            log('Logout error: $e',
-                                                name: 'ProfileViewBody');
-                                          }
-                                        }
-                                      },
-                                      child: Text('Logout',
-                                          style: TextStyles.buttonLabel
-                                              .copyWith(
-                                                  color:
-                                                      ColorManager.redColorF5)),
+                  ),
+                  SettingItem(
+                    icon: Icons.person,
+                    title: "Edit Profile",
+                    onTap: () {
+                      Navigator.pushNamed(context, EditProfile.routeName);
+                    },
+                  ),
+                  SettingItem(
+                    icon: Icons.notifications,
+                    title: "Notifications",
+                    onTap: () {
+                      Navigator.pushNamed(context, Notifications.routeName);
+                    },
+                  ),
+                  SizedBox(height: 0.01 * height),
+                  SettingItem(
+                    icon: Icons.security,
+                    title: "Terms of Service",
+                    onTap: () {
+                      Navigator.pushNamed(
+                          context, TermsOfServiceView.routeName);
+                    },
+                  ),
+                  SizedBox(height: 0.01 * height),
+                  SettingItem(
+                    icon: Icons.lock,
+                    title: "Change Password",
+                    onTap: () {
+                      Navigator.pushNamed(
+                          context, ChangePasswordView.routeName);
+                    },
+                  ),
+                  SizedBox(height: 0.01 * height),
+                  SettingItem(
+                    icon: Icons.help_outlined,
+                    title: "Help & Support",
+                    onTap: () {
+                      Navigator.pushNamed(context, HelpSupportView.routeName);
+                    },
+                  ),
+                  SizedBox(height: 0.01 * height),
+                  SettingItem(
+                    icon: Icons.delete_forever,
+                    title: "Delete Account",
+                    onTap: () {
+                      _showReAuthDialog(context,
+                          Provider.of<ProfileProvider>(context, listen: false));
+                    },
+                  ),
+                  SettingItem(
+                    icon: Icons.logout,
+                    title: "Log Out",
+                    onTap: () {
+                      showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (context) {
+                          bool isLoggingOut = false;
+                          return StatefulBuilder(
+                            builder: (context, setDialogState) {
+                              return AlertDialog(
+                                backgroundColor: ColorManager.primaryColor,
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 20.0.w),
+                                      child: Text(
+                                        'Are you sure you want to log out?',
+                                        style: TextStyles.skip
+                                            .copyWith(color: Colors.black),
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 28.w),
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 10.0.w),
-                                    child: ElevatedButton(
-                                      style: ButtonStyles.smallButton,
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text('Cancel',
-                                          style: TextStyles.buttonLabel
-                                              .copyWith(
+                                  ],
+                                ),
+                                actions: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      TextButton(
+                                        onPressed: isLoggingOut
+                                            ? null
+                                            : () async {
+                                                setDialogState(
+                                                    () => isLoggingOut = true);
+                                                try {
+                                                  final profileProvider =
+                                                      Provider.of<
+                                                              ProfileProvider>(
+                                                          context,
+                                                          listen: false);
+                                                  await profileProvider
+                                                      .logout();
+                                                } catch (e) {
+                                                  setDialogState(() =>
+                                                      isLoggingOut = false);
+                                                  if (context.mounted) {
+                                                    showCustomBar(
+                                                        context, e.toString());
+                                                  }
+                                                }
+                                              },
+                                        child: isLoggingOut
+                                            ? SizedBox(
+                                                height: 20.w,
+                                                width: 20.w,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
                                                   color: ColorManager
-                                                      .primaryColor)),
-                                    ),
+                                                      .secondaryColor,
+                                                ),
+                                              )
+                                            : Text('Logout',
+                                                style: TextStyles.buttonLabel
+                                                    .copyWith(
+                                                        color: ColorManager
+                                                            .redColorF5)),
+                                      ),
+                                      SizedBox(width: 28.w),
+                                      ElevatedButton(
+                                        style: ButtonStyles.smallButton,
+                                        onPressed: isLoggingOut
+                                            ? null
+                                            : () {
+                                                Navigator.of(context).pop();
+                                              },
+                                        child: Text('Cancel',
+                                            style: TextStyles.buttonLabel
+                                                .copyWith(
+                                                    color: ColorManager
+                                                        .primaryColor)),
+                                      ),
+                                    ],
                                   ),
                                 ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                    SizedBox(height: 20),
-                  ],
-                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  SizedBox(height: 20),
+                ],
               ),
             ),
           );
@@ -474,65 +482,84 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatefulBuilder(builder: (context, setState) {
-        return AlertDialog(
-          backgroundColor: ColorManager.primaryColor,
-          title: Text('Delete Account', style: TextStyle(color: Colors.red)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Are you sure you want to delete your account? This action cannot be undone.',
-                style: TextStyles.skip.copyWith(color: Colors.black),
+      builder: (context) {
+        bool isDeleting = false;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: ColorManager.primaryColor,
+              title:
+                  Text('Delete Account', style: TextStyle(color: Colors.red)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Are you sure you want to delete your account? This action cannot be undone.',
+                    style: TextStyles.skip.copyWith(color: Colors.black),
+                  ),
+                  if (shouldShowPassword) ...[
+                    SizedBox(height: 10),
+                    PasswordFiled(
+                      controller: passwordController,
+                      lable: 'Password',
+                      icon: Assets.passwordIcon,
+                      hint: 'Password',
+                      textInputType: TextInputType.visiblePassword,
+                    ),
+                  ],
+                ],
               ),
-              if (shouldShowPassword) ...[
-                SizedBox(height: 10),
-                PasswordFiled(
-                  controller: passwordController,
-                  lable: 'Password',
-                  icon: Assets.passwordIcon,
-                  hint: 'Password',
-                  textInputType: TextInputType.visiblePassword,
+              actions: [
+                TextButton(
+                  onPressed:
+                      isDeleting ? null : () => Navigator.of(context).pop(),
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: isDeleting ? Colors.grey : Colors.red),
+                  onPressed: isDeleting
+                      ? null
+                      : () async {
+                          if (shouldShowPassword &&
+                              passwordController.text.isEmpty) {
+                            showCustomBar(
+                                context, 'Please enter your password');
+                            return;
+                          }
+
+                          setDialogState(() => isDeleting = true);
+                          try {
+                            final passwordToSend = shouldShowPassword
+                                ? passwordController.text
+                                : null;
+
+                            await provider
+                                .reauthenticateAndDelete(passwordToSend);
+                            // Navigation happens on success
+                          } catch (e) {
+                            setDialogState(() => isDeleting = false);
+                            if (context.mounted) {
+                              showCustomBar(context, e.toString());
+                            }
+                          }
+                        },
+                  child: isDeleting
+                      ? SizedBox(
+                          height: 20.h,
+                          width: 20.h,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.redAccent,
+                          ),
+                        )
+                      : Text('Confirm', style: TextStyle(color: Colors.white)),
                 ),
               ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-            Consumer<ProfileProvider>(
-              builder: (context, provider, child) {
-                return ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  onPressed: () async {
-                    if (shouldShowPassword && passwordController.text.isEmpty) {
-                      showCustomBar(context, 'Please enter your password');
-                      return;
-                    }
-
-                    try {
-                      final passwordToSend =
-                          shouldShowPassword ? passwordController.text : null;
-
-                      // Pop dialog immediately to show background skeleton
-                      Navigator.of(context).pop();
-
-                      await provider.reauthenticateAndDelete(passwordToSend);
-                    } catch (e) {
-                      if (context.mounted) {
-                        showCustomBar(context, e.toString());
-                      }
-                    }
-                  },
-                  child: Text('Confirm', style: TextStyle(color: Colors.white)),
-                );
-              },
-            ),
-          ],
+            );
+          },
         );
-      }),
+      },
     );
   }
 }

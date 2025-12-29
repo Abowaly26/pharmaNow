@@ -129,7 +129,7 @@ class _PharmaNowState extends State<PharmaNow> {
                 navigatorKey.currentState?.pushNamedAndRemoveUntil(
                   SignInView.routeName,
                   (route) => false,
-                  arguments: {'accountDeleted': false},
+                  arguments: {'accountDeleted': false, 'loggedOut': true},
                 );
               } else if (authService.isUserDeleted) {
                 authService.setUserDeleted(false);

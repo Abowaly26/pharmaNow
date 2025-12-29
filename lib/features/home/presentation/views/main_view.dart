@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 
 import '../../../../core/utils/color_manger.dart';
+import 'package:pharma_now/core/widgets/custom_loading_overlay.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -33,26 +34,28 @@ class _MainViewState extends State<MainView> {
           final isNavigatingOut = profileProvider.isNavigatingOut;
           debugPrint('MainView: build - isNavigatingOut: $isNavigatingOut');
 
-          return Scaffold(
-            extendBody: true,
-            backgroundColor: ColorManager.primaryColor,
-            appBar: CurrentViewIndex == 0
-                ? PreferredSize(
-                    preferredSize: Size.fromHeight(80.h),
-                    child: HomeAppbar(),
-                  )
-                : null,
-            bottomNavigationBar: isNavigatingOut
-                ? null
-                : CustomBottomNavigationBar(
-                    onItemTapped: (int value) {
-                      CurrentViewIndex = value;
-                      setState(() {});
-                    },
-                  ),
-            body: SafeArea(
-              child: MainViewBodyBlocConsummer(
-                CurrentViewIndex: CurrentViewIndex,
+          return CustomLoadingOverlay(
+            isLoading: isNavigatingOut,
+            showCard: false,
+            child: Scaffold(
+              extendBody: true,
+              backgroundColor: ColorManager.primaryColor,
+              appBar: CurrentViewIndex == 0
+                  ? PreferredSize(
+                      preferredSize: Size.fromHeight(80.h),
+                      child: HomeAppbar(),
+                    )
+                  : null,
+              bottomNavigationBar: CustomBottomNavigationBar(
+                onItemTapped: (int value) {
+                  CurrentViewIndex = value;
+                  setState(() {});
+                },
+              ),
+              body: SafeArea(
+                child: MainViewBodyBlocConsummer(
+                  CurrentViewIndex: CurrentViewIndex,
+                ),
               ),
             ),
           );
@@ -61,48 +64,3 @@ class _MainViewState extends State<MainView> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          //  Scaffold(
-          //   extendBody: true,
-          //   backgroundColor: ColorManager.primaryColor,
-          //   appBar: _currentIndex == 0
-          //       ? PreferredSize(
-          //           preferredSize: Size.fromHeight(80.h),
-          //           child: HomeAppbar(),
-          //         )
-          //       : null,
-          //   // Display the currently selected screen based on _currentIndex
-          //   body: _screens[_currentIndex],
-          //   bottomNavigationBar: Theme(
-          //     data: Theme.of(context).copyWith(
-          //       iconTheme: const IconThemeData(color: Colors.white),
-          //     ),
-          //     child: CurvedNavigationBar(
-          //       color: Color(0xFF5555FF),
-          //       buttonBackgroundColor: Color(0xFF5555FF),
-          //       backgroundColor: Colors.transparent,
-          //       height: 58,
-          //       animationCurve: Curves.bounceInOut,
-          //       animationDuration: const Duration(milliseconds: 400),
-          //       index: _currentIndex,
-          //       items: _items,
-          //       onTap: (index) => setState(() {
-          //         _currentIndex = index;
-          //       }),
-          //     ),
-          //   ),
-          // ),
