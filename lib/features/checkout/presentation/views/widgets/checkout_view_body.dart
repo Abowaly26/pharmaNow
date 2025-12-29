@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:ui';
 import 'package:pharma_now/core/utils/color_manger.dart';
@@ -52,7 +51,6 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   String? selectedImagePath; // To show preview
   bool isUploadingImage = false;
   File? paymentProofFile;
-  bool _isPickerActive = false;
 
   // Dynamic shipping options
   final List<String> shippingTitles = [
@@ -152,24 +150,6 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     walletPhoneController.dispose();
 
     super.dispose();
-  }
-
-  Future<void> _pickPaymentProof() async {
-    if (_isPickerActive) return;
-    _isPickerActive = true;
-    try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-      if (pickedFile != null) {
-        setState(() {
-          paymentProofFile = File(pickedFile.path);
-          selectedImagePath = pickedFile.path;
-        });
-      }
-    } finally {
-      _isPickerActive = false;
-    }
   }
 
   @override

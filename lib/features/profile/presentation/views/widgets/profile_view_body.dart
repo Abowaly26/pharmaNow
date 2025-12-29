@@ -15,6 +15,7 @@ import 'package:pharma_now/features/profile/presentation/views/widgets/profile_t
 import 'package:pharma_now/features/profile/presentation/views/widgets/profile_tab/edit_profile_view.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
+import 'package:pharma_now/core/services/permission_service.dart';
 
 import '../../../../../core/helper_functions/build_error_bar.dart';
 import '../../../../../core/widgets/password_field.dart';
@@ -206,6 +207,23 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    bool hasPermission = false;
+    if (source == ImageSource.camera) {
+      hasPermission = await PermissionService.handleCameraPermission(
+        context,
+        content:
+            'This app needs camera access to take profile pictures. Please enable it in your device settings.',
+      );
+    } else {
+      hasPermission = await PermissionService.handleGalleryPermission(
+        context,
+        content:
+            'This app needs access to your gallery to choose profile pictures. Please enable it in your device settings.',
+      );
+    }
+
+    if (!hasPermission) return;
+
     try {
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: source,

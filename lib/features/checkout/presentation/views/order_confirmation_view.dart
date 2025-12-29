@@ -7,6 +7,7 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/helper_functions/show_custom_bar.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
 import 'package:pharma_now/core/widgets/custom_loading_overlay.dart';
+import 'package:pharma_now/core/services/permission_service.dart';
 import 'dart:ui';
 
 class OrderConfirmationView extends StatefulWidget {
@@ -28,12 +29,130 @@ class _OrderConfirmationViewState extends State<OrderConfirmationView> {
   Future<void> _pickPaymentProof() async {
     if (_isPickingImage) return;
 
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: ColorManager.primaryColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 20.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40.w,
+                  height: 4.h,
+                  margin: EdgeInsets.only(bottom: 20.h),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                Text(
+                  'Upload Payment Proof',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                _buildOptionTile(
+                  icon: Icons.camera_alt_outlined,
+                  title: 'Take Photo',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _executePickImage(ImageSource.camera);
+                  },
+                ),
+                _buildOptionTile(
+                  icon: Icons.photo_library_outlined,
+                  title: 'Choose from Gallery',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _executePickImage(ImageSource.gallery);
+                  },
+                ),
+                SizedBox(height: 10.h),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: ColorManager.secondaryColor,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: EdgeInsets.all(10.r),
+        decoration: BoxDecoration(
+          color: ColorManager.secondaryColor.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: ColorManager.secondaryColor,
+          size: 24.sp,
+        ),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.sp,
+          color: Colors.black87,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Future<void> _executePickImage(ImageSource source) async {
+    bool hasPermission = false;
+    if (source == ImageSource.camera) {
+      hasPermission = await PermissionService.handleCameraPermission(
+        context,
+        title: 'Camera Access Required',
+        content:
+            'Please grant camera access to take a photo of your payment receipt for order verification.',
+      );
+    } else {
+      hasPermission = await PermissionService.handleGalleryPermission(
+        context,
+        title: 'Gallery Access Required',
+        content:
+            'Please grant gallery access to upload a screenshot or photo of your payment receipt.',
+      );
+    }
+
+    if (!hasPermission) return;
+
     setState(() => _isPickingImage = true);
 
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         imageQuality: 70,
       );
 
@@ -42,6 +161,10 @@ class _OrderConfirmationViewState extends State<OrderConfirmationView> {
           selectedImagePath = image.path;
           paymentProofFile = File(image.path);
         });
+      }
+    } catch (e) {
+      if (mounted) {
+        showCustomBar(context, 'Failed to pick image');
       }
     } finally {
       setState(() => _isPickingImage = false);
