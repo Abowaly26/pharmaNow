@@ -1,6 +1,7 @@
 const kHorizintalPadding = 16;
 const kIsOnBoardingViewSeen = 'isOnBoardingViewSeen';
 const kUserData = 'userData';
+const kLoginMethod = 'loginMethod';
 
 const kEmailActionContinueUrl = 'https://pharmanow-754a7.firebaseapp.com';
 const kAndroidPackageName = 'com.example.pharma_now';

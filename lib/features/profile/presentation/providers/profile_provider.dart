@@ -27,16 +27,21 @@ class ProfileProvider extends ChangeNotifier {
   UserEntity? _currentUser;
   bool _isLoading = false;
   bool _isNavigatingOut = false;
+  bool _isPasswordUser = false;
+  String? _currentLoginMethod;
 
   ProfileStatus get status => _status;
   String get errorMessage => _errorMessage;
   UserEntity? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isNavigatingOut => _isNavigatingOut;
+  bool get isPasswordUser => _isPasswordUser;
+  bool get isPasswordSession => _currentLoginMethod == 'password';
 
   ProfileProvider() {
     if (FirebaseAuth.instance.currentUser != null) {
       _loadUserDataFromFirebase(FirebaseAuth.instance.currentUser!.uid);
+      _currentLoginMethod = prefs.getString(kLoginMethod);
     }
     _listenToAuthChanges();
   }
@@ -46,6 +51,7 @@ class ProfileProvider extends ChangeNotifier {
       if (user != null) {
         _status = ProfileStatus.loading;
         notifyListeners();
+        _currentLoginMethod = prefs.getString(kLoginMethod);
         _loadUserDataFromFirebase(user.uid);
       } else {
         if (!_isNavigatingOut) {
@@ -115,6 +121,8 @@ class ProfileProvider extends ChangeNotifier {
             }
 
             _currentUser = userDataFromFirestore;
+            _isPasswordUser = firebaseUser.providerData
+                .any((userInfo) => userInfo.providerId == 'password');
             await _saveUserToLocal(_currentUser!);
             _status = ProfileStatus.success;
             _isLoading = false;
@@ -280,6 +288,9 @@ class ProfileProvider extends ChangeNotifier {
     _errorMessage = '';
     _isLoading = false;
     _isNavigatingOut = false; // Reset navigation flag when clearing data
+    _isPasswordUser = false;
+    _currentLoginMethod = null;
+    await prefs.remove(kLoginMethod);
     notifyListeners();
   }
 
@@ -295,9 +306,6 @@ class ProfileProvider extends ChangeNotifier {
       AuthCredential? credential;
       bool isGoogleUser = user.providerData
           .any((userInfo) => userInfo.providerId == 'google.com');
-
-      bool isPasswordProvider = user.providerData
-          .any((userInfo) => userInfo.providerId == 'password');
 
       if (password != null && password.isNotEmpty) {
         credential = EmailAuthProvider.credential(
@@ -324,7 +332,7 @@ class ProfileProvider extends ChangeNotifier {
           if (e == 'Google sign-in cancelled') rethrow;
           throw 'Failed to re-authenticate with Google. Please try again.';
         }
-      } else if (isPasswordProvider) {
+      } else if (!isGoogleUser && user.email != null) {
         throw 'Please enter your password';
       }
 

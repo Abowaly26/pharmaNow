@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
@@ -353,9 +352,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                     },
                   ),
                   SizedBox(height: 0.01 * height),
-                  if (FirebaseAuth.instance.currentUser?.providerData.any(
-                          (userInfo) => userInfo.providerId == 'password') ??
-                      false)
+                  if (provider.isPasswordUser)
                     SettingItem(
                       icon: Icons.lock,
                       title: "Change Password",
@@ -489,11 +486,8 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
 
   void _showReAuthDialog(BuildContext context, ProfileProvider provider) {
     final TextEditingController passwordController = TextEditingController();
-    final user = FirebaseAuth.instance.currentUser;
 
-    bool shouldShowPassword = user?.providerData
-            .any((userInfo) => userInfo.providerId == 'password') ??
-        false;
+    bool shouldShowPassword = provider.isPasswordSession;
 
     showDialog(
       context: context,
