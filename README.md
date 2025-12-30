@@ -1,5 +1,10 @@
 # 💊 Pharma Now
 
+## 📥 Download APK
+[⬇️ Download Pharma Now APK]([https://github.com/USERNAME/REPO/releases/download/v1.0.0/app-release.apk]
+
+
+
 [🎥 Watch Demo](https://drive.google.com/file/d/1ipP_dw_Y2_1MtqQVqWh3-yPZfxjz8ROg/view?usp=sharing)
 
 A cross-platform mobile application built with **Flutter** to help users **search, compare, and order medications** from different pharmacies in real-time.  
