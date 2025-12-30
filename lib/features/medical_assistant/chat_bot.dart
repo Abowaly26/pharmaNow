@@ -5,8 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/widgets/custom_bottom_sheet.dart';
 import 'package:pharma_now/core/widgets/custom_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import '../../../core/utils/app_images.dart';
 
@@ -26,6 +29,24 @@ class ChatMessage {
 
   bool get isUser => role == 'user';
   bool get isAssistant => role == 'assistant';
+
+  Map<String, dynamic> toJson() {
+    return {
+      'role': role,
+      'content': content,
+      'timestamp': timestamp.toIso8601String(),
+      'messageId': messageId,
+    };
+  }
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
+      role: json['role'] as String,
+      content: json['content'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      messageId: json['messageId'] as String?,
+    );
+  }
 }
 
 class ApiResponse {
@@ -53,6 +74,8 @@ class ChatConstants {
   static const int frequencyPenalty = 1;
   static const int topK = 50;
 
+  static String getStorageKey(String uid) => 'medical_chat_history_$uid';
+
   static const String systemPrompt =
       'You are a professional medical consultant AI assistant. Provide accurate, '
       'evidence-based medical information and guidance in a clear, compassionate manner. '
@@ -75,6 +98,7 @@ class ChatColors {
 // Service Layer
 class ChatApiService {
   static Future<ApiResponse> sendMessage(String userMessage) async {
+    developer.log('Sending message to AI: $userMessage', name: 'ChatBot');
     try {
       final response = await http
           .post(
@@ -104,17 +128,25 @@ class ChatApiService {
           )
           .timeout(const Duration(seconds: 30));
 
+      developer.log('API Response Status: ${response.statusCode}',
+          name: 'ChatBot');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         final content = data['choices']?[0]['message']['content'] ??
             data['content'] ??
             'No response available';
 
+        developer.log('API Response Content Success', name: 'ChatBot');
+
         return ApiResponse(success: true, content: content);
       } else {
         final errorData = jsonDecode(response.body);
         final errorMessage =
             errorData['error']?['message'] ?? 'Unknown server error';
+
+        developer.log('API Error: $errorMessage',
+            name: 'ChatBot', error: errorMessage);
 
         return ApiResponse(
           success: false,
@@ -123,11 +155,13 @@ class ChatApiService {
         );
       }
     } on TimeoutException {
+      developer.log('API Timeout', name: 'ChatBot');
       return ApiResponse(
         success: false,
         error: 'Request timeout. Please check your internet connection.',
       );
     } catch (e) {
+      developer.log('Connection Error', name: 'ChatBot', error: e);
       return ApiResponse(
         success: false,
         error: 'Connection failed: ${e.toString()}',
@@ -155,6 +189,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   bool _isLoading = false;
   bool _isTyping = false;
   bool _hasText = false;
+  bool _isInitialized = false;
+  String? _currentUserId;
 
   late AnimationController _typingAnimationController;
 
@@ -173,7 +209,69 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       });
     });
 
-    _addWelcomeMessage();
+    _initializeChat();
+  }
+
+  Future<void> _initializeChat() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _currentUserId = user.uid;
+      await _loadMessages();
+    } else {
+      _addWelcomeMessage();
+      setState(() {
+        _isInitialized = true;
+      });
+    }
+  }
+
+  Future<void> _loadMessages() async {
+    if (_currentUserId == null) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = ChatConstants.getStorageKey(_currentUserId!);
+      final String? storedMessages = prefs.getString(key);
+
+      if (storedMessages != null) {
+        final List<dynamic> decoded = jsonDecode(storedMessages);
+        final loadedMessages =
+            decoded.map((item) => ChatMessage.fromJson(item)).toList();
+
+        setState(() {
+          _messages.addAll(loadedMessages);
+          _isInitialized = true;
+        });
+
+        // Scroll to bottom after loading
+        Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+      } else {
+        _addWelcomeMessage();
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      developer.log('Error loading messages', name: 'ChatBot', error: e);
+      _addWelcomeMessage();
+      setState(() {
+        _isInitialized = true;
+      });
+    }
+  }
+
+  Future<void> _saveMessages() async {
+    if (_currentUserId == null) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = ChatConstants.getStorageKey(_currentUserId!);
+      final String encoded =
+          jsonEncode(_messages.map((m) => m.toJson()).toList());
+      await prefs.setString(key, encoded);
+    } catch (e) {
+      developer.log('Error saving messages', name: 'ChatBot', error: e);
+    }
   }
 
   @override
@@ -186,12 +284,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   }
 
   void _addWelcomeMessage() {
-    _messages.add(ChatMessage(
+    final welcome = ChatMessage(
       role: 'assistant',
       content: 'Hello! I\'m your medical assistant. How can I help you today? '
           'Please remember that I provide general information only, and you should '
           'consult with a healthcare professional for medical advice.',
-    ));
+    );
+    _messages.add(welcome);
+    _saveMessages();
   }
 
   Future<void> _sendMessage() async {
@@ -208,6 +308,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
     _messageController.clear();
     _scrollToBottom();
+    _saveMessages(); // Save after user message
 
     // Send to API
     final response = await ChatApiService.sendMessage(messageText);
@@ -218,13 +319,15 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       content: response.success ? response.content! : response.error!,
     );
 
-    setState(() {
-      _messages.add(assistantMessage);
-      _isLoading = false;
-      _isTyping = false;
-    });
-
-    _scrollToBottom();
+    if (mounted) {
+      setState(() {
+        _messages.add(assistantMessage);
+        _isLoading = false;
+        _isTyping = false;
+      });
+      _scrollToBottom();
+      _saveMessages(); // Save after assistant response
+    }
   }
 
   void _scrollToBottom() {
@@ -245,6 +348,15 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const Scaffold(
+        backgroundColor: ChatColors.surface,
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: ChatColors.surface,
       appBar: _buildAppBar(),
@@ -271,7 +383,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),
         child: Container(
-          color: Color(0xFFF2F4F9),
+          color: const Color(0xFFF2F4F9),
           height: 1,
         ),
       ),
@@ -279,11 +391,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: ChatColors.background,
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.psychology_outlined,
               color: ChatColors.primary,
               size: 24,
@@ -368,7 +480,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             Container(
               margin: const EdgeInsets.only(right: 8, top: 4),
               padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: ChatColors.background,
                 shape: BoxShape.circle,
               ),
@@ -426,7 +538,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         children: [
           Container(
             padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: ChatColors.background,
               shape: BoxShape.circle,
             ),
@@ -538,7 +650,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
+                        valueColor: const AlwaysStoppedAnimation<Color>(
                           ChatColors.surface,
                         ),
                       ),
@@ -596,7 +708,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     );
   }
 
-  void _clearChat() {
+  void _clearChat() async {
     CustomDialog.show(
       context,
       title: 'Clear Chat',
@@ -608,7 +720,17 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         color: ColorManager.redColorF5,
         size: 40.sp,
       ),
-      onConfirm: () {
+      onConfirm: () async {
+        if (_currentUserId != null) {
+          try {
+            final prefs = await SharedPreferences.getInstance();
+            final key = ChatConstants.getStorageKey(_currentUserId!);
+            await prefs.remove(key);
+          } catch (e) {
+            developer.log('Error clearing chat', name: 'ChatBot', error: e);
+          }
+        }
+
         setState(() {
           _messages.clear();
           _addWelcomeMessage();
