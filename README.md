@@ -1,7 +1,7 @@
 # 💊 Pharma Now
 
 ## 📥 Download APK
-[⬇️ Download Pharma Now APK]([https://github.com/USERNAME/REPO/releases/download/v1.0.0/app-release.apk]
+[⬇️ Download Pharma Now APK]([https://github.com/Abowaly26/pharmaNow/releases/tag/v1.0.0]
 
 
 
