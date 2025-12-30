@@ -195,20 +195,54 @@ class FirebaseProfileRepository implements ProfileRepository {
     }
 
     try {
-      // Delete user data from Firestore
-      await _firestore.collection('users').doc(currentUser.uid).delete();
+      final String userEmail = currentUser.email!;
+      final String currentUid = currentUser.uid;
 
-      // Delete profile image from Supabase Storage if exists
+      log('Starting deletion for user: $userEmail (UID: $currentUid)',
+          name: 'FirebaseProfileRepository');
+
+      // 1. Delete ALL documents with this email in Firestore
+      // This handles cases where multiple "users" docs exist for the same email
+      final QuerySnapshot emailMatches = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: userEmail)
+          .get();
+
+      final WriteBatch batch = _firestore.batch();
+      int deletedCount = 0;
+
+      for (var doc in emailMatches.docs) {
+        log('Deleting user document: ${doc.id}',
+            name: 'FirebaseProfileRepository');
+        batch.delete(doc.reference);
+        deletedCount++;
+      }
+
+      if (deletedCount > 0) {
+        await batch.commit();
+        log('Deleted $deletedCount user document(s) from Firestore',
+            name: 'FirebaseProfileRepository');
+      } else {
+        log('No user documents found in Firestore to delete',
+            name: 'FirebaseProfileRepository');
+      }
+
+      // 2. Delete profile image from Supabase Storage if exists
+      // We try to delete using the current UID. If there were old UIDs,
+      // their images might remain in storage, but since we deleted the DB record,
+      // they effectively become orphaned and won't be linked to the new account.
       try {
-        await _supabaseStorage.deleteProfileImage(currentUser.uid);
+        await _supabaseStorage.deleteProfileImage(currentUid);
       } catch (e) {
         // Ignore if no profile image exists
         log('No profile image to delete or error: $e',
             name: 'FirebaseProfileRepository');
       }
 
-      // Delete user from Authentication
+      // 3. Delete user from Authentication
       await currentUser.delete();
+      log('User deleted from Firebase Authentication',
+          name: 'FirebaseProfileRepository');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
         throw RequiresRecentLoginException(

@@ -183,9 +183,11 @@ class AuthRepoImpl extends AuthRepo {
         if (user.photoURL != null &&
             (userEntity.profileImageUrl == null ||
                 userEntity.profileImageUrl!.isEmpty)) {
-          log('🔄 Syncing Google profile image for returning user (no existing image)');
+          log('🔄 [Fix] Syncing Google profile image. Local image was null/empty.',
+              name: 'AuthRepoImpl');
           userEntity = userEntity.copyWith(profileImageUrl: user.photoURL);
-          await addUserData(user: userEntity); // Updates Firestore
+          // With merge: true, this will only update the fields in the map (including profileImageUrl)
+          await addUserData(user: userEntity);
         }
 
         await saveUserData(user: userEntity);

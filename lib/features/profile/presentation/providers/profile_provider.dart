@@ -105,9 +105,18 @@ class ProfileProvider extends ChangeNotifier {
                 firebaseUser.photoURL != null &&
                 (userDataFromFirestore.profileImageUrl == null ||
                     userDataFromFirestore.profileImageUrl!.isEmpty)) {
+              log('🔄 [ProfileProvider] Self-healing: Syncing Google Image to Profile',
+                  name: 'ProfileProvider');
+
               userDataFromFirestore = userDataFromFirestore.copyWith(
                   profileImageUrl: firebaseUser.photoURL);
+
+              // Update remote
               await _profileRepository.updateUserProfile(userDataFromFirestore);
+              // Also update the local specific image update if needed, but updateUserProfile does the job usually.
+              // We also need to ensure the image URL is actually persisted to Supabase?
+              // No, if we use the Google URL, we just save the URL string to Firestore. We don't upload the Google Image to Supabase unless the user explicitly "uploads" it.
+              // Storing the Google URL directly is the correct approach for "Link" behavior.
             }
 
             if (firebaseUser.displayName != userDataFromFirestore.name) {

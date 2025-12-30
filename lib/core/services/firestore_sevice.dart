@@ -11,7 +11,10 @@ class FireStoreSevice implements DatabaseService {
     String? documentId,
   }) async {
     if (documentId != null) {
-      await firestore.collection(path).doc(documentId).set(data);
+      await firestore
+          .collection(path)
+          .doc(documentId)
+          .set(data, SetOptions(merge: true));
     } else {
       await firestore.collection(path).add(data);
     }

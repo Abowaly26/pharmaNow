@@ -169,12 +169,28 @@ class _VerificationViewBodyState extends State<VerificationViewBody> {
             ),
           ),
           SizedBox(height: 12.h),
-          Text(
-            'Verification email sent! Check your inbox or spam folder and click the link.',
+          RichText(
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: Colors.black54,
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: Colors.black54,
+                height: 1.5,
+              ),
+              children: [
+                const TextSpan(text: 'Verification email sent to \n'),
+                TextSpan(
+                  text:
+                      '${FirebaseAuth.instance.currentUser?.email ?? "your email"}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const TextSpan(
+                    text:
+                        '.\nCheck your inbox or spam folder and click the link.'),
+              ],
             ),
           ),
           SizedBox(height: 32.h),
