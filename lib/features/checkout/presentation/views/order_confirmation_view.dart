@@ -7,6 +7,7 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/helper_functions/show_custom_bar.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
 import 'package:pharma_now/core/widgets/custom_loading_overlay.dart';
+import 'package:pharma_now/core/widgets/custom_bottom_sheet.dart';
 import 'package:pharma_now/core/services/permission_service.dart';
 
 class OrderConfirmationView extends StatefulWidget {
@@ -28,101 +29,27 @@ class _OrderConfirmationViewState extends State<OrderConfirmationView> {
   Future<void> _pickPaymentProof() async {
     if (_isPickingImage) return;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: ColorManager.primaryColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+    CustomBottomSheet.show(
+      context,
+      title: 'Upload Payment Proof',
+      options: [
+        BottomSheetOption(
+          icon: Icons.camera_alt_outlined,
+          title: 'Take Photo',
+          onTap: () {
+            Navigator.pop(context);
+            _executePickImage(ImageSource.camera);
+          },
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40.w,
-                  height: 4.h,
-                  margin: EdgeInsets.only(bottom: 20.h),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-                Text(
-                  'Upload Payment Proof',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                _buildOptionTile(
-                  icon: Icons.camera_alt_outlined,
-                  title: 'Take Photo',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _executePickImage(ImageSource.camera);
-                  },
-                ),
-                _buildOptionTile(
-                  icon: Icons.photo_library_outlined,
-                  title: 'Choose from Gallery',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _executePickImage(ImageSource.gallery);
-                  },
-                ),
-                SizedBox(height: 10.h),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: ColorManager.secondaryColor,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        BottomSheetOption(
+          icon: Icons.photo_library_outlined,
+          title: 'Choose from Gallery',
+          onTap: () {
+            Navigator.pop(context);
+            _executePickImage(ImageSource.gallery);
+          },
         ),
-      ),
-    );
-  }
-
-  Widget _buildOptionTile({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Container(
-        padding: EdgeInsets.all(10.r),
-        decoration: BoxDecoration(
-          color: ColorManager.secondaryColor.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: ColorManager.secondaryColor,
-          size: 24.sp,
-        ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 16.sp,
-          color: Colors.black87,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      onTap: onTap,
+      ],
     );
   }
 

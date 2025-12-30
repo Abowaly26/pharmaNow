@@ -6,6 +6,7 @@ import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
+import 'package:pharma_now/core/widgets/custom_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HelpSupportView extends StatelessWidget {
@@ -416,37 +417,16 @@ class HelpSupportView extends StatelessWidget {
   }
 
   void _showInfoDialog(BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: ColorManager.primaryColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          title,
-          style: TextStyles.sectionTitle,
-        ),
-        content: SingleChildScrollView(
-          child: Text(
-            content,
-            style: TextStyles.description.copyWith(
-              color: ColorManager.greyColor,
-              height: 1.5,
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Close',
-              style: TextStyles.buttonLabel.copyWith(
-                color: ColorManager.secondaryColor,
-              ),
-            ),
-          ),
-        ],
+    CustomDialog.show(
+      context,
+      title: title,
+      content: content,
+      confirmText: 'Got it',
+      onConfirm: () => Navigator.pop(context),
+      icon: Icon(
+        Icons.info_outline,
+        color: ColorManager.secondaryColor,
+        size: 40.sp,
       ),
     );
   }

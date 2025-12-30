@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
+import 'package:pharma_now/core/widgets/custom_bottom_sheet.dart';
 import 'package:pharma_now/core/widgets/profile_avatar.dart';
 
 import 'package:pharma_now/core/utils/color_manger.dart';
@@ -92,116 +93,38 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     final hasProfileImage = provider.currentUser?.profileImageUrl != null &&
         provider.currentUser!.profileImageUrl!.isNotEmpty;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: ColorManager.primaryColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+    CustomBottomSheet.show(
+      context,
+      title: 'Change Profile Photo',
+      options: [
+        BottomSheetOption(
+          icon: Icons.camera_alt_outlined,
+          title: 'Take Photo',
+          onTap: () {
+            Navigator.pop(context);
+            _pickImage(ImageSource.camera);
+          },
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40.w,
-                  height: 4.h,
-                  margin: EdgeInsets.only(bottom: 20.h),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-                Text(
-                  'Change Profile Photo',
-                  style: TextStyles.settingItemTitle.copyWith(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                _buildOptionTile(
-                  icon: Icons.camera_alt_outlined,
-                  title: 'Take Photo',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.camera);
-                  },
-                ),
-                _buildOptionTile(
-                  icon: Icons.photo_library_outlined,
-                  title: 'Choose from Gallery',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.gallery);
-                  },
-                ),
-                if (hasProfileImage)
-                  _buildOptionTile(
-                    icon: Icons.delete_outline,
-                    title: 'Remove Photo',
-                    iconColor: Colors.red,
-                    textColor: Colors.red,
-                    onTap: () {
-                      Navigator.pop(context);
-                      _removeProfileImage();
-                    },
-                  ),
-                SizedBox(height: 10.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: ColorManager.secondaryColor,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        BottomSheetOption(
+          icon: Icons.photo_library_outlined,
+          title: 'Choose from Gallery',
+          onTap: () {
+            Navigator.pop(context);
+            _pickImage(ImageSource.gallery);
+          },
+        ),
+        if (hasProfileImage)
+          BottomSheetOption(
+            icon: Icons.delete_outline,
+            title: 'Remove Photo',
+            iconColor: Colors.red,
+            textColor: Colors.red,
+            onTap: () {
+              Navigator.pop(context);
+              _removeProfileImage();
+            },
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionTile({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color? iconColor,
-    Color? textColor,
-  }) {
-    return ListTile(
-      leading: Container(
-        padding: EdgeInsets.all(10.r),
-        decoration: BoxDecoration(
-          color: (iconColor ?? ColorManager.secondaryColor).withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: iconColor ?? ColorManager.secondaryColor,
-          size: 24.sp,
-        ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 16.sp,
-          color: textColor ?? Colors.black87,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      onTap: onTap,
+      ],
     );
   }
 
@@ -531,6 +454,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                   onPressed: isDeleting
                       ? null
                       : () async {
+                          FocusScope.of(context).unfocus();
                           if (shouldShowPassword &&
                               passwordController.text.isEmpty) {
                             showCustomBar(

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:pharma_now/core/utils/color_manger.dart';
+import 'package:pharma_now/core/widgets/custom_bottom_sheet.dart';
+import 'package:pharma_now/core/widgets/custom_dialog.dart';
 import 'dart:convert';
 import 'dart:async';
 
@@ -569,78 +572,66 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   }
 
   void _showOptionsMenu() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.clear_all),
-              title: const Text('Clear Chat'),
-              onTap: () {
-                Navigator.pop(context);
-                _clearChat();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('About'),
-              onTap: () {
-                Navigator.pop(context);
-                _showAboutDialog();
-              },
-            ),
-          ],
+    CustomBottomSheet.show(
+      context,
+      title: 'Chat Options',
+      options: [
+        BottomSheetOption(
+          icon: Icons.clear_all,
+          title: 'Clear Chat',
+          onTap: () {
+            Navigator.pop(context);
+            _clearChat();
+          },
         ),
-      ),
+        BottomSheetOption(
+          icon: Icons.info_outline,
+          title: 'About',
+          onTap: () {
+            Navigator.pop(context);
+            _showAboutDialog();
+          },
+        ),
+      ],
     );
   }
 
   void _clearChat() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear Chat'),
-        content: const Text('Are you sure you want to clear all messages?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _messages.clear();
-                _addWelcomeMessage();
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Clear'),
-          ),
-        ],
+    CustomDialog.show(
+      context,
+      title: 'Clear Chat',
+      content: 'Are you sure you want to clear all messages?',
+      confirmText: 'Clear',
+      confirmColor: ColorManager.redColorF5,
+      icon: Icon(
+        Icons.delete_outline,
+        color: ColorManager.redColorF5,
+        size: 40.sp,
       ),
+      onConfirm: () {
+        setState(() {
+          _messages.clear();
+          _addWelcomeMessage();
+        });
+        Navigator.pop(context);
+      },
     );
   }
 
   void _showAboutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Medical Assistant'),
-        content: const Text(
-          'This AI assistant provides general medical information and guidance. '
-          'Always consult with qualified healthcare professionals for proper '
-          'medical advice, diagnosis, and treatment.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+    CustomDialog.show(
+      context,
+      title: 'Medical Assistant',
+      content:
+          'This AI assistant provides general medical information and guidance. Always consult with qualified healthcare professionals for proper medical advice, diagnosis, and treatment.',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      icon: Icon(
+        Icons.psychology_outlined,
+        color: ColorManager.secondaryColor,
+        size: 40.sp,
       ),
+      onConfirm: () => Navigator.pop(context),
     );
   }
 }

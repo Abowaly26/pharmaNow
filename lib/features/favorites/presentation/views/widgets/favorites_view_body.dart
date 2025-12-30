@@ -11,6 +11,7 @@ import 'package:pharma_now/features/favorites/presentation/providers/favorites_p
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/app_images.dart' show Assets;
+import 'package:pharma_now/core/widgets/custom_dialog.dart';
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
 
 class FavoriteViewBody extends StatefulWidget {
@@ -128,36 +129,21 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
   }
 
   void _showClearConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          title: const Text('Clear All Favorites'),
-          content:
-              const Text('Are you sure you want to delete all your favorites?'),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-            ),
-            TextButton(
-              child: Text(
-                'Clear',
-                style: TextStyle(color: ColorManager.redColorF5),
-              ),
-              onPressed: () {
-                Provider.of<FavoritesProvider>(context, listen: false)
-                    .clearAllFavorites();
-                Navigator.of(dialogContext).pop();
-              },
-            ),
-          ],
-        );
+    CustomDialog.show(
+      context,
+      title: 'Clear All Favorites',
+      content: 'Are you sure you want to delete all your favorites?',
+      confirmText: 'Clear',
+      confirmColor: ColorManager.redColorF5,
+      icon: Icon(
+        Icons.delete_sweep_outlined,
+        color: ColorManager.redColorF5,
+        size: 40.sp,
+      ),
+      onConfirm: () {
+        Provider.of<FavoritesProvider>(context, listen: false)
+            .clearAllFavorites();
+        Navigator.of(context).pop();
       },
     );
   }

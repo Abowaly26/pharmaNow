@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../../../../../../core/utils/app_images.dart';
 import '../../../../../../core/utils/button_style.dart';
 import '../../../../../../core/utils/color_manger.dart';
+import '../../../../../../core/widgets/custom_bottom_sheet.dart';
 import '../../../../../../core/widgets/custom_app_bar.dart';
 import '../../../../../../core/widgets/custom_text_field.dart';
 import '../../../../presentation/providers/profile_provider.dart';
@@ -55,105 +56,27 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> _showImagePickerOptions() async {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: ColorManager.primaryColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+    CustomBottomSheet.show(
+      context,
+      title: 'Change Profile Photo',
+      options: [
+        BottomSheetOption(
+          icon: Icons.camera_alt_outlined,
+          title: 'Take Photo',
+          onTap: () {
+            Navigator.pop(context);
+            _pickImage(ImageSource.camera);
+          },
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40.w,
-                  height: 4.h,
-                  margin: EdgeInsets.only(bottom: 20.h),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-                Text(
-                  'Change Profile Photo',
-                  style: TextStyles.settingItemTitle.copyWith(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                _buildOptionTile(
-                  icon: Icons.camera_alt_outlined,
-                  title: 'Take Photo',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.camera);
-                  },
-                ),
-                _buildOptionTile(
-                  icon: Icons.photo_library_outlined,
-                  title: 'Choose from Gallery',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.gallery);
-                  },
-                ),
-                SizedBox(height: 10.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: ColorManager.secondaryColor,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        BottomSheetOption(
+          icon: Icons.photo_library_outlined,
+          title: 'Choose from Gallery',
+          onTap: () {
+            Navigator.pop(context);
+            _pickImage(ImageSource.gallery);
+          },
         ),
-      ),
-    );
-  }
-
-  Widget _buildOptionTile({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color? iconColor,
-    Color? textColor,
-  }) {
-    return ListTile(
-      leading: Container(
-        padding: EdgeInsets.all(10.r),
-        decoration: BoxDecoration(
-          color: (iconColor ?? ColorManager.secondaryColor).withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: iconColor ?? ColorManager.secondaryColor,
-          size: 24.sp,
-        ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 16.sp,
-          color: textColor ?? Colors.black87,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      onTap: onTap,
+      ],
     );
   }
 
