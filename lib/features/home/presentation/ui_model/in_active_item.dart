@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../../../../core/utils/color_manger.dart';
 
 class InActiveItem extends StatelessWidget {
   const InActiveItem({super.key, required this.image});

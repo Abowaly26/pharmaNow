@@ -11,21 +11,17 @@ abstract class Failure extends Equatable {
 }
 
 class ServerFailure extends Failure {
-  const ServerFailure(String message, [StackTrace? stackTrace])
-      : super(message, stackTrace);
+  const ServerFailure(super.message, [super.stackTrace]);
 }
 
 class CacheFailure extends Failure {
-  const CacheFailure(String message, [StackTrace? stackTrace])
-      : super(message, stackTrace);
+  const CacheFailure(super.message, [super.stackTrace]);
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure(String message, [StackTrace? stackTrace])
-      : super(message, stackTrace);
+  const NetworkFailure(super.message, [super.stackTrace]);
 }
 
 class UnauthorizedFailure extends Failure {
-  const UnauthorizedFailure(String message, [StackTrace? stackTrace])
-      : super(message, stackTrace);
+  const UnauthorizedFailure(super.message, [super.stackTrace]);
 }

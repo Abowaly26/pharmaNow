@@ -7,7 +7,6 @@ import 'package:pharma_now/core/utils/app_validation.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
-import 'package:pharma_now/core/widgets/bottom_pop_up.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';

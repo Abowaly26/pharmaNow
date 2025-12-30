@@ -1,6 +1,5 @@
-import 'package:bloc/bloc.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:pharma_now/core/repos/medicine_repo/medicine_repo.dart';
 
 import '../../enitites/medicine_entity.dart';

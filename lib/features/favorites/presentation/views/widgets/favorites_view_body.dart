@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +14,7 @@ import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
 
 class FavoriteViewBody extends StatefulWidget {
-  const FavoriteViewBody({Key? key}) : super(key: key);
+  const FavoriteViewBody({super.key});
 
   @override
   State<FavoriteViewBody> createState() => _FavoriteViewBodyState();

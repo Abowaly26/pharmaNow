@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
-import '../../ui_model/categories_response.dart';
 
 class CategoryWidget extends StatelessWidget {
   const CategoryWidget({

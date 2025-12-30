@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
@@ -87,6 +86,8 @@ class SearchViewBody extends StatelessWidget {
 
                 // Display search results in a list view using InfoMedicinesListViewItem structure
                 return ListView.builder(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   itemCount: state.products.length,
                   itemBuilder: (context, index) {
                     final medicine = state.products[index];
@@ -299,8 +300,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                     height: 80.h,
                     width: 80.w,
                   )
-                : (medicineEntity.discountRating != null &&
-                        medicineEntity.discountRating > 0)
+                : (medicineEntity.discountRating > 0)
                     ? Stack(
                         alignment: Alignment.centerLeft,
                         children: [

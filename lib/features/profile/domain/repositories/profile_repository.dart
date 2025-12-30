@@ -8,7 +8,6 @@ import 'package:pharma_now/core/errors/exceptions.dart';
 import 'package:pharma_now/core/services/supabase_storage.dart';
 import 'package:pharma_now/features/auth/data/models/user_model.dart';
 import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
-import 'firebase_profile_error_handler.dart';
 
 abstract class ProfileRepository {
   Future<void> updateUserProfile(UserEntity userEntity);

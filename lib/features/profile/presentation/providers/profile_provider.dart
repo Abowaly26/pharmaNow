@@ -126,32 +126,12 @@ class ProfileProvider extends ChangeNotifier {
                 name: 'ProfileProvider');
 
             if (retryCount >= maxRetries - 1) {
-              // Final attempt failed, now we can consider fallback or error
-              // For Google users, we can safely create a profile from Firebase User
-              bool isGoogleUser = firebaseUser.providerData
-                  .any((userInfo) => userInfo.providerId == 'google.com');
-
-              if (isGoogleUser) {
-                _currentUser = UserModel(
-                  name: firebaseUser.displayName ?? '',
-                  email: firebaseUser.email ?? '',
-                  uId: firebaseUser.uid,
-                  profileImageUrl: firebaseUser.photoURL,
-                );
-                await _profileRepository.updateUserProfile(_currentUser!);
-                log('Created new Google user profile in Firestore',
-                    name: 'ProfileProvider');
-                _status = ProfileStatus.success;
-                _isLoading = false;
-                break;
-              } else {
-                // For email/pass registration, we should wait for the registration logic to finish.
-                // If it still hasn't finished after all retries, then we might be stuck.
-                _errorMessage = 'User profile data not found.';
-                _status = ProfileStatus.error;
-                _currentUser = null;
-                break;
-              }
+              // Final attempt failed. We don't create profiles here to avoid race conditions
+              // with the Auth repository's registration/migration logic.
+              _errorMessage = 'User profile data not found.';
+              _status = ProfileStatus.error;
+              _currentUser = null;
+              break;
             }
           }
         } else {

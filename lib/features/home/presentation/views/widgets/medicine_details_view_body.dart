@@ -343,8 +343,7 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                     height: 132.h,
                     width: 106.w,
                   )
-                : (widget.medicineEntity.discountRating != null &&
-                        widget.medicineEntity.discountRating > 0)
+                : (widget.medicineEntity.discountRating > 0)
                     ? Stack(
                         alignment: Alignment.centerLeft,
                         children: [

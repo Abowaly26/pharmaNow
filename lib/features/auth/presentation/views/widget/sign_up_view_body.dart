@@ -6,7 +6,6 @@ import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/app_validation.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
-import 'package:pharma_now/core/widgets/custom_check_box.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 
 import 'package:pharma_now/core/widgets/custom_text_field.dart';
@@ -152,6 +151,7 @@ class _SingnUpBodyState extends State<SingnUpBody> {
             ElevatedButton(
               style: ButtonStyles.primaryButton,
               onPressed: () {
+                FocusScope.of(context).unfocus();
                 if (formKey.currentState!.validate()) {
                   if (isTermsAccepted) {
                     formKey.currentState!.save();

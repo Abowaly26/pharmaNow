@@ -8,10 +8,10 @@ class CategoriesListView extends StatelessWidget {
   // final Widget Function(BuildContext, int) itemBuilder;
 
   const CategoriesListView({
-    Key? key,
+    super.key,
     // required this.itemCount,
     // required this.itemBuilder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

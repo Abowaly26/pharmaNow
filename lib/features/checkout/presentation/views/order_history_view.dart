@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/features/checkout/data/services/order_service.dart';
-import 'package:pharma_now/features/checkout/domain/entites/orderentity.dart';
 
 class OrderHistoryView extends StatelessWidget {
   const OrderHistoryView({super.key});
@@ -34,6 +33,8 @@ class OrderHistoryView extends StatelessWidget {
 }
 
 class OrderHistoryBody extends StatelessWidget {
+  const OrderHistoryBody({super.key});
+
   @override
   Widget build(BuildContext context) {
     final orderService = getIt<OrderService>();

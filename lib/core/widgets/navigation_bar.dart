@@ -26,16 +26,16 @@ class _NavState extends State<Nav> {
 
   @override
   Widget build(BuildContext context) {
-    int _currentIndex = 0;
+    int currentIndex = 0;
 
-    final List<Widget> _items = [
+    final List<Widget> items = [
       const Icon(Icons.home, size: 30),
       const Icon(Icons.favorite, size: 30),
       const Icon(Icons.chat, size: 30),
       const Icon(Icons.person, size: 30),
     ];
 
-    final List<Widget> _screens = [
+    final List<Widget> screens = [
       const HomeView(), // Replace with your actual home content screen
       const FavoriteView(),
       // const ChatView(), // This was missing in your original code
@@ -43,7 +43,7 @@ class _NavState extends State<Nav> {
     ];
     return Scaffold(
       extendBody: true,
-      body: _screens[_currentIndex],
+      body: screens[currentIndex],
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           iconTheme: const IconThemeData(color: Colors.white),
@@ -55,10 +55,10 @@ class _NavState extends State<Nav> {
           height: 60,
           animationCurve: Curves.bounceInOut,
           animationDuration: const Duration(milliseconds: 300),
-          index: _currentIndex,
-          items: _items,
+          index: currentIndex,
+          items: items,
           onTap: (index) => setState(() {
-            _currentIndex = index;
+            currentIndex = index;
           }),
         ),
       ),

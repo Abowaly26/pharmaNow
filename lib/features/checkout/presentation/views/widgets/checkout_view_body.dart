@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
-import 'dart:ui';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
@@ -15,7 +14,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
 import 'package:get_it/get_it.dart';
-import 'package:provider/provider.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 import 'package:pharma_now/core/services/supabase_storage.dart';
 

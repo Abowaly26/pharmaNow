@@ -15,11 +15,11 @@ class SearchSuggestionsList extends StatelessWidget {
   final VoidCallback? onSuggestionTap;
 
   const SearchSuggestionsList({
-    Key? key,
+    super.key,
     required this.query,
     required this.suggestions,
     this.onSuggestionTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

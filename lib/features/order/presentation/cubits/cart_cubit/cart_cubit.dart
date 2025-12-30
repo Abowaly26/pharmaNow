@@ -58,8 +58,9 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void addMedicineToCart(MedicineEntity medicineEntity) {
-    if (state is! CartLoaded && state is! CartInitial)
+    if (state is! CartLoaded && state is! CartInitial) {
       return; // Should not happen if initialized correctly
+    }
 
     final currentCartEntity = (state as dynamic).cartEntity as CartEntity;
 

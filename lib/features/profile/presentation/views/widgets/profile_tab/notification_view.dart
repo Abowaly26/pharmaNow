@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
@@ -7,6 +6,8 @@ import '../../../../../../core/widgets/custom_app_bar.dart';
 
 class Notifications extends StatelessWidget {
   static const String routeName = "Notification";
+
+  const Notifications({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +113,7 @@ class _ToggleRowState extends State<ToggleRow> {
                 _isOn = val;
               });
             },
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: ColorManager.secondaryColor,
             inactiveTrackColor: Color(0xFFA9ABD5),
             inactiveThumbColor: Colors.white,

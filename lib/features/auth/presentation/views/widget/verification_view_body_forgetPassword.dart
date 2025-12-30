@@ -6,10 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/helper_functions/build_error_bar.dart'
     show showCustomBar, MessageType;
-import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
-import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
 
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/color_manger.dart';

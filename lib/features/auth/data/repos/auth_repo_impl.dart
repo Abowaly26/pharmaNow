@@ -30,13 +30,11 @@ class AuthRepoImpl extends AuthRepo {
           email: email, password: password);
 
       // Implement the fix: Update the Firebase User's displayName immediately
-      if (user != null) {
-        await user.updateDisplayName(name);
-        await user.reload();
-        var refreshedUser = FirebaseAuth.instance.currentUser;
-        if (refreshedUser != null) {
-          user = refreshedUser;
-        }
+      await user.updateDisplayName(name);
+      await user.reload();
+      var refreshedUser = FirebaseAuth.instance.currentUser;
+      if (refreshedUser != null) {
+        user = refreshedUser;
       }
 
       var userEntity = UserEntity(
@@ -161,6 +159,7 @@ class AuthRepoImpl extends AuthRepo {
   //   }
   // }
 
+  @override
   Future<Either<Failures, UserEntity>> signinWithGoogle() async {
     User? user;
     try {
@@ -198,22 +197,26 @@ class AuthRepoImpl extends AuthRepo {
       final oldUserData = await getUserDataByEmail(email);
 
       if (oldUserData != null) {
-        // Found old data from password account
-        log('📦 Found old data for email $email, migrating to new UID');
+        log('📦 Found existing legacy account for email: $email. Migrating to UID: $newUid');
 
-        // Create user entity with old data but new UID and update image from Google if old image is missing
+        // Logic: Prioritize existing uploaded image from legacy account.
+        // If legacy account has no image, fallback to Google profile photo.
+        String? finalProfileImage = (oldUserData.profileImageUrl != null &&
+                oldUserData.profileImageUrl!.isNotEmpty)
+            ? oldUserData.profileImageUrl
+            : user.photoURL;
+
         final userEntity = UserEntity(
           name: oldUserData.name,
           email: email,
-          uId: newUid, // Use new Google UID
-          profileImageUrl: oldUserData.profileImageUrl ?? user.photoURL,
+          uId: newUid,
+          profileImageUrl: finalProfileImage,
         );
 
-        // Save to new UID
         await addUserData(user: userEntity);
         await saveUserData(user: userEntity);
 
-        log('✅ Data migrated successfully to UID: $newUid with profile image sync');
+        log('✅ Data migration completed. Image source: ${finalProfileImage == oldUserData.profileImageUrl ? "Legacy account" : "Google profile"}');
         return right(userEntity);
       }
 

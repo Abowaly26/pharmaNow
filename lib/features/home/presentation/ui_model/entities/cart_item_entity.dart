@@ -12,14 +12,14 @@ class CartItemEntity extends Equatable {
     fromJson: _medicineFromJson,
   )
   final MedicineEntity medicineEntity;
-  int count;
+  final int count;
 
   static Map<String, dynamic> _medicineToJson(MedicineEntity medicine) =>
       medicine.toJson();
   static MedicineEntity _medicineFromJson(Map<String, dynamic> json) =>
       MedicineEntity.fromJson(json);
 
-  CartItemEntity({
+  const CartItemEntity({
     required this.medicineEntity,
     required this.count,
   });
@@ -47,14 +47,4 @@ class CartItemEntity extends Equatable {
   // Create from JSON from Firestore
   factory CartItemEntity.fromJson(Map<String, dynamic> json) =>
       _$CartItemEntityFromJson(json);
-
-  void increaseQuantity() {
-    count++;
-  }
-
-  void decreaseQuantity() {
-    if (count > 1) {
-      count--;
-    }
-  }
 }

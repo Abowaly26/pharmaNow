@@ -18,6 +18,8 @@ import '../../../../presentation/providers/profile_provider.dart';
 
 class EditProfile extends StatefulWidget {
   static const String routeName = "EditProfile";
+
+  const EditProfile({super.key});
   @override
   State<EditProfile> createState() => _EditProfileState();
 }

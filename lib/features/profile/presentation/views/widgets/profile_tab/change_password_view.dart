@@ -17,6 +17,8 @@ import 'package:pharma_now/core/helper_functions/build_error_bar.dart'
 class ChangePasswordView extends StatefulWidget {
   static const String routeName = "ChangePasswordView";
 
+  const ChangePasswordView({super.key});
+
   @override
   State<ChangePasswordView> createState() => _ChangePasswordViewState();
 }

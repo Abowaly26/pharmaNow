@@ -8,7 +8,6 @@ import 'package:pharma_now/core/helper_functions/show_custom_bar.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
 import 'package:pharma_now/core/widgets/custom_loading_overlay.dart';
 import 'package:pharma_now/core/services/permission_service.dart';
-import 'dart:ui';
 
 class OrderConfirmationView extends StatefulWidget {
   static const routeName = 'order_confirmation';

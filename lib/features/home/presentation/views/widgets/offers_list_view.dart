@@ -9,9 +9,9 @@ class OffersListView extends StatelessWidget {
   final List<MedicineEntity> medicines;
 
   const OffersListView({
-    Key? key,
+    super.key,
     required this.medicines,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

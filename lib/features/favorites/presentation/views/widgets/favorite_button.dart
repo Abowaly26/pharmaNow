@@ -13,13 +13,13 @@ class FavoriteButton extends StatelessWidget {
   final Color? inactiveColor;
 
   const FavoriteButton({
-    Key? key,
+    super.key,
     required this.itemId,
     required this.itemData,
     this.size = 24,
     this.activeColor = Colors.red,
     this.inactiveColor = Colors.grey,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

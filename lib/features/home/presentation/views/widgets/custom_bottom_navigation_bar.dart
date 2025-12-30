@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pharma_now/core/utils/color_manger.dart';
 
 import '../../ui_model/entities/bottom_navigation_bar_entity.dart';
 import '../../ui_model/navigation_bar_item.dart';

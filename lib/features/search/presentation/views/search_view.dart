@@ -22,19 +22,24 @@ class SearchView extends StatelessWidget {
         BlocProvider(create: (context) => GetIt.instance<SearchCubit>()),
         BlocProvider.value(value: GetIt.instance<CartCubit>()),
       ],
-      child: Scaffold(
-        backgroundColor: ColorManager.primaryColor,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(48.sp),
-          child: PharmaAppBar(
-            isBack: true,
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, MainView.routeName);
-            },
-            title: 'Search',
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Scaffold(
+          backgroundColor: ColorManager.primaryColor,
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(48.sp),
+            child: PharmaAppBar(
+              isBack: true,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, MainView.routeName);
+              },
+              title: 'Search',
+            ),
           ),
+          body: const SearchViewBody(),
         ),
-        body: const SearchViewBody(),
       ),
     );
   }

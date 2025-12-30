@@ -26,7 +26,7 @@ class MedicineEntity extends Equatable {
   final List<ReviewEntity> reviews;
   final int discountRating;
 
-  MedicineEntity({
+  const MedicineEntity({
     required this.discountRating,
     required this.reviews,
     required this.pharmacyName,

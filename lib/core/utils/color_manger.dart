@@ -14,7 +14,7 @@ class ColorManager {
   static const Color colorOfsecondPopUp = Color(0xFF718096);
   static const Color greenColor = Color(0xFF20B83A);
   static const Color redColorF5 = Color(0xFFF56565);
-  static const Color greyColorC6 = Color(0xFF2F4F9);
+  static const Color greyColorC6 = Color(0x0ff2f4f9);
   static const Color lightPurpleColorF5 = Color(0xFFA9ABD5);
   static const Color lightBlueColorF5C = Color(0xFFC5E9FF);
   static const Color lightGreenColorF5C = Color(0xFFCDF6E7);

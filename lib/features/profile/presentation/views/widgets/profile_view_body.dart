@@ -44,13 +44,13 @@ class SettingItem extends StatelessWidget {
     return InkWell(
       onTap: onTap ?? () {},
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
         child: Row(
           children: [
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Color(0xFFDBEAFE),
+                color: const Color(0xFFDBEAFE),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -59,13 +59,13 @@ class SettingItem extends StatelessWidget {
                 size: 20,
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: textColor ?? Color(0xff4F5A69),
+                  color: textColor ?? const Color(0xff4F5A69),
                 ),
               ),
             ),

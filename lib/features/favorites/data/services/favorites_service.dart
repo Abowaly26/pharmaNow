@@ -162,7 +162,7 @@ class FavoritesService {
     return userFavoritesCollection
         .orderBy('title') // Assumes there's a "title" field in the data
         .where('title', isGreaterThanOrEqualTo: searchTerm)
-        .where('title', isLessThanOrEqualTo: searchTerm + '\uf8ff')
+        .where('title', isLessThanOrEqualTo: '$searchTerm\uf8ff')
         .snapshots();
   }
 

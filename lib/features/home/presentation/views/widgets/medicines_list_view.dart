@@ -11,11 +11,11 @@ class MedicinesListView extends StatelessWidget {
   final List<MedicineEntity> medicines;
 
   const MedicinesListView({
-    Key? key,
+    super.key,
     required this.medicines,
     // required this.itemCount,
     // required this.itemBuilder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

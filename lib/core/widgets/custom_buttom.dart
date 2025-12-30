@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 
@@ -9,7 +8,7 @@ class CustomButtom extends StatelessWidget {
   final TextStyle? textStyle;
   final Function onButtonClicked;
 
-  CustomButtom({
+  const CustomButtom({super.key, 
     required this.text,
     this.buttonColor,
     this.prefixButtonIcon,

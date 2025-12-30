@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:developer';
 
-import 'package:path/path.dart';
 import 'package:pharma_now/core/services/storage_service.dart';
 
 import 'package:path/path.dart' as b;
@@ -24,8 +23,9 @@ class SupabaseStorageService implements StorageService {
       try {
         buckets = await _supabase.client.storage.listBuckets();
       } catch (e) {
-        // If we can't list buckets (e.g., RLS policy), assume they exist or we can't do anything about it dynamically.
-        log('Warning: Could not list buckets (Likely RLS Restricted). Skipping user-side creation check for $bucketName.',
+        // If we can't list buckets (e.g., RLS policy), we can't check existence.
+        // We'll log a clear instruction and move on.
+        log('Note: Skipping automatic check for bucket "$bucketName". Please ensure it exists and is PUBLIC in your Supabase Dashboard.',
             name: 'SupabaseStorageService');
         return;
       }
@@ -52,27 +52,25 @@ class SupabaseStorageService implements StorageService {
           log('Successfully created bucket: $bucketName',
               name: 'SupabaseStorageService');
         } catch (e) {
-          // Swallow the error if it's permission-related, it means we can't create it from the client.
-          log('Failed to create bucket $bucketName. Ensure it exists in Supabase Dashboard.',
+          // If 403, it's expected if using anon key.
+          log('Unable to create bucket "$bucketName" automatically (Permission Denied). This is normal for client-side keys. Please create it manually in the Supabase Dashboard and set it to PUBLIC.',
               name: 'SupabaseStorageService');
-          log('Error details: $e', name: 'SupabaseStorageService');
         }
       } else if (!isPublic) {
-        log('Checking public status for $bucketName...',
+        log('Bucket "$bucketName" exists but is not public. Attempting to update...',
             name: 'SupabaseStorageService');
         try {
-          // This might also fail if we don't have update permissions, which is expected for anon.
           await _supabase.client.storage.updateBucket(
             bucketName,
             const BucketOptions(public: true),
           );
         } catch (e) {
-          log('Note: Could not update bucket public status (Permission Denied). Ensure "Public Bucket" is ON in Dashboard.',
+          log('Note: Could not update bucket public status (Permission Denied). Ensure "Public Bucket" is ON for "$bucketName" in Dashboard.',
               name: 'SupabaseStorageService');
         }
       }
     } catch (e) {
-      log('Unexpected error in createBuckets: $e',
+      log('Unexpected error in createBuckets check for "$bucketName": $e',
           name: 'SupabaseStorageService');
     }
   }

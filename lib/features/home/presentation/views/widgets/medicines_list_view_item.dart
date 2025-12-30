@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -126,8 +125,7 @@ class MedicineListViewItem extends StatelessWidget {
                     height: 80.h,
                     width: 106.w,
                   )
-                : (medicineEntity.discountRating != null &&
-                        medicineEntity.discountRating > 0)
+                : (medicineEntity.discountRating > 0)
                     ? Stack(
                         alignment: Alignment.centerLeft,
                         children: [

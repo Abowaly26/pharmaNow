@@ -268,10 +268,9 @@ class CartViewBody extends StatelessWidget {
       num itemDiscountedPrice = itemOriginalPrice;
 
       // If the product has a discount
-      if (item.medicineEntity.discountRating != null &&
-          item.medicineEntity.discountRating! > 0) {
+      if (item.medicineEntity.discountRating > 0) {
         itemDiscountedPrice =
-            itemOriginalPrice * (1 - item.medicineEntity.discountRating! / 100);
+            itemOriginalPrice * (1 - item.medicineEntity.discountRating / 100);
       }
 
       totalOriginalPrice += itemOriginalPrice;

@@ -7,12 +7,12 @@ class CustomProgressHUD extends StatelessWidget {
   final double opacity;
 
   const CustomProgressHUD({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.child,
     this.color = Colors.black,
     this.opacity = 0.3,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

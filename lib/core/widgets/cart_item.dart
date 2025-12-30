@@ -8,7 +8,6 @@ import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/cart_item_action_buttons.dart';
 import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
-import 'package:provider/provider.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
@@ -133,8 +132,7 @@ class CartItem extends StatelessWidget {
                     height: 80.h,
                     width: 80.w,
                   )
-                : cartItemEntity.medicineEntity.discountRating != null &&
-                        cartItemEntity.medicineEntity.discountRating > 0
+                : cartItemEntity.medicineEntity.discountRating > 0
                     ? Stack(
                         alignment: Alignment.centerLeft,
                         children: [

@@ -12,7 +12,7 @@ class ShippingAddressEntity extends Equatable {
   final String apartmentNumber;
   final String phoneNumber;
 
-  ShippingAddressEntity({
+  const ShippingAddressEntity({
     required this.namee,
     required this.email,
     required this.address,

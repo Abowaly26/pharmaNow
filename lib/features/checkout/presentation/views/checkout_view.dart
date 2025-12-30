@@ -7,7 +7,6 @@ import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cu
 import 'package:pharma_now/features/cart/di/cart_injection.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'dart:ui';
 
 import 'package:pharma_now/core/widgets/custom_loading_overlay.dart';
 

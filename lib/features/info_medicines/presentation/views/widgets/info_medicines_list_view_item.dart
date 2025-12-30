@@ -127,8 +127,7 @@ class InfoMedicinesListViewItem extends StatelessWidget {
                     height: 80.h,
                     width: 80.w,
                   )
-                : (medicineEntity.discountRating != null &&
-                        medicineEntity.discountRating > 0)
+                : (medicineEntity.discountRating > 0)
                     ? Stack(
                         alignment: Alignment.centerLeft,
                         children: [
