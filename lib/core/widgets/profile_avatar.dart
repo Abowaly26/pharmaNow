@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,7 +9,10 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 /// - User's profile image if available (with caching)
 /// - User's initial letter as fallback
 /// - Optional camera overlay for edit mode
-class ProfileAvatar extends StatelessWidget {
+class ProfileAvatar extends StatefulWidget {
+  /// Local file image to display (Optimistic UI)
+  final File? imageFile;
+
   /// The URL of the profile image (nullable)
   final String? imageUrl;
 
@@ -34,6 +39,7 @@ class ProfileAvatar extends StatelessWidget {
 
   const ProfileAvatar({
     super.key,
+    this.imageFile,
     this.imageUrl,
     this.userName,
     this.radius = 50,
@@ -45,106 +51,108 @@ class ProfileAvatar extends StatelessWidget {
   });
 
   @override
+  State<ProfileAvatar> createState() => _ProfileAvatarState();
+}
+
+class _ProfileAvatarState extends State<ProfileAvatar> {
+  bool _isNetworkImageLoading = false;
+
+  @override
+  void didUpdateWidget(ProfileAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If image URL changed, we reset the internal loading state
+    if (widget.imageUrl != oldWidget.imageUrl) {
+      _isNetworkImageLoading =
+          widget.imageUrl != null && widget.imageUrl!.isNotEmpty;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final String initialLetter = _getInitialLetter();
-    final Color bgColor = backgroundColor ?? ColorManager.secondaryColor;
+    final Color bgColor = widget.backgroundColor ?? ColorManager.secondaryColor;
+
+    // We consider it loading if either the prop is true or we are internally waiting for network image
+    final bool effectiveLoading = widget.isLoading || _isNetworkImageLoading;
 
     Widget avatar;
 
-    // If we are loading and have no data, show skeleton
-    // If we are loading and HAVE data, we'll show the avatar with an overlay
-    final bool isInitialLoading = isLoading &&
-        imageUrl == null &&
-        (userName == null || userName!.isEmpty);
+    final bool isInitialLoading = effectiveLoading &&
+        widget.imageFile == null &&
+        widget.imageUrl == null &&
+        (widget.userName == null || widget.userName!.isEmpty);
 
     if (isInitialLoading) {
-      // Return a simple circle that Skeletonizer will treat as a bone
       avatar = CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.grey[300],
+        radius: widget.radius,
+        backgroundColor: Colors.grey[200],
       );
-    } else if (imageUrl != null && imageUrl!.isNotEmpty) {
+    } else if (widget.imageFile != null) {
+      avatar = CircleAvatar(
+        radius: widget.radius,
+        backgroundImage: FileImage(widget.imageFile!),
+        backgroundColor: Colors.transparent,
+      );
+    } else if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
       avatar = _buildImageAvatar();
     } else {
       avatar = _buildInitialAvatar(initialLetter, bgColor);
     }
 
-    // Add loading overlay if we are loading but already have data (e.g. uploading/updating)
-    if (isLoading && !isInitialLoading) {
-      avatar = Stack(
-        alignment: Alignment.center,
-        children: [
-          avatar,
-          Container(
-            width: radius * 2,
-            height: radius * 2,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: SizedBox(
-                width: radius * 0.4,
-                height: radius * 0.4,
-                child: const CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 3,
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
+    // Add loading overlay if we are loading but already have data
+    if (effectiveLoading && !isInitialLoading) {
+      avatar = _buildLoadingOverlay(avatar);
     }
 
     // Wrap with arc if needed
-    // Hide arc when loading for a cleaner skeleton look
-    if (showArc && !isLoading) {
+    if (widget.showArc) {
       avatar = Stack(
         alignment: Alignment.center,
         children: [
-          SizedBox(
-            width: radius * 2.2,
-            height: radius * 2.2,
-            child: CustomPaint(painter: _ArcPainter()),
-          ),
+          if (!isInitialLoading)
+            SizedBox(
+              width: widget.radius * 2.2,
+              height: widget.radius * 2.2,
+              child: CustomPaint(painter: _ArcPainter()),
+            ),
           avatar,
         ],
       );
     }
 
     // Add edit overlay if needed
-    // Hide overlay when loading for a cleaner look
-    if (showEditOverlay && !isLoading) {
+    if (widget.showEditOverlay) {
       return Stack(
         children: [
           avatar,
-          Positioned(
-            right: showArc ? radius * 0.1 : 0,
-            bottom: showArc ? radius * 0.1 : 0,
-            child: GestureDetector(
-              onTap: onEditTap,
-              child: Container(
-                padding: EdgeInsets.all(8.r),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.camera_alt,
-                  size: radius * 0.35,
-                  color: ColorManager.secondaryColor,
+          // Hide camera button during any loading state to prevent distraction
+          if (!effectiveLoading)
+            Positioned(
+              right: widget.showArc ? widget.radius * 0.1 : 0,
+              bottom: widget.showArc ? widget.radius * 0.1 : 0,
+              child: GestureDetector(
+                onTap: widget.onEditTap,
+                child: Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.camera_alt,
+                    size: widget.radius * 0.35,
+                    color: ColorManager.secondaryColor,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       );
     }
@@ -153,50 +161,91 @@ class ProfileAvatar extends StatelessWidget {
   }
 
   String _getInitialLetter() {
-    if (userName != null && userName!.trim().isNotEmpty) {
-      final List<String> names = userName!.trim().split(' ');
+    if (widget.userName != null && widget.userName!.trim().isNotEmpty) {
+      final List<String> names = widget.userName!.trim().split(' ');
       if (names.length > 1) {
-        // Get first letter of first two words
         return (names[0][0] + names[1][0]).toUpperCase();
       }
       return names[0][0].toUpperCase();
     }
-    return ''; // Return empty string instead of '?' to allow skeletonizer to show better placeholder
+    return '';
   }
 
   Widget _buildImageAvatar() {
     return CachedNetworkImage(
-      imageUrl: imageUrl!,
-      imageBuilder: (context, imageProvider) => CircleAvatar(
-        radius: radius,
-        backgroundImage: imageProvider,
-      ),
-      placeholder: (context, url) => CircleAvatar(
-        radius: radius,
-        backgroundColor: ColorManager.secondaryColor.withOpacity(0.1),
-        child: SizedBox(
-          width: radius * 0.5,
-          height: radius * 0.5,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor:
-                AlwaysStoppedAnimation<Color>(ColorManager.secondaryColor),
+      imageUrl: widget.imageUrl!,
+      imageBuilder: (context, imageProvider) {
+        if (_isNetworkImageLoading) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _isNetworkImageLoading = false);
+          });
+        }
+        return CircleAvatar(
+          radius: widget.radius,
+          backgroundImage: imageProvider,
+        );
+      },
+      placeholder: (context, url) {
+        // Placeholder should just be a clean background with the spinner overlay
+        return _buildLoadingOverlay(
+          CircleAvatar(
+            radius: widget.radius,
+            backgroundColor: Colors.grey[200],
+          ),
+        );
+      },
+      errorWidget: (context, url, error) {
+        if (_isNetworkImageLoading) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _isNetworkImageLoading = false);
+          });
+        }
+        return _buildInitialAvatar(
+          _getInitialLetter(),
+          widget.backgroundColor ?? ColorManager.secondaryColor,
+        );
+      },
+    );
+  }
+
+  Widget _buildLoadingOverlay(Widget background) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        background,
+        ClipOval(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+            child: Container(
+              width: widget.radius * 2,
+              height: widget.radius * 2,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: widget.radius * 0.45,
+                  height: widget.radius * 0.45,
+                  child: const CircularProgressIndicator(
+                    color: ColorManager.secondaryColor,
+                    strokeWidth: 1.9,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-      ),
-      errorWidget: (context, url, error) => _buildInitialAvatar(
-        _getInitialLetter(),
-        backgroundColor ?? ColorManager.secondaryColor,
-      ),
+      ],
     );
   }
 
   Widget _buildInitialAvatar(String letter, Color bgColor) {
-    // Dynamic font size based on number of initials
-    final double fontSize = letter.length > 1 ? radius * 0.5 : radius * 0.8;
+    final double fontSize =
+        letter.length > 1 ? widget.radius * 0.45 : widget.radius * 0.6;
 
     return CircleAvatar(
-      radius: radius,
+      radius: widget.radius,
       backgroundColor: bgColor,
       child: Text(
         letter,

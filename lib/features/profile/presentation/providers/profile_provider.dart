@@ -232,7 +232,12 @@ class ProfileProvider extends ChangeNotifier {
       _status = ProfileStatus.success;
     } catch (e) {
       log('Original upload error: $e', name: 'ProfileProvider');
-      _errorMessage = 'error in upload image';
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('network_error')) {
+        _errorMessage = 'No internet connection. Please check your network.';
+      } else {
+        _errorMessage = 'Failed to upload image. Please try again.';
+      }
       _status = ProfileStatus.error;
     } finally {
       _isLoading = false;
@@ -265,7 +270,12 @@ class ProfileProvider extends ChangeNotifier {
       await _saveUserToLocal(_currentUser!);
       _status = ProfileStatus.success;
     } catch (e) {
-      _errorMessage = 'Failed to remove profile photo: ${e.toString()}';
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('network_error')) {
+        _errorMessage = 'No internet connection. Please check your network.';
+      } else {
+        _errorMessage = 'Failed to remove profile photo. Please try again.';
+      }
       _status = ProfileStatus.error;
     } finally {
       _isLoading = false;

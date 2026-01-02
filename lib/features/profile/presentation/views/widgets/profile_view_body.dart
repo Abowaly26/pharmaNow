@@ -8,6 +8,7 @@ import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/widgets/custom_bottom_sheet.dart';
 import 'package:pharma_now/core/widgets/profile_avatar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
@@ -87,6 +88,8 @@ class ProfileViewBody extends StatefulWidget {
 
 class _ProfileViewBodyState extends State<ProfileViewBody> {
   final ImagePicker _imagePicker = ImagePicker();
+  bool _isLocalLoading = false;
+  File? _localImageFile;
 
   Future<void> _showImagePickerOptions() async {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
@@ -156,13 +159,35 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
 
       if (pickedFile != null) {
         final File imageFile = File(pickedFile.path);
+
+        if (mounted) {
+          setState(() {
+            _isLocalLoading = true;
+            _localImageFile = imageFile;
+          });
+        }
+
         final provider = Provider.of<ProfileProvider>(context, listen: false);
         await provider.updateProfileImage(imageFile);
 
         if (mounted) {
           if (provider.status == ProfileStatus.error) {
+            setState(() {
+              _isLocalLoading = false;
+              _localImageFile = null;
+            });
             showCustomBar(context, provider.errorMessage);
           } else {
+            // Wait for image to be cached/ready before showing success
+            final newUrl = provider.currentUser?.profileImageUrl;
+            if (newUrl != null && newUrl.isNotEmpty) {
+              await precacheImage(CachedNetworkImageProvider(newUrl), context);
+            }
+            setState(() {
+              _isLocalLoading = false;
+              _localImageFile =
+                  null; // Switch to remote URL now that it's cached
+            });
             showCustomBar(
               context,
               'Profile photo updated successfully',
@@ -174,6 +199,10 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     } catch (e) {
       log('Error picking image: $e', name: 'ProfileViewBody');
       if (mounted) {
+        setState(() {
+          _isLocalLoading = false;
+          _localImageFile = null;
+        });
         showCustomBar(context, 'Failed to pick image');
       }
     }
@@ -181,10 +210,20 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
 
   Future<void> _removeProfileImage() async {
     try {
+      if (mounted) {
+        setState(() {
+          _isLocalLoading = true;
+          _localImageFile = null;
+        });
+      }
       final provider = Provider.of<ProfileProvider>(context, listen: false);
       await provider.removeProfileImage();
 
       if (mounted) {
+        setState(() {
+          _isLocalLoading = false;
+          _localImageFile = null;
+        });
         if (provider.status == ProfileStatus.error) {
           showCustomBar(context, provider.errorMessage);
         } else {
@@ -198,6 +237,10 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     } catch (e) {
       log('Error removing image: $e', name: 'ProfileViewBody');
       if (mounted) {
+        setState(() {
+          _isLocalLoading = false;
+          _localImageFile = null;
+        });
         showCustomBar(context, 'Failed to remove profile photo');
       }
     }
@@ -221,12 +264,13 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                 children: [
                   SizedBox(height: 0.02 * height),
                   ProfileAvatar(
+                    imageFile: _localImageFile,
                     imageUrl: user?.profileImageUrl,
                     userName: user?.name,
                     radius: avatarRadius,
                     showArc: true,
                     showEditOverlay: true,
-                    isLoading: false, // Keep background stable
+                    isLoading: provider.isLoading || _isLocalLoading,
                     onEditTap: _showImagePickerOptions,
                   ),
                   SizedBox(height: 0.01 * height),
