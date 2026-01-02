@@ -1,1 +1,24 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"pharmanow-754a7","appId":"1:899708379709:android:c0899fc0febcd747b38054","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"pharmanow-754a7","configurations":{"android":"1:899708379709:android:c0899fc0febcd747b38054","ios":"1:899708379709:ios:76c13c27305280cdb38054","web":"1:899708379709:web:808bc5cc7ce74cbeb38054","windows":"1:899708379709:web:231e1fd331ecb1e1b38054"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "pharmanow-754a7",
+          "appId": "1:899708379709:android:c0899fc0febcd747b38054",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "pharmanow-754a7",
+          "configurations": {
+            "android": "1:899708379709:android:c0899fc0febcd747b38054",
+            "ios": "1:899708379709:ios:76c13c27305280cdb38054",
+            "web": "1:899708379709:web:808bc5cc7ce74cbeb38054",
+            "windows": "1:899708379709:web:231e1fd331ecb1e1b38054"
+          }
+        }
+      }
+    }
+  }
+}

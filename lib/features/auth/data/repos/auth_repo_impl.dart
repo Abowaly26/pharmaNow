@@ -12,6 +12,7 @@ import 'package:pharma_now/features/auth/data/models/user_model.dart';
 import 'package:pharma_now/features/auth/domain/repo/auth_repo.dart';
 import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 
+import 'package:pharma_now/core/services/fcm_service.dart';
 import '../../../../core/services/firebase_auth_service.dart';
 
 class AuthRepoImpl extends AuthRepo {
@@ -53,6 +54,13 @@ class AuthRepoImpl extends AuthRepo {
 
       // await addUserData(user: userEntity);
       await saveUserData(user: userEntity);
+
+      // Trigger FCM token sync
+      try {
+        await FCMService.instance.init();
+      } catch (e) {
+        log('Error initializing FCM after signup: $e');
+      }
 
       // CRITICAL: Sign out immediately so the user is not automatically logged in
       // Do not sign out here. We keep the user signed in to check verification status.
@@ -117,11 +125,13 @@ class AuthRepoImpl extends AuthRepo {
       //     path: BackendEndpoint.isUserExist, docuementId: user.uid);
 
       await saveUserData(user: userEntity);
-      // if (isUserExist) {
-      // await getUserData(uid: user.uid);
-      // } else {
-      //   await addUserData(user: userEntity);
-      // }
+
+      // Trigger FCM token sync
+      try {
+        await FCMService.instance.init();
+      } catch (e) {
+        log('Error initializing FCM after sign in: $e');
+      }
 
       return right(userEntity);
     } on CustomException catch (e) {
@@ -227,6 +237,13 @@ class AuthRepoImpl extends AuthRepo {
       final userEntity = UserModel.fromFirebaseUser(user);
       await addUserData(user: userEntity);
       await saveUserData(user: userEntity);
+
+      // Trigger FCM token sync
+      try {
+        await FCMService.instance.init();
+      } catch (e) {
+        log('Error initializing FCM after google sign in: $e');
+      }
 
       return right(userEntity);
     } catch (e) {

@@ -18,4 +18,6 @@ abstract class DatabaseService {
 
   Future<List<Map<String, dynamic>>> searchMedicines(
       {required String path, required String query});
+
+  Future<void> deleteData({required String path, required String documentId});
 }

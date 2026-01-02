@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/services/supabase_storage.dart';
 import 'package:provider/provider.dart';
@@ -15,11 +18,48 @@ import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 import 'package:pharma_now/firebase_options.dart';
 import 'package:pharma_now/core/services/firebase_auth_service.dart';
 import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
-import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart'; // Import SignInView for the route name
-import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
-import 'package:pharma_now/core/services/auth_navigation_observer.dart'; // Import AuthNavigationObserver
+import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pharma_now/core/services/auth_navigation_observer.dart';
+import 'package:pharma_now/core/services/notification_log_service.dart';
+import 'package:pharma_now/core/services/fcm_service.dart';
+import 'package:pharma_now/features/notifications/presentation/models/notification_payload.dart';
 
 import 'core/services/custom_bloc_observer.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  setupGetit(); // Need this to use our services in background isolate
+  debugPrint("Handling a background message: ${message.messageId}");
+
+  // Save to Firestore logs
+  try {
+    // We need to parse the payload manually here since we don't want to rely on the singleton's private methods
+    final data = message.data;
+    NotificationPayload? payload;
+
+    if (data.containsKey('payload')) {
+      final Map<String, dynamic> map = jsonDecode(data['payload']);
+      payload = NotificationPayload.fromMap(map);
+    } else {
+      payload = NotificationPayload(
+        type: data['type'] ?? 'system',
+        entityId: data['entityId'],
+        route: data['route'],
+        imageUrl: data['image'],
+        title: message.notification?.title ?? 'Notification',
+        body: message.notification?.body ?? '',
+      );
+    }
+
+    final logService = getIt<NotificationLogService>();
+    await logService.addLog(payload, notificationId: message.messageId);
+    debugPrint("Background message saved to logs");
+  } catch (e) {
+    debugPrint("Error saving background message to logs: $e");
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,17 +69,57 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   setupGetit();
+
+  await _initializeLocalNotifications();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  await FCMService.instance.init();
   Bloc.observer = CustomBlocObserver();
 
   await prefs.init();
   runApp(PharmaNow());
-  // Initialize dynamic links after the app is running to ensure plugins are registered
   WidgetsBinding.instance.addPostFrameCallback((_) {
     _initDynamicLinks();
   });
 }
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+Future<void> _initializeLocalNotifications() async {
+  final plugin = getIt<FlutterLocalNotificationsPlugin>();
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const DarwinInitializationSettings initializationSettingsDarwin =
+      DarwinInitializationSettings();
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsDarwin,
+  );
+
+  await plugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) {
+      _handleLocalNotificationTap(response.payload);
+    },
+  );
+}
+
+void _handleLocalNotificationTap(String? payload) {
+  if (payload == null || payload.isEmpty) return;
+  try {
+    final Map<String, dynamic> data = jsonDecode(payload);
+    final String? route = data['route'] as String?;
+    if (route != null && route.isNotEmpty) {
+      navigatorKey.currentState?.pushNamed(route);
+    }
+  } catch (e) {
+    debugPrint('Error parsing local notification payload: $e');
+  }
+}
+
+final GlobalKey<NavigatorState> navigatorKey =
+    getIt<GlobalKey<NavigatorState>>();
 final AuthNavigationObserver authNavigationObserver = AuthNavigationObserver();
 
 Future<void> _initDynamicLinks() async {

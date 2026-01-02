@@ -15,6 +15,8 @@ import '../../../../../../core/utils/color_manger.dart';
 import '../../../../../../core/widgets/custom_bottom_sheet.dart';
 import '../../../../../../core/widgets/custom_app_bar.dart';
 import '../../../../../../core/widgets/custom_text_field.dart';
+import 'package:flutter/services.dart';
+import 'package:pharma_now/core/utils/app_validation.dart';
 import '../../../../presentation/providers/profile_provider.dart';
 
 class EditProfile extends StatefulWidget {
@@ -28,6 +30,8 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   final TextEditingController _nameController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
   bool _isPickerActive = false;
 
   @override
@@ -138,8 +142,11 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<void> _updateProfile() async {
     final provider = Provider.of<ProfileProvider>(context, listen: false);
-    if (_nameController.text.trim().isEmpty) {
-      showCustomBar(context, 'Please enter a valid name');
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() {
+        _autovalidateMode = AutovalidateMode.always;
+      });
       return;
     }
 
@@ -177,78 +184,89 @@ class _EditProfileState extends State<EditProfile> {
       ),
       body: SingleChildScrollView(
         child: Center(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 0.04 * width),
-            child: Column(
-              children: [
-                SizedBox(height: 0.03 * height),
-                // Profile Avatar with edit capability
-                Consumer<ProfileProvider>(
-                  builder: (context, currentProviderState, child) {
-                    return ProfileAvatar(
-                      imageUrl:
-                          currentProviderState.currentUser?.profileImageUrl,
-                      userName: currentProviderState.currentUser?.name,
-                      radius: avatarRadius,
-                      showArc: true,
-                      showEditOverlay: true,
-                      isLoading: currentProviderState.isLoading,
-                      onEditTap: _showImagePickerOptions,
-                    );
-                  },
-                ),
-                SizedBox(height: 0.02 * height),
-                Consumer<ProfileProvider>(
-                  builder: (context, providerData, _) {
-                    String userName = providerData.currentUser?.name ?? '';
-                    if (providerData.currentUser == null || userName.isEmpty) {
-                      final firebaseUser = FirebaseAuth.instance.currentUser;
-                      userName = firebaseUser?.displayName ??
-                          firebaseUser?.email?.split('@')[0] ??
-                          "Guest";
-                    }
-                    if (_nameController.text.isNotEmpty) {
-                      userName = _nameController.text;
-                    }
-                    return Text(
-                      userName.isNotEmpty ? userName : "Guest",
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    );
-                  },
-                ),
-                SizedBox(height: 0.01 * height),
-                Consumer<ProfileProvider>(
-                  builder: (context, providerData, _) {
-                    final userEmail = providerData.currentUser?.email ?? "";
-                    return Text(
-                      userEmail,
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    );
-                  },
-                ),
-                SizedBox(height: 0.04 * height),
-                CustomTextField(
-                  controller: _nameController,
-                  textInputType: TextInputType.name,
-                  lable: 'Name',
-                  icon: Assets.nameIcon,
-                  hint: 'Enter your name',
-                ),
-                SizedBox(height: 0.05 * height),
-                ElevatedButton(
-                  style: ButtonStyles.primaryButton,
-                  onPressed: provider.isLoading ||
-                          provider.status == ProfileStatus.loading
-                      ? null
-                      : _updateProfile,
-                  child: provider.isLoading ||
-                          provider.status == ProfileStatus.loading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Save Changes', style: TextStyles.buttonLabel),
-                ),
-                SizedBox(height: 0.02 * height),
-              ],
+          child: Form(
+            key: _formKey,
+            autovalidateMode: _autovalidateMode,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 0.04 * width),
+              child: Column(
+                children: [
+                  SizedBox(height: 0.03 * height),
+                  // Profile Avatar with edit capability
+                  Consumer<ProfileProvider>(
+                    builder: (context, currentProviderState, child) {
+                      return ProfileAvatar(
+                        imageUrl:
+                            currentProviderState.currentUser?.profileImageUrl,
+                        userName: currentProviderState.currentUser?.name,
+                        radius: avatarRadius,
+                        showArc: true,
+                        showEditOverlay: true,
+                        isLoading: currentProviderState.isLoading,
+                        onEditTap: _showImagePickerOptions,
+                      );
+                    },
+                  ),
+                  SizedBox(height: 0.02 * height),
+                  Consumer<ProfileProvider>(
+                    builder: (context, providerData, _) {
+                      String userName = providerData.currentUser?.name ?? '';
+                      if (providerData.currentUser == null ||
+                          userName.isEmpty) {
+                        final firebaseUser = FirebaseAuth.instance.currentUser;
+                        userName = firebaseUser?.displayName ??
+                            firebaseUser?.email?.split('@')[0] ??
+                            "Guest";
+                      }
+                      if (_nameController.text.isNotEmpty) {
+                        userName = _nameController.text;
+                      }
+                      return Text(
+                        userName.isNotEmpty ? userName : "Guest",
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 0.01 * height),
+                  Consumer<ProfileProvider>(
+                    builder: (context, providerData, _) {
+                      final userEmail = providerData.currentUser?.email ?? "";
+                      return Text(
+                        userEmail,
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 0.04 * height),
+                  CustomTextField(
+                    controller: _nameController,
+                    textInputType: TextInputType.name,
+                    lable: 'Name',
+                    icon: Assets.nameIcon,
+                    hint: 'Enter your first and last name',
+                    validator: AppValidation.validateUserName,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'[a-zA-Z\u0600-\u06FF ]'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 0.05 * height),
+                  ElevatedButton(
+                    style: ButtonStyles.primaryButton,
+                    onPressed: provider.isLoading ||
+                            provider.status == ProfileStatus.loading
+                        ? null
+                        : _updateProfile,
+                    child: provider.isLoading ||
+                            provider.status == ProfileStatus.loading
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text('Save Changes', style: TextStyles.buttonLabel),
+                  ),
+                  SizedBox(height: 0.02 * height),
+                ],
+              ),
             ),
           ),
         ),

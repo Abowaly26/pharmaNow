@@ -6,18 +6,21 @@ class AppValidation {
       return 'Name is required';
     }
 
-    // Trim and split by whitespace
-    final names = value.trim().split(RegExp(r'\s+'));
+    final trimmedValue = value.trim();
+    // Use regex to split by one or more whitespace characters
+    final names = trimmedValue.split(RegExp(r'\s+'));
 
     if (names.length < 2) {
       return 'Please enter both your first and last name';
     }
 
-    if (value.length < 3) {
-      return 'Name must be at least 3 characters';
+    for (var name in names) {
+      if (name.length < 3) {
+        return 'Each part of the name must be at least 3 characters';
+      }
     }
 
-    if (!AppRegex.isNameValid(value)) {
+    if (!AppRegex.isNameValid(trimmedValue)) {
       return 'Name must contain letters only';
     }
     return null;

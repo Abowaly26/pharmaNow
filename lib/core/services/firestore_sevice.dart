@@ -10,7 +10,7 @@ class FireStoreSevice implements DatabaseService {
     required Map<String, dynamic> data,
     String? documentId,
   }) async {
-    if (documentId != null) {
+    if (documentId != null && documentId.isNotEmpty) {
       await firestore
           .collection(path)
           .doc(documentId)
@@ -25,7 +25,7 @@ class FireStoreSevice implements DatabaseService {
       {required String path,
       String? docuementId,
       Map<String, dynamic>? query}) async {
-    if (docuementId != null) {
+    if (docuementId != null && docuementId.isNotEmpty) {
       var data = await firestore.collection(path).doc(docuementId).get();
       return data.data();
     } else {
@@ -33,12 +33,10 @@ class FireStoreSevice implements DatabaseService {
 
       if (query != null) {
         if (query['orderBy'] != null) {
-          if (query['orderBy'] != null) {
-            var orderByField = query['orderBy'];
-            var descending = query['descending'];
+          var orderByField = query['orderBy'];
+          var descending = query['descending'] ?? false;
 
-            data = data.orderBy(orderByField, descending: descending);
-          }
+          data = data.orderBy(orderByField, descending: descending);
         }
 
         if (query['limit'] != null) {
@@ -49,13 +47,19 @@ class FireStoreSevice implements DatabaseService {
 
       var result = await data.get();
 
-      return result.docs.map((e) => e.data()).toList();
+      // IMPORTANT: Map the document ID into the data map so we can use it later
+      return result.docs.map((e) {
+        var dataMap = e.data();
+        dataMap['id'] = e.id;
+        return dataMap;
+      }).toList();
     }
   }
 
   @override
   Future<bool> checkIfDataExist(
       {required String path, required String docuementId}) async {
+    if (docuementId.isEmpty) return false;
     var data = await firestore.collection(path).doc(docuementId).get();
     return data.exists;
   }
@@ -126,5 +130,11 @@ class FireStoreSevice implements DatabaseService {
       print('Search error: $error');
       throw Exception('Search error : $error');
     }
+  }
+
+  @override
+  Future<void> deleteData(
+      {required String path, required String documentId}) async {
+    await firestore.collection(path).doc(documentId).delete();
   }
 }

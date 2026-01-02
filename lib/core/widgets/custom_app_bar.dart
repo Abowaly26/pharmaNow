@@ -32,11 +32,17 @@ import 'package:pharma_now/core/utils/text_styles.dart';
 // }
 
 class PharmaAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const PharmaAppBar(
-      {super.key, required this.title, this.isBack = false, this.onPressed});
+  const PharmaAppBar({
+    super.key,
+    required this.title,
+    this.isBack = false,
+    this.onPressed,
+    this.action,
+  });
   final String title;
   final bool isBack;
   final Function()? onPressed;
+  final List<Widget>? action;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +67,7 @@ class PharmaAppBar extends StatelessWidget implements PreferredSizeWidget {
           : null,
       centerTitle: true,
       title: Text(title),
+      actions: action,
       titleTextStyle: TextStyles.appBarTitle18,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),

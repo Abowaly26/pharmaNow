@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/widgets/profile_avatar.dart';
 import 'package:pharma_now/features/medical_assistant/chat_bot.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:provider/provider.dart';
 
@@ -18,15 +20,7 @@ class HomeAppbar extends StatelessWidget {
 
   late final List<ActionItem> actions = [
     ActionItem(
-      icon: Badge(
-          backgroundColor: ColorManager.greenColor,
-          label: Text('0'),
-          textColor: ColorManager.primaryColor,
-          child: SvgPicture.asset(
-            Assets.notificationsIcon,
-            width: 24,
-            height: 24,
-          )),
+      icon: _NotificationsBadgeIcon(),
       callback: (BuildContext ctx) {
         Navigator.of(ctx).push(
           MaterialPageRoute(
@@ -110,6 +104,47 @@ class HomeAppbar extends StatelessWidget {
                             ))
                         .toList()))
           ]),
+    );
+  }
+}
+
+class _NotificationsBadgeIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    final baseIcon = SvgPicture.asset(
+      Assets.notificationsIcon,
+      width: 24,
+      height: 24,
+    );
+
+    if (uid == null) {
+      return Badge(
+        isLabelVisible: false,
+        backgroundColor: ColorManager.greenColor,
+        textColor: ColorManager.primaryColor,
+        label: const Text('0'),
+        child: baseIcon,
+      );
+    }
+
+    final unreadStream = FirebaseFirestore.instance
+        .collection('users/$uid/notifications')
+        .where('read', isEqualTo: false)
+        .snapshots();
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: unreadStream,
+      builder: (context, snapshot) {
+        final int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+        return Badge(
+          isLabelVisible: count > 0,
+          backgroundColor: ColorManager.greenColor,
+          textColor: ColorManager.primaryColor,
+          label: Text('$count'),
+          child: baseIcon,
+        );
+      },
     );
   }
 }

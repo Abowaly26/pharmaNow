@@ -251,6 +251,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 0.009 * height),
                   SettingItem(
                     icon: Icons.person,
                     title: "Edit Profile",
@@ -258,6 +259,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                       Navigator.pushNamed(context, EditProfile.routeName);
                     },
                   ),
+                  SizedBox(height: 0.009 * height),
                   SettingItem(
                     icon: Icons.notifications,
                     title: "Notifications",
@@ -265,7 +267,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                       Navigator.pushNamed(context, Notifications.routeName);
                     },
                   ),
-                  SizedBox(height: 0.01 * height),
+                  SizedBox(height: 0.009 * height),
                   SettingItem(
                     icon: Icons.security,
                     title: "Terms of Service",
@@ -274,8 +276,8 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                           context, TermsOfServiceView.routeName);
                     },
                   ),
-                  SizedBox(height: 0.01 * height),
-                  if (provider.isPasswordUser)
+                  if (provider.isPasswordUser) ...[
+                    SizedBox(height: 0.009 * height),
                     SettingItem(
                       icon: Icons.lock,
                       title: "Change Password",
@@ -284,7 +286,8 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                             context, ChangePasswordView.routeName);
                       },
                     ),
-                  SizedBox(height: 0.01 * height),
+                  ],
+                  SizedBox(height: 0.009 * height),
                   SettingItem(
                     icon: Icons.help_outlined,
                     title: "Help & Support",
@@ -292,7 +295,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                       Navigator.pushNamed(context, HelpSupportView.routeName);
                     },
                   ),
-                  SizedBox(height: 0.01 * height),
+                  SizedBox(height: 0.009 * height),
                   SettingItem(
                     icon: Icons.delete_forever,
                     title: "Delete Account",
@@ -301,6 +304,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                           Provider.of<ProfileProvider>(context, listen: false));
                     },
                   ),
+                  SizedBox(height: 0.009 * height),
                   SettingItem(
                     icon: Icons.logout,
                     title: "Log Out",
