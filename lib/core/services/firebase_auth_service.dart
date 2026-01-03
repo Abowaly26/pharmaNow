@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
 
@@ -46,7 +45,6 @@ class FirebaseAuthService {
       // Convert sign-in method to provider ID
       if (methods.contains('password')) return 'password';
       if (methods.contains('google.com')) return 'google.com';
-      if (methods.contains('facebook.com')) return 'facebook.com';
 
       return methods.first;
     } catch (e) {
@@ -165,17 +163,6 @@ class FirebaseAuthService {
     );
 
     return (await FirebaseAuth.instance.signInWithCredential(credential)).user!;
-  }
-
-  Future<User> signInWithFacebook() async {
-    final LoginResult loginResult = await FacebookAuth.instance.login();
-
-    final OAuthCredential facebookAuthCredential =
-        FacebookAuthProvider.credential(loginResult.accessToken!.tokenString);
-
-    return (await FirebaseAuth.instance
-            .signInWithCredential(facebookAuthCredential))
-        .user!;
   }
 
   bool isLoggedIn() {

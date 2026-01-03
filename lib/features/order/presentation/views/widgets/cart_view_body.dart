@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/widgets/cart_header.dart';
+import 'package:pharma_now/core/widgets/premium_loading_indicator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/checkout/presentation/views/checkout_view.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
@@ -24,7 +25,7 @@ class CartViewBody extends StatelessWidget {
         if (state is! CartLoaded && state is! CartInitial) {
           return const Center(
               child:
-                  CircularProgressIndicator()); // Or some other loading/error state
+                  PremiumLoadingIndicator()); // Or some other loading/error state
         }
         final cartEntity = (state as dynamic).cartEntity as CartEntity;
 

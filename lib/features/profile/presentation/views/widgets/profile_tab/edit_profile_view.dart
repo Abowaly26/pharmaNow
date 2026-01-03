@@ -261,7 +261,10 @@ class _EditProfileState extends State<EditProfile> {
                         : _updateProfile,
                     child: provider.isLoading ||
                             provider.status == ProfileStatus.loading
-                        ? CircularProgressIndicator(color: Colors.white)
+                        ? CircularProgressIndicator(
+                            color: ColorManager.secondaryColor,
+                            strokeWidth: 2,
+                          )
                         : Text('Save Changes', style: TextStyles.buttonLabel),
                   ),
                   SizedBox(height: 0.02 * height),

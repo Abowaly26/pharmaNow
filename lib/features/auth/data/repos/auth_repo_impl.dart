@@ -254,26 +254,6 @@ class AuthRepoImpl extends AuthRepo {
     }
   }
 
-  // @override
-  // Future<Either<Failures, UserEntity>> signinWithFacebook() async {
-  //   User? user;
-  //   try {
-  //     var user = await firebaseAuthService.signInWithFacebook();
-
-  //     var userEntity = UserModel.fromFirebaseUser(user);
-  //     await addUserData(user: userEntity);
-  //     return right(userEntity);
-  //   } on CustomException catch (e) {
-  //     await deleteUser(user);
-  //     return left(ServerFailure(e.message));
-  //   } catch (e) {
-  //     await deleteUser(user);
-  //     log('Exception in AuthRepoImpl.signinWithFacebook: ${e.toString()}');
-  //     return left(ServerFailure(
-  //         'An error occurred on the server. Please try again later.'));
-  //   }
-  // }
-
   @override
   Future addUserData({required UserEntity user}) async {
     await databaseService.addData(
@@ -343,7 +323,7 @@ class AuthRepoImpl extends AuthRepo {
         return right(null);
       }
 
-      // Any other provider (e.g., Facebook)
+      // Any other provider
       log('Email $sanitized is associated with unsupported provider: $provider');
       return left(ServerFailure(
           'This email is associated with $provider. Please sign in with that provider.'));

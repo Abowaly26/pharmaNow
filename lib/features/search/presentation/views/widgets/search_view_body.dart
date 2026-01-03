@@ -14,6 +14,7 @@ import '../../cubit/cubit/search_cubit.dart';
 import '../../cubit/cubit/search_state.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import '../../../../home/presentation/ui_model/entities/cart_entity.dart';
 
 class SearchViewBody extends StatelessWidget {
   const SearchViewBody({super.key});
@@ -94,12 +95,10 @@ class SearchViewBody extends StatelessWidget {
                     return GestureDetector(
                       onTap: () {
                         // Navigate to medicine details view
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => MedicineDetailsView(
-                              medicineEntity: medicine,
-                            ),
-                          ),
+                        Navigator.pushNamed(
+                          context,
+                          MedicineDetailsView.routeName,
+                          arguments: medicine,
                         );
                       },
                       child: SearchMedicinesListViewItem(
@@ -182,7 +181,7 @@ class SearchViewBody extends StatelessWidget {
   }
 }
 
-class SearchMedicinesListViewItem extends StatelessWidget {
+class SearchMedicinesListViewItem extends StatefulWidget {
   final int index;
   final MedicineEntity medicineEntity;
   final String? searchQuery; // Add search query parameter for highlighting
@@ -196,12 +195,21 @@ class SearchMedicinesListViewItem extends StatelessWidget {
     this.onTap,
   });
 
+  @override
+  State<SearchMedicinesListViewItem> createState() =>
+      _SearchMedicinesListViewItemState();
+}
+
+class _SearchMedicinesListViewItemState
+    extends State<SearchMedicinesListViewItem> {
+  bool _isAddingToCart = false;
+
   // Getter to determine stock status from medicine quantity
   StockStatus get stockStatus {
-    if (medicineEntity.quantity <= 0) {
+    if (widget.medicineEntity.quantity <= 0) {
       return StockStatus.outOfStock;
     }
-    if (medicineEntity.quantity < 10) {
+    if (widget.medicineEntity.quantity < 10) {
       return StockStatus.lowStock;
     }
     return StockStatus.inStock;
@@ -211,36 +219,49 @@ class SearchMedicinesListViewItem extends StatelessWidget {
   // Convert medicine entity to model for storing in favorites
   Map<String, dynamic> _convertEntityToModel() {
     return {
-      'id': medicineEntity.code,
-      'name': medicineEntity.name,
-      'price': medicineEntity.price,
-      'imageUrl': medicineEntity.subabaseORImageUrl,
-      'pharmacyName': medicineEntity.pharmacyName,
-      'pharmacyId': medicineEntity.pharmacyId,
-      'pharmcyAddress': medicineEntity.pharmcyAddress,
-      'discountRating': medicineEntity.discountRating,
-      'isNewProduct': medicineEntity.isNewProduct,
-      'description': medicineEntity.description,
-      'quantity': medicineEntity.quantity,
+      'id': widget.medicineEntity.code,
+      'name': widget.medicineEntity.name,
+      'price': widget.medicineEntity.price,
+      'imageUrl': widget.medicineEntity.subabaseORImageUrl,
+      'pharmacyName': widget.medicineEntity.pharmacyName,
+      'pharmacyId': widget.medicineEntity.pharmacyId,
+      'pharmcyAddress': widget.medicineEntity.pharmcyAddress,
+      'discountRating': widget.medicineEntity.discountRating,
+      'isNewProduct': widget.medicineEntity.isNewProduct,
+      'description': widget.medicineEntity.description,
+      'quantity': widget.medicineEntity.quantity,
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: 12.h,
-          left: 16.r,
-          right: 16.r,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildLeftContainer(),
-            _buildRightContainer(context),
-          ],
+    return BlocListener<CartCubit, CartState>(
+      listener: (context, state) {
+        if (state is CartItemAdded) {
+          final cartEntity = state.cartEntity;
+          final isNowInCart = cartEntity.isExist(widget.medicineEntity);
+          if (isNowInCart && _isAddingToCart) {
+            setState(() {
+              _isAddingToCart = false;
+            });
+          }
+        }
+      },
+      child: InkWell(
+        onTap: widget.onTap,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: 12.h,
+            left: 16.r,
+            right: 16.r,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLeftContainer(),
+              _buildRightContainer(context),
+            ],
+          ),
         ),
       ),
     );
@@ -251,7 +272,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
       width: 106.w,
       height: 124.h,
       decoration: BoxDecoration(
-        color: index.isEven
+        color: widget.index.isEven
             ? ColorManager.lightBlueColorF5C
             : ColorManager.lightGreenColorF5C,
         borderRadius: BorderRadius.only(
@@ -271,13 +292,13 @@ class SearchMedicinesListViewItem extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
-              child: medicineEntity.subabaseORImageUrl == null
+              child: widget.medicineEntity.subabaseORImageUrl == null
                   ? SizedBox(
                       height: 120.h,
                       width: 100.w,
                     )
                   : Image.network(
-                      medicineEntity.subabaseORImageUrl!,
+                      widget.medicineEntity.subabaseORImageUrl!,
                       fit: BoxFit.contain,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
@@ -292,15 +313,15 @@ class SearchMedicinesListViewItem extends StatelessWidget {
 
           // Banner logic - Show either New banner OR Discount banner
           Positioned(
-            top: medicineEntity.isNewProduct ? 0 : 8.h,
+            top: widget.medicineEntity.isNewProduct ? 0 : 8.h,
             left: 0,
-            child: medicineEntity.isNewProduct
+            child: widget.medicineEntity.isNewProduct
                 ? SvgPicture.asset(
                     Assets.bannerNewProduct,
                     height: 80.h,
                     width: 80.w,
                   )
-                : (medicineEntity.discountRating > 0)
+                : (widget.medicineEntity.discountRating > 0)
                     ? Stack(
                         alignment: Alignment.centerLeft,
                         children: [
@@ -315,7 +336,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                               left: 20.0.h,
                             ),
                             child: Text(
-                              "${medicineEntity.discountRating}%",
+                              "${widget.medicineEntity.discountRating}%",
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 9.sp,
@@ -367,8 +388,8 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                         Flexible(
                           child: Container(
                             child: SearchHighlightText(
-                              text: medicineEntity.name,
-                              query: searchQuery ?? '',
+                              text: widget.medicineEntity.name,
+                              query: widget.searchQuery ?? '',
                               defaultStyle: TextStyles.listView_product_name,
                               highlightColor: ColorManager.secondaryColor,
                               highlightBackgroundColor:
@@ -387,7 +408,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                   ),
                   // Favorite button - uses the shared FavoriteButton component to add/remove medicine from favorites
                   FavoriteButton(
-                    itemId: medicineEntity.code,
+                    itemId: widget.medicineEntity.code,
                     itemData: _convertEntityToModel(),
                     size: 24,
                   ),
@@ -396,7 +417,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
             ),
             Container(
               child: Text(
-                medicineEntity.pharmacyName,
+                widget.medicineEntity.pharmacyName,
                 style: TextStyles.listView_product_name.copyWith(
                   fontSize: 10.sp,
                   color: ColorManager.textInputColor,
@@ -408,7 +429,7 @@ class SearchMedicinesListViewItem extends StatelessWidget {
             SizedBox(height: 4.h),
             // Add description here
             Text(
-              medicineEntity.description ?? 'No description available',
+              widget.medicineEntity.description ?? 'No description available',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -426,9 +447,9 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Show the original price with strikethrough if there's a discount
-                    if (medicineEntity.discountRating > 0)
+                    if (widget.medicineEntity.discountRating > 0)
                       Text(
-                        '${medicineEntity.price} EGP',
+                        '${widget.medicineEntity.price} EGP',
                         style: TextStyles.listView_product_name.copyWith(
                           fontSize: 10.sp,
                           decoration: TextDecoration.lineThrough,
@@ -437,9 +458,9 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                       ),
                     // Show discounted price or regular price
                     Text(
-                      medicineEntity.discountRating > 0
-                          ? '${_calculateDiscountedPrice(medicineEntity.price.toDouble(), medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
-                          : '${medicineEntity.price} EGP',
+                      widget.medicineEntity.discountRating > 0
+                          ? '${_calculateDiscountedPrice(widget.medicineEntity.price.toDouble(), widget.medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
+                          : '${widget.medicineEntity.price} EGP',
                       style: TextStyles.listView_product_name.copyWith(
                         fontSize: 11.sp,
                         color: const Color(0xFF20B83A),
@@ -448,41 +469,44 @@ class SearchMedicinesListViewItem extends StatelessWidget {
                     SizedBox(height: 4.h),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () {
-                    // Add to cart functionality
-                    context.read<CartCubit>().addMedicineToCart(medicineEntity);
+                BlocBuilder<CartCubit, CartState>(
+                  builder: (context, cartState) {
+                    final cartEntity =
+                        (cartState as dynamic).cartEntity as CartEntity;
+                    final isInCart = cartEntity.isExist(widget.medicineEntity);
 
-                    // Show success message
-                    final screenWidth = MediaQuery.of(context).size.width;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Added to cart',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 12),
-                        ),
-                        backgroundColor:
-                            const Color.fromARGB(255, 109, 193, 111),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(42),
-                        ),
-                        margin: EdgeInsets.only(
-                          left: screenWidth * 0.3,
-                          right: screenWidth * 0.3,
-                          bottom: 20.h,
-                        ),
-                        duration: const Duration(seconds: 1),
+                    return GestureDetector(
+                      onTap: (isInCart || _isAddingToCart)
+                          ? null
+                          : () {
+                              setState(() {
+                                _isAddingToCart = true;
+                              });
+                              context
+                                  .read<CartCubit>()
+                                  .addMedicineToCart(widget.medicineEntity);
+                            },
+                      child: Opacity(
+                        opacity: isInCart ? 0.5 : 1.0,
+                        child: _isAddingToCart
+                            ? SizedBox(
+                                width: 32.w,
+                                height: 32.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    ColorManager.secondaryColor,
+                                  ),
+                                ),
+                              )
+                            : SvgPicture.asset(
+                                Assets.cart,
+                                width: 32.w,
+                                height: 32.h,
+                              ),
                       ),
                     );
                   },
-                  child: SvgPicture.asset(
-                    Assets.cart,
-                    width: 32.w,
-                    height: 32.h,
-                  ),
                 ),
               ],
             ),

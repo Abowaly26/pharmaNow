@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import '../../ui_model/entities/cart_item_entity.dart';
 
 class MedicineDetailsViewBody extends StatefulWidget {
   const MedicineDetailsViewBody({
@@ -31,6 +32,22 @@ class MedicineDetailsViewBody extends StatefulWidget {
 
 class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
   int _counter = 1;
+
+  CartItemEntity? _getCartItem() {
+    return context
+        .read<CartCubit>()
+        .state
+        .cartEntity
+        .getCartItem(widget.medicineEntity);
+  }
+
+  bool _isInCart() {
+    return context
+        .read<CartCubit>()
+        .state
+        .cartEntity
+        .isExist(widget.medicineEntity);
+  }
 
   // Getter to determine stock status from medicine quantity
   StockStatus get stockStatus {
@@ -105,9 +122,18 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
             // Product Card Section
             _buildProductCardSection(context, height, width),
 
-            SizedBox(height: widget.fromCart ? 20.h : 160.h),
-            // Completely Separated Add to Cart Button Section
-            if (!widget.fromCart) _buildAddToCartButton(context),
+            BlocBuilder<CartCubit, CartState>(
+              builder: (context, cartState) {
+                final isItemInCart = _isInCart();
+                return Column(
+                  children: [
+                    SizedBox(height: isItemInCart ? 20.h : 160.h),
+                    // Completely Separated Add to Cart Button Section
+                    if (!isItemInCart) _buildAddToCartButton(context),
+                  ],
+                );
+              },
+            ),
 
             SizedBox(height: 16.h), // Bottom padding
           ],
@@ -213,89 +239,110 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                     SizedBox(height: 8.h),
                     _buildQuantityStatus(),
                     SizedBox(height: 8.h),
-                    Row(
-                      children: [
-                        widget.fromCart
-                            ? Text(
-                                "Description",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              )
-                            : Container(
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFF2F4F9),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(32)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        if (_counter > 1) {
-                                          setState(() {
-                                            _counter--;
-                                          });
-                                        }
-                                      },
-                                      icon: Icon(
-                                        Icons.remove,
-                                        size: 24.sp,
+                    BlocBuilder<CartCubit, CartState>(
+                      builder: (context, cartState) {
+                        final isItemInCart = _isInCart();
+                        final cartItem = isItemInCart ? _getCartItem() : null;
+                        final quantity =
+                            isItemInCart ? (cartItem?.count ?? 1) : _counter;
+
+                        return Row(
+                          children: [
+                            isItemInCart && cartItem != null
+                                ? Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w,
+                                      vertical: 8.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFF2F4F9),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(32),
                                       ),
                                     ),
-                                    SizedBox(width: 0.05 * width),
-                                    Text(
-                                      "$_counter",
+                                    child: Text(
+                                      "Quantity: $quantity",
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 20.sp,
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    SizedBox(width: 0.05 * width),
-                                    IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _counter++;
-                                        });
-                                      },
-                                      icon: Icon(
-                                        Icons.add_circle_outlined,
-                                        size: 32.sp,
-                                        color: ColorManager.secondaryColor,
-                                      ),
+                                  )
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFF2F4F9),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(32)),
                                     ),
-                                  ],
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            if (_counter > 1) {
+                                              setState(() {
+                                                _counter--;
+                                              });
+                                            }
+                                          },
+                                          icon: Icon(
+                                            Icons.remove,
+                                            size: 24.sp,
+                                          ),
+                                        ),
+                                        SizedBox(width: 0.05 * width),
+                                        Text(
+                                          "$_counter",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20.sp,
+                                          ),
+                                        ),
+                                        SizedBox(width: 0.05 * width),
+                                        IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _counter++;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.add_circle_outlined,
+                                            size: 32.sp,
+                                            color: ColorManager.secondaryColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                            Spacer(),
+                            Column(
+                              children: [
+                                if (widget.medicineEntity.discountRating > 0)
+                                  Text(
+                                    '${(widget.medicineEntity.price * quantity).toStringAsFixed(0)} EGP',
+                                    style: TextStyles.listView_product_name
+                                        .copyWith(
+                                      fontSize: 12.sp,
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                // Show discounted price or regular price
+                                Text(
+                                  widget.medicineEntity.discountRating > 0
+                                      ? '${_calculateDiscountedPrice(widget.medicineEntity.price.toDouble(), widget.medicineEntity.discountRating.toDouble(), quantity).toStringAsFixed(0)} EGP'
+                                      : '${(widget.medicineEntity.price * quantity).toStringAsFixed(0)} EGP',
+                                  style: TextStyle(
+                                    color: Color(0xFF375DFB),
+                                    fontSize: 22.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                        Spacer(),
-                        Column(
-                          children: [
-                            if (widget.medicineEntity.discountRating > 0)
-                              Text(
-                                // السعر الأصلي الكلي
-                                '${(widget.medicineEntity.price * _counter).toStringAsFixed(0)} EGP',
-                                style:
-                                    TextStyles.listView_product_name.copyWith(
-                                  fontSize: 12.sp,
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            // Show discounted price or regular price
-                            Text(
-                              widget.medicineEntity.discountRating > 0
-                                  ? '${_calculateDiscountedPrice(widget.medicineEntity.price.toDouble(), widget.medicineEntity.discountRating.toDouble(), _counter).toStringAsFixed(0)} EGP'
-                                  : '${(widget.medicineEntity.price * _counter).toStringAsFixed(0)} EGP',
-                              style: TextStyle(
-                                color: Color(0xFF375DFB),
-                                fontSize: 22.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                              ],
+                            )
                           ],
-                        )
-                      ],
+                        );
+                      },
                     ),
                     if (!widget.fromCart) ...[
                       SizedBox(height: 10.h),
@@ -418,26 +465,35 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
 
   // Completely Separated Add to Cart Button
   Widget _buildAddToCartButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      decoration: BoxDecoration(),
-      child: SizedBox(
-        width: double.infinity,
-        height: 50.h,
-        child: ElevatedButton(
-          style: ButtonStyles.primaryButton,
-          onPressed: () {
-            context
-                .read<CartCubit>()
-                .addMedicineToCartWithCount(widget.medicineEntity, _counter);
-          },
-          child: Text(
-            'Add to Cart',
-            style: TextStyles.buttonLabel,
+    return BlocBuilder<CartCubit, CartState>(
+      builder: (context, cartState) {
+        final isItemInCart = _isInCart();
+
+        if (isItemInCart) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          decoration: BoxDecoration(),
+          child: SizedBox(
+            width: double.infinity,
+            height: 50.h,
+            child: ElevatedButton(
+              style: ButtonStyles.primaryButton,
+              onPressed: () {
+                context.read<CartCubit>().addMedicineToCartWithCount(
+                    widget.medicineEntity, _counter);
+              },
+              child: Text(
+                'Add to Cart',
+                style: TextStyles.buttonLabel,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

@@ -13,6 +13,9 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 import 'package:pharma_now/core/widgets/custom_dialog.dart';
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
+import 'package:pharma_now/core/widgets/premium_loading_indicator.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../home/presentation/ui_model/entities/cart_entity.dart';
 
 class FavoriteViewBody extends StatefulWidget {
   const FavoriteViewBody({super.key});
@@ -88,7 +91,7 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
               child: Consumer<FavoritesProvider>(
                 builder: (context, favoritesProvider, child) {
                   if (favoritesProvider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: PremiumLoadingIndicator());
                   }
 
                   if (favoritesProvider.favorites.isEmpty) {
@@ -220,7 +223,7 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
 }
 
 // Medicine List View Item Widget
-class MedicineListViewItem extends StatelessWidget {
+class MedicineListViewItem extends StatefulWidget {
   final int index;
   final MedicineEntity medicineEntity;
   // Optional callback for when favorite status changes
@@ -233,12 +236,19 @@ class MedicineListViewItem extends StatelessWidget {
     this.onFavoriteChanged,
   });
 
+  @override
+  State<MedicineListViewItem> createState() => _MedicineListViewItemState();
+}
+
+class _MedicineListViewItemState extends State<MedicineListViewItem> {
+  bool _isAddingToCart = false;
+
   // Getter to determine stock status from medicine quantity
   StockStatus get stockStatus {
-    if (medicineEntity.quantity <= 0) {
+    if (widget.medicineEntity.quantity <= 0) {
       return StockStatus.outOfStock;
     }
-    if (medicineEntity.quantity < 10) {
+    if (widget.medicineEntity.quantity < 10) {
       return StockStatus.lowStock;
     }
     return StockStatus.inStock;
@@ -246,24 +256,37 @@ class MedicineListViewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          MedicineDetailsView.routeName,
-          arguments: {
-            'medicineEntity': medicineEntity,
-            'fromFavorites': true,
-          },
-        );
+    return BlocListener<CartCubit, CartState>(
+      listener: (context, state) {
+        if (state is CartItemAdded) {
+          final cartEntity = state.cartEntity;
+          final isNowInCart = cartEntity.isExist(widget.medicineEntity);
+          if (isNowInCart && _isAddingToCart) {
+            setState(() {
+              _isAddingToCart = false;
+            });
+          }
+        }
       },
-      child: Padding(
-        padding: EdgeInsetsDirectional.only(end: 12.w),
-        child: Column(
-          children: [
-            _buildTopContainer(context),
-            _buildBottomContainer(context),
-          ],
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            MedicineDetailsView.routeName,
+            arguments: {
+              'medicineEntity': widget.medicineEntity,
+              'fromFavorites': true,
+            },
+          );
+        },
+        child: Padding(
+          padding: EdgeInsetsDirectional.only(end: 12.w),
+          child: Column(
+            children: [
+              _buildTopContainer(context),
+              _buildBottomContainer(context),
+            ],
+          ),
         ),
       ),
     );
@@ -274,7 +297,7 @@ class MedicineListViewItem extends StatelessWidget {
       width: 162.w,
       height: 90.h,
       decoration: BoxDecoration(
-        color: index.isOdd
+        color: widget.index.isOdd
             ? ColorManager.lightBlueColorF5C
             : ColorManager.lightGreenColorF5C,
         borderRadius: BorderRadius.only(
@@ -295,8 +318,8 @@ class MedicineListViewItem extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
-              child: medicineEntity.subabaseORImageUrl == null ||
-                      medicineEntity.subabaseORImageUrl!.isEmpty
+              child: widget.medicineEntity.subabaseORImageUrl == null ||
+                      widget.medicineEntity.subabaseORImageUrl!.isEmpty
                   ? Container(
                       color: ColorManager.textInputColor.withOpacity(0.2),
                       height: 80.h,
@@ -305,7 +328,7 @@ class MedicineListViewItem extends StatelessWidget {
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(8.r),
                       child: CachedNetworkImage(
-                        imageUrl: medicineEntity.subabaseORImageUrl!,
+                        imageUrl: widget.medicineEntity.subabaseORImageUrl!,
                         fit: BoxFit.contain,
                         placeholder: (context, url) => _buildLoadingAnimation(),
                         errorWidget: (context, url, error) =>
@@ -317,15 +340,15 @@ class MedicineListViewItem extends StatelessWidget {
           Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
           // Banner logic - Show either New banner OR Discount banner
           Positioned(
-            top: medicineEntity.isNewProduct ? 0 : 8.h,
+            top: widget.medicineEntity.isNewProduct ? 0 : 8.h,
             left: 0,
-            child: medicineEntity.isNewProduct
+            child: widget.medicineEntity.isNewProduct
                 ? SvgPicture.asset(
                     Assets.bannerNewProduct,
                     height: 80.h,
                     width: 106.w,
                   )
-                : (medicineEntity.discountRating > 0)
+                : (widget.medicineEntity.discountRating > 0)
                     ? Stack(
                         alignment: Alignment.centerLeft,
                         children: [
@@ -340,7 +363,7 @@ class MedicineListViewItem extends StatelessWidget {
                               left: 20.0.h,
                             ),
                             child: Text(
-                              "${medicineEntity.discountRating}%",
+                              "${widget.medicineEntity.discountRating}%",
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 9.sp,
@@ -364,7 +387,7 @@ class MedicineListViewItem extends StatelessWidget {
                   onTap: () async {
                     try {
                       // Use the correct code for the item
-                      final code = medicineEntity.code;
+                      final code = widget.medicineEntity.code;
 
                       // Remove the item from favorites
                       await favoritesProvider.removeFromFavorites(code);
@@ -381,8 +404,8 @@ class MedicineListViewItem extends StatelessWidget {
                       }
 
                       // Notify the parent widget of the change
-                      if (onFavoriteChanged != null) {
-                        onFavoriteChanged!(false);
+                      if (widget.onFavoriteChanged != null) {
+                        widget.onFavoriteChanged!(false);
                       }
                     } catch (e) {
                       // Show error message
@@ -439,7 +462,7 @@ class MedicineListViewItem extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    medicineEntity.name,
+                    widget.medicineEntity.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyles.listView_product_name,
@@ -453,7 +476,7 @@ class MedicineListViewItem extends StatelessWidget {
               ],
             ),
             Text(
-              medicineEntity.pharmacyName,
+              widget.medicineEntity.pharmacyName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyles.listView_product_name.copyWith(
@@ -471,9 +494,9 @@ class MedicineListViewItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Show the original price with strikethrough if there's a discount
-                      if (medicineEntity.discountRating > 0)
+                      if (widget.medicineEntity.discountRating > 0)
                         Text(
-                          '${medicineEntity.price} EGP',
+                          '${widget.medicineEntity.price} EGP',
                           style: TextStyles.listView_product_name.copyWith(
                             fontSize: 10.sp,
                             decoration: TextDecoration.lineThrough,
@@ -482,9 +505,9 @@ class MedicineListViewItem extends StatelessWidget {
                         ),
                       // Show discounted price or regular price
                       Text(
-                        medicineEntity.discountRating > 0
-                            ? '${_calculateDiscountedPrice(medicineEntity.price.toDouble(), medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
-                            : '${medicineEntity.price} EGP',
+                        widget.medicineEntity.discountRating > 0
+                            ? '${_calculateDiscountedPrice(widget.medicineEntity.price.toDouble(), widget.medicineEntity.discountRating.toDouble()).split('.')[0]} EGP'
+                            : '${widget.medicineEntity.price} EGP',
                         style: TextStyles.listView_product_name.copyWith(
                           fontSize: 11.sp,
                           color: const Color(0xFF20B83A),
@@ -494,17 +517,42 @@ class MedicineListViewItem extends StatelessWidget {
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: 8.r),
-                    child: GestureDetector(
-                      onTap: () {
-                        context
-                            .read<CartCubit>()
-                            .addMedicineToCart(medicineEntity);
+                    child: BlocBuilder<CartCubit, CartState>(
+                      builder: (context, cartState) {
+                        final cartEntity =
+                            (cartState as dynamic).cartEntity as CartEntity;
+                        final isInCart =
+                            cartEntity.isExist(widget.medicineEntity);
+
+                        return GestureDetector(
+                          onTap: (isInCart || _isAddingToCart)
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _isAddingToCart = true;
+                                  });
+                                  context
+                                      .read<CartCubit>()
+                                      .addMedicineToCart(widget.medicineEntity);
+                                },
+                          child: Opacity(
+                            opacity: isInCart ? 0.5 : 1.0,
+                            child: _isAddingToCart
+                                ? SizedBox(
+                                    width: 32.w,
+                                    height: 32.h,
+                                    child: PremiumLoadingIndicator(
+                                      size: 32.h,
+                                    ),
+                                  )
+                                : SvgPicture.asset(
+                                    Assets.cart,
+                                    width: 32.w,
+                                    height: 32.h,
+                                  ),
+                          ),
+                        );
                       },
-                      child: SvgPicture.asset(
-                        'assets/images/cart.svg',
-                        width: 32.w,
-                        height: 32.h,
-                      ),
                     ),
                   )
                 ],

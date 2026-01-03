@@ -135,13 +135,6 @@ class _SiginViewBodyState extends State<SiginViewBody> {
             SizedBox(
               height: 15.h,
             ),
-            // AnotherStepLogin(
-            //   onPressed: () {
-            //     // context.read<SigninCubit>().signinWithFacbook();
-            //   },
-            //   text: 'Continue with Facebook',
-            //   icon: Assets.facebook_Icon,
-            // ),
             SizedBox(
               height: 190.h,
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharma_now/core/widgets/premium_loading_indicator.dart';
 
 class CustomProgressHUD extends StatelessWidget {
   final bool isLoading;
@@ -25,7 +26,7 @@ class CustomProgressHUD extends StatelessWidget {
           child: Container(
             color: color.withOpacity(opacity),
             child: const Center(
-              child: CircularProgressIndicator(),
+              child: PremiumLoadingIndicator(),
             ),
           ),
         ),

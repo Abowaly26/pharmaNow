@@ -32,8 +32,6 @@ class Assets {
 
   static const String splashViewImage = "assets/images/splash_view_image.svg";
 
-  static const String facebook_Icon = "assets/images/facebook_Icon.svg";
-
   static const String google_Icon = "assets/images/google_Icon.svg";
 
   static const String imageOfVerification =
@@ -100,6 +98,5 @@ class Assets {
   static const String chatImage = "assets/images/chatImage.svg";
   static const String whatsappIcon = "assets/images/WhatsAppIcon.svg";
   static const String emptyNotific = "assets/images/empty_notific.svg";
-  static const String facebookIcon = "assets/images/FacebookIcon.svg";
   static const String checkMark = "assets/images/check_mark.svg";
 }

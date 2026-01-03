@@ -21,8 +21,6 @@ abstract class AuthRepo {
 
   Future<Either<Failures, bool>> checkEmailAlreadyExists(String email);
 
-  // Future<Either<Failures, UserEntity>> signinWithFacebook();
-
   /// Sends email verification to the currently signed-in user
   Future<Either<Failures, void>> sendEmailVerification();
 

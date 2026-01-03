@@ -25,12 +25,10 @@ class OffersListView extends StatelessWidget {
           index: index,
           onTap: () {
             // Navigate to medicine details view
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MedicineDetailsView(
-                  medicineEntity: medicines[index],
-                ),
-              ),
+            Navigator.pushNamed(
+              context,
+              MedicineDetailsView.routeName,
+              arguments: medicines[index],
             );
           },
           medicineEntity: medicines[index],

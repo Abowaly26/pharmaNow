@@ -61,14 +61,6 @@ class HelpSupportView extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
 
-            _buildContactCard(
-              iconPath: Assets.facebookIcon,
-              title: 'Facebook',
-              subtitle: 'Follow us on Facebook',
-              onTap: () => _launchFacebook(
-                  'https://www.facebook.com/profile.php?id=100072882292717&locale=ar_AR'),
-            ),
-
             SizedBox(height: 32.h),
 
             // FAQ Section
@@ -406,13 +398,6 @@ class HelpSupportView extends StatelessWidget {
     final Uri whatsappUri = Uri.parse("https://wa.me/$phone");
     if (await canLaunchUrl(whatsappUri)) {
       await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  void _launchFacebook(String url) async {
-    final Uri fbUri = Uri.parse(url);
-    if (await canLaunchUrl(fbUri)) {
-      await launchUrl(fbUri, mode: LaunchMode.externalApplication);
     }
   }
 

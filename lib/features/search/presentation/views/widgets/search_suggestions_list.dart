@@ -106,12 +106,10 @@ class SearchSuggestionsList extends StatelessWidget {
         color: ColorManager.greyColor,
       ),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => MedicineDetailsView(
-              medicineEntity: medicine,
-            ),
-          ),
+        Navigator.pushNamed(
+          context,
+          MedicineDetailsView.routeName,
+          arguments: medicine,
         );
 
         context.read<SearchCubit>().searchProducts(query: medicine.name);

@@ -28,24 +28,20 @@ class MedicinesListView extends StatelessWidget {
           itemBuilder: (context, index) => GestureDetector(
                 onTap: () {
                   // Navigate to medicine details view
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => MedicineDetailsView(
-                        medicineEntity: medicines[index],
-                      ),
-                    ),
+                  Navigator.pushNamed(
+                    context,
+                    MedicineDetailsView.routeName,
+                    arguments: medicines[index],
                   );
                 },
                 child: MedicineListViewItem(
                   index: index,
                   medicineEntity: medicines[index],
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => MedicineDetailsView(
-                          medicineEntity: medicines[index],
-                        ),
-                      ),
+                    Navigator.pushNamed(
+                      context,
+                      MedicineDetailsView.routeName,
+                      arguments: medicines[index],
                     );
                   },
                 ),
