@@ -14,6 +14,10 @@ class FavoritesProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  // Set to store IDs of items currently being added/removed
+  final Set<String> _loadingItemIds = {};
+  bool isItemLoading(String itemId) => _loadingItemIds.contains(itemId);
+
   // List of favorite items
   List<Map<String, dynamic>> _favorites = [];
   List<Map<String, dynamic>> get favorites => _favorites;
@@ -88,31 +92,54 @@ class FavoritesProvider extends ChangeNotifier {
     required String itemId,
     required Map<String, dynamic> itemData,
   }) async {
-    _setLoading(true);
-    bool isNowFavorite = false;
+    // Optimistic UI: Update state immediately
+    bool wasFavorite = _favoriteIds.contains(itemId);
+    bool isNowFavorite = !wasFavorite;
 
     try {
-      isNowFavorite = await _favoritesService.toggleFavorite(
-        itemId: itemId,
-        itemData: itemData,
-      );
+      _loadingItemIds.add(itemId);
 
-      // Update the local list for immediate response
+      // Perform optimistic update
       if (isNowFavorite) {
-        if (!_favoriteIds.contains(itemId)) {
-          _favoriteIds.add(itemId);
-          _favorites.add({...itemData, 'code': itemId});
-        }
+        _favoriteIds.add(itemId);
+        _favorites.add({...itemData, 'code': itemId});
       } else {
         _favoriteIds.remove(itemId);
         _favorites.removeWhere((item) => item['code'] == itemId);
       }
-
       notifyListeners();
+
+      // Perform actual API call
+      final actualResult = await _favoritesService.toggleFavorite(
+        itemId: itemId,
+        itemData: itemData,
+      );
+
+      // If the actual result differs from our optimistic guess (unlikely but possible), sync it
+      if (actualResult != isNowFavorite) {
+        if (actualResult) {
+          _favoriteIds.add(itemId);
+          _favorites.add({...itemData, 'code': itemId});
+        } else {
+          _favoriteIds.remove(itemId);
+          _favorites.removeWhere((item) => item['code'] == itemId);
+        }
+        notifyListeners();
+      }
     } catch (e) {
       debugPrint('Error toggling favorite status: $e');
-      rethrow; // Re-throw the error to be caught in the UI
+      // Rollback optimistic update
+      if (wasFavorite) {
+        _favoriteIds.add(itemId);
+        _favorites.add({...itemData, 'code': itemId});
+      } else {
+        _favoriteIds.remove(itemId);
+        _favorites.removeWhere((item) => item['code'] == itemId);
+      }
+      notifyListeners();
+      rethrow;
     } finally {
+      _loadingItemIds.remove(itemId);
       _setLoading(false);
     }
 
@@ -127,6 +154,9 @@ class FavoritesProvider extends ChangeNotifier {
     _setLoading(true);
 
     try {
+      _loadingItemIds.add(itemId);
+      notifyListeners();
+
       await _favoritesService.addToFavorites(
         itemId: itemId,
         itemData: itemData,
@@ -142,6 +172,7 @@ class FavoritesProvider extends ChangeNotifier {
       debugPrint('Error adding item to favorites: $e');
       rethrow;
     } finally {
+      _loadingItemIds.remove(itemId);
       _setLoading(false);
     }
   }
@@ -151,6 +182,9 @@ class FavoritesProvider extends ChangeNotifier {
     _setLoading(true);
 
     try {
+      _loadingItemIds.add(itemId);
+      notifyListeners();
+
       // Remove the item from the local list first for immediate UI update
       _favorites.removeWhere((item) => item['code'] == itemId);
       _favoriteIds.remove(itemId);
@@ -164,6 +198,7 @@ class FavoritesProvider extends ChangeNotifier {
       _listenToFavorites();
       rethrow;
     } finally {
+      _loadingItemIds.remove(itemId);
       _setLoading(false);
     }
   }

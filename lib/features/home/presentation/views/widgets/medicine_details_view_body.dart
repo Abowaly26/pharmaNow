@@ -205,8 +205,6 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                           itemId: widget.medicineEntity.code,
                           itemData: _convertEntityToModel(),
                           size: 32,
-                          activeColor: Colors.red,
-                          inactiveColor: Colors.grey,
                         ),
                       ],
                     ),
