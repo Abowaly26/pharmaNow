@@ -26,8 +26,12 @@ class CartSnackBarListener extends StatelessWidget {
         } else if (state is CartItemRemoved) {
           showCustomBar(
             targetContext,
-            'Removed from cart',
+            'Removed "${state.removedItem.medicineEntity.name}"',
             type: MessageType.info,
+            actionLabel: 'Undo',
+            onAction: () {
+              context.read<CartCubit>().undoDeleteMedicine(state.removedItem);
+            },
           );
         } else if (state is CartError) {
           showCustomBar(

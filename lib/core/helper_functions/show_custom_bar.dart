@@ -67,6 +67,8 @@ void showCustomBar(
   Color? iconBackgroundColor,
   IconData? icon,
   Duration? duration = const Duration(seconds: 3),
+  String? actionLabel,
+  VoidCallback? onAction,
 }) {
   final overlay = Overlay.of(context, rootOverlay: true);
 
@@ -182,6 +184,32 @@ void showCustomBar(
                           ),
                         ),
                         const SizedBox(width: 8),
+                        if (actionLabel != null && onAction != null)
+                          TextButton(
+                            onPressed: () {
+                              onAction();
+                              // Remove the bar after action
+                              controller.reverse().then((_) {
+                                if (_currentErrorEntry == entry) {
+                                  entry.remove();
+                                  _currentErrorEntry = null;
+                                }
+                              });
+                            },
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              actionLabel,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),

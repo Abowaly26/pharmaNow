@@ -116,13 +116,61 @@ class CartCubit extends Cubit<CartState> {
     await _saveCart(newCartEntity, medicineId: medicineId);
   }
 
-  void deleteMedicineFromCart(CartItemEntity cartItem) {
+  void deleteMedicineFromCart(CartItemEntity cartItem) async {
     if (state is! CartLoaded && state is! CartInitial) return;
 
+    final medicineId = cartItem.medicineEntity.code;
     final currentCartEntity = state.cartEntity;
+
+    // Add to deleting state for optimistic UI / loading
+    final newDeletingIds = Set<String>.from(state.deletingMedicineIds)
+      ..add(medicineId);
+    emit(CartLoaded(
+      cartEntity: currentCartEntity,
+      loadingMedicineIds: state.loadingMedicineIds,
+      deletingMedicineIds: newDeletingIds,
+    ));
+
     final newCartEntity = currentCartEntity.deleteCartItemFromCart(cartItem);
-    emit(CartItemRemoved(cartEntity: newCartEntity));
-    _saveCart(newCartEntity);
+
+    try {
+      final result = await _cartRepository.saveCart(newCartEntity);
+      result.fold(
+        (failure) {
+          final updatedDeletingIds = Set<String>.from(state.deletingMedicineIds)
+            ..remove(medicineId);
+          emit(CartError(
+            message: 'Failed to delete item',
+            cartEntity: currentCartEntity,
+            loadingMedicineIds: state.loadingMedicineIds,
+            deletingMedicineIds: updatedDeletingIds,
+          ));
+        },
+        (_) {
+          final updatedDeletingIds = Set<String>.from(state.deletingMedicineIds)
+            ..remove(medicineId);
+          emit(CartItemRemoved(
+            removedItem: cartItem,
+            cartEntity: newCartEntity,
+            loadingMedicineIds: state.loadingMedicineIds,
+            deletingMedicineIds: updatedDeletingIds,
+          ));
+        },
+      );
+    } catch (e) {
+      final updatedDeletingIds = Set<String>.from(state.deletingMedicineIds)
+        ..remove(medicineId);
+      emit(CartError(
+        message: 'Failed to delete item',
+        cartEntity: currentCartEntity,
+        loadingMedicineIds: state.loadingMedicineIds,
+        deletingMedicineIds: updatedDeletingIds,
+      ));
+    }
+  }
+
+  void undoDeleteMedicine(CartItemEntity cartItem) {
+    addMedicineToCartWithCount(cartItem.medicineEntity, cartItem.count);
   }
 
   // Helper method to update quantity (increase/decrease)

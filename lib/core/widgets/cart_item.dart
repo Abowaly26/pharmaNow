@@ -11,6 +11,7 @@ import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_ite
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import '../../../../../core/widgets/custom_dialog.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -38,44 +39,105 @@ class CartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CartItemCubit, CartItemState>(
+    return BlocBuilder<CartCubit, CartState>(
       buildWhen: (previous, current) {
-        if (current is CartItemUpdated) {
-          if (current.cartItemEntity == cartItemEntity) {
-            return true;
-          }
-        }
-        return false;
+        return previous.deletingMedicineIds != current.deletingMedicineIds;
       },
-      builder: (context, state) {
-        return InkWell(
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              MedicineDetailsView.routeName,
-              arguments: {
-                'medicineEntity': cartItemEntity.medicineEntity,
-                'fromCart': true,
-              },
+      builder: (context, cartState) {
+        final isDeleting = cartState.deletingMedicineIds
+            .contains(cartItemEntity.medicineEntity.code);
+
+        return BlocBuilder<CartItemCubit, CartItemState>(
+          buildWhen: (previous, current) {
+            if (current is CartItemUpdated) {
+              if (current.cartItemEntity == cartItemEntity) {
+                return true;
+              }
+            }
+            return false;
+          },
+          builder: (context, state) {
+            return Stack(
+              children: [
+                InkWell(
+                  onTap: isDeleting
+                      ? null
+                      : () {
+                          Navigator.pushNamed(
+                            context,
+                            MedicineDetailsView.routeName,
+                            arguments: {
+                              'medicineEntity': cartItemEntity.medicineEntity,
+                              'fromCart': true,
+                            },
+                          );
+                        },
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: 10.h,
+                      left: 16.r,
+                      right: 16.r,
+                    ),
+                    child: Opacity(
+                      opacity: isDeleting ? 0.5 : 1.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildLeftContainer(),
+                          _buildRightContainer(context, isDeleting),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                if (isDeleting)
+                  Positioned.fill(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: ColorManager.primaryColor,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ),
+              ],
             );
           },
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: 10.h,
-              left: 16.r,
-              right: 16.r,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildLeftContainer(),
-                _buildRightContainer(context),
-              ],
-            ),
-          ),
         );
       },
     );
+  }
+
+  Future<bool?> _showDeleteConfirmation(BuildContext context) async {
+    bool? result = false;
+    await showDialog(
+      context: context,
+      builder: (context) => CustomDialog(
+        title: 'Remove Item',
+        content:
+            'Are you sure you want to remove "${cartItemEntity.medicineEntity.name}" from cart?',
+        confirmText: 'Remove',
+        cancelText: 'Cancel',
+        confirmColor: Colors.red.shade400,
+        icon: Container(
+          padding: EdgeInsets.all(16.r),
+          decoration: BoxDecoration(
+            color: Colors.red.shade50,
+            shape: BoxShape.circle,
+          ),
+          child: SvgPicture.asset(
+            Assets.trash,
+            colorFilter: ColorFilter.mode(Colors.red.shade400, BlendMode.srcIn),
+            width: 40.w,
+            height: 40.h,
+          ),
+        ),
+        onConfirm: () {
+          result = true;
+          Navigator.pop(context);
+        },
+      ),
+    );
+    return result;
   }
 
   Widget _buildLeftContainer() {
@@ -166,7 +228,7 @@ class CartItem extends StatelessWidget {
     );
   }
 
-  Widget _buildRightContainer(BuildContext context) {
+  Widget _buildRightContainer(BuildContext context, bool isDeleting) {
     return Container(
       width: 237.w,
       height: 124.h,
@@ -214,11 +276,17 @@ class CartItem extends StatelessWidget {
                       )),
                 ),
                 GestureDetector(
-                  onTap: () {
-                    context
-                        .read<CartCubit>()
-                        .deleteMedicineFromCart(cartItemEntity);
-                  },
+                  onTap: isDeleting
+                      ? null
+                      : () async {
+                          final confirm =
+                              await _showDeleteConfirmation(context);
+                          if (confirm == true && context.mounted) {
+                            context
+                                .read<CartCubit>()
+                                .deleteMedicineFromCart(cartItemEntity);
+                          }
+                        },
                   child: Padding(
                     padding: EdgeInsets.only(top: 8.r),
                     child: SvgPicture.asset(
