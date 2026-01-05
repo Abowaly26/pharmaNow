@@ -11,7 +11,6 @@ import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
-import '../../ui_model/entities/cart_entity.dart';
 
 class OffersListViewItem extends StatefulWidget {
   final int index;
@@ -30,8 +29,6 @@ class OffersListViewItem extends StatefulWidget {
 }
 
 class _OffersListViewItemState extends State<OffersListViewItem> {
-  bool _isAddingToCart = false;
-
   // Getter to determine stock status from medicine quantity
   StockStatus get stockStatus {
     if (widget.medicineEntity.quantity <= 0) {
@@ -62,28 +59,15 @@ class _OffersListViewItemState extends State<OffersListViewItem> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CartCubit, CartState>(
-      listener: (context, state) {
-        if (state is CartItemAdded) {
-          final cartEntity = state.cartEntity;
-          final isNowInCart = cartEntity.isExist(widget.medicineEntity);
-          if (isNowInCart && _isAddingToCart) {
-            setState(() {
-              _isAddingToCart = false;
-            });
-          }
-        }
-      },
-      child: InkWell(
-        onTap: widget.onTap,
-        child: Padding(
-          padding: EdgeInsetsDirectional.only(end: 11.w),
-          child: Column(
-            children: [
-              _buildTopContainer(),
-              _buildBottomContainer(context),
-            ],
-          ),
+    return InkWell(
+      onTap: widget.onTap,
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(end: 11.w),
+        child: Column(
+          children: [
+            _buildTopContainer(),
+            _buildBottomContainer(context),
+          ],
         ),
       ),
     );
@@ -263,38 +247,49 @@ class _OffersListViewItemState extends State<OffersListViewItem> {
                     ),
                     child: BlocBuilder<CartCubit, CartState>(
                       builder: (context, cartState) {
-                        final cartEntity = (cartState as dynamic).cartEntity as CartEntity;
-                        final isInCart = cartEntity.isExist(widget.medicineEntity);
-                        
+                        final cartEntity = cartState.cartEntity;
+                        final isInCart =
+                            cartEntity.isExist(widget.medicineEntity);
+                        final isLoading = cartState.loadingMedicineIds
+                            .contains(widget.medicineEntity.code);
+
                         return GestureDetector(
-                          onTap: (isInCart || _isAddingToCart)
+                          onTap: (isInCart || isLoading)
                               ? null
                               : () {
-                                  setState(() {
-                                    _isAddingToCart = true;
-                                  });
                                   context
                                       .read<CartCubit>()
                                       .addMedicineToCart(widget.medicineEntity);
                                 },
                           child: Opacity(
                             opacity: isInCart ? 0.5 : 1.0,
-                            child: _isAddingToCart
-                                ? SizedBox(
-                                    width: 32.w,
-                                    height: 32.h,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        ColorManager.secondaryColor,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  Assets.frameCart,
+                                  width: 32.w,
+                                  height: 32.h,
+                                ),
+                                isLoading
+                                    ? SizedBox(
+                                        width: 12.w,
+                                        height: 12.h,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            ColorManager.primaryColor,
+                                          ),
+                                        ),
+                                      )
+                                    : SvgPicture.asset(
+                                        Assets.cartPlus,
+                                        width: 24.w,
+                                        height: 24.h,
                                       ),
-                                    ),
-                                  )
-                                : SvgPicture.asset(
-                                    Assets.cart,
-                                    width: 32.w,
-                                    height: 32.h,
-                                  ),
+                              ],
+                            ),
                           ),
                         );
                       },

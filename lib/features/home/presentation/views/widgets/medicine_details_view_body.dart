@@ -471,6 +471,9 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
           return const SizedBox.shrink();
         }
 
+        final isLoading =
+            cartState.loadingMedicineIds.contains(widget.medicineEntity.code);
+
         return Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -480,14 +483,34 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
             height: 50.h,
             child: ElevatedButton(
               style: ButtonStyles.primaryButton,
-              onPressed: () {
-                context.read<CartCubit>().addMedicineToCartWithCount(
-                    widget.medicineEntity, _counter);
-              },
-              child: Text(
-                'Add to Cart',
-                style: TextStyles.buttonLabel,
-              ),
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      context.read<CartCubit>().addMedicineToCartWithCount(
+                          widget.medicineEntity, _counter);
+                    },
+              child: isLoading
+                  ? Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          Assets.frameCart,
+                          height: 32.h,
+                        ),
+                        SizedBox(
+                          height: 12.h,
+                          width: 12.h,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      'Add to Cart',
+                      style: TextStyles.buttonLabel,
+                    ),
             ),
           ),
         );

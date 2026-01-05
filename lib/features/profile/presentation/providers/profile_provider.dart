@@ -11,6 +11,8 @@ import 'package:pharma_now/features/profile/domain/repositories/profile_reposito
 import 'package:pharma_now/core/services/firebase_auth_service.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:pharma_now/features/cart/di/cart_injection.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 enum ProfileStatus {
   initial,
@@ -310,6 +312,11 @@ class ProfileProvider extends ChangeNotifier {
     _isPasswordUser = false;
     _currentLoginMethod = null;
     await prefs.remove(kLoginMethod);
+    try {
+      getIt<CartCubit>().reset();
+    } catch (e) {
+      log('Failed to reset CartCubit: $e', name: 'ProfileProvider');
+    }
     notifyListeners();
   }
 

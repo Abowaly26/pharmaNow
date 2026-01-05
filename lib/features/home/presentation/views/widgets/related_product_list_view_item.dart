@@ -151,11 +151,21 @@ class RelatedProudcutListViewItem extends StatelessWidget {
                       style: TextStyles.listView_product_name
                           .copyWith(fontSize: 12.sp)),
                 ),
-                SvgPicture.asset(
-                  Assets.cart,
-                  width: 32,
-                  height: 32,
-                )
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      Assets.frameCart,
+                      width: 32.w,
+                      height: 32.h,
+                    ),
+                    SvgPicture.asset(
+                      Assets.cartPlus,
+                      width: 24.w,
+                      height: 24.h,
+                    ),
+                  ],
+                ),
               ],
             )
           ],

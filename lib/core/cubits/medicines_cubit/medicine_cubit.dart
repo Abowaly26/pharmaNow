@@ -12,10 +12,10 @@ class MedicinesCubit extends Cubit<MedicinesState> {
   final MedicineRepo medicineRepo;
 
   Future<void> getMedicines() async {
-    emit(MedicinesLoading());
+    emit(MedicinesLoading(state.medicines));
     final result = await medicineRepo.getMedicines();
     result.fold(
-      (failure) => emit(MedicinesFailure(failure.message)),
+      (failure) => emit(MedicinesFailure(failure.message, state.medicines)),
       (medicines) => emit(MedicinesSuccess(medicines)),
     );
   }

@@ -7,7 +7,6 @@ import 'package:pharma_now/core/widgets/cart_header.dart';
 import 'package:pharma_now/core/widgets/premium_loading_indicator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/checkout/presentation/views/checkout_view.dart';
-import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
 
@@ -22,12 +21,25 @@ class CartViewBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
-        if (state is! CartLoaded && state is! CartInitial) {
-          return const Center(
-              child:
-                  PremiumLoadingIndicator()); // Or some other loading/error state
+        final cartEntity = state.cartEntity;
+
+        // Only show full screen loading if we don't have items yet
+        if (state is CartLoading && cartEntity.cartItems.isEmpty) {
+          return const Center(child: PremiumLoadingIndicator());
         }
-        final cartEntity = (state as dynamic).cartEntity as CartEntity;
+
+        // Show full screen error only if we don't have items yet
+        if (state is CartError && cartEntity.cartItems.isEmpty) {
+          return Center(
+            child: Text(
+              state.message,
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: Colors.red,
+              ),
+            ),
+          );
+        }
 
         // Check if cart is empty
         if (cartEntity.cartItems.isEmpty) {

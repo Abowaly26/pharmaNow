@@ -25,7 +25,7 @@ void initCartDependencies() {
   );
 
   // Register cubits
-  getIt.registerFactory(
+  getIt.registerLazySingleton<CartCubit>(
     () => CartCubit(
       cartRepository: getIt<CartRepository>(),
     ),

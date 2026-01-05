@@ -15,7 +15,6 @@ import 'package:pharma_now/core/widgets/custom_dialog.dart';
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
 import 'package:pharma_now/core/widgets/premium_loading_indicator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../home/presentation/ui_model/entities/cart_entity.dart';
 
 class FavoriteViewBody extends StatefulWidget {
   const FavoriteViewBody({super.key});
@@ -241,8 +240,6 @@ class MedicineListViewItem extends StatefulWidget {
 }
 
 class _MedicineListViewItemState extends State<MedicineListViewItem> {
-  bool _isAddingToCart = false;
-
   // Getter to determine stock status from medicine quantity
   StockStatus get stockStatus {
     if (widget.medicineEntity.quantity <= 0) {
@@ -256,37 +253,24 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CartCubit, CartState>(
-      listener: (context, state) {
-        if (state is CartItemAdded) {
-          final cartEntity = state.cartEntity;
-          final isNowInCart = cartEntity.isExist(widget.medicineEntity);
-          if (isNowInCart && _isAddingToCart) {
-            setState(() {
-              _isAddingToCart = false;
-            });
-          }
-        }
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          MedicineDetailsView.routeName,
+          arguments: {
+            'medicineEntity': widget.medicineEntity,
+            'fromFavorites': true,
+          },
+        );
       },
-      child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(
-            context,
-            MedicineDetailsView.routeName,
-            arguments: {
-              'medicineEntity': widget.medicineEntity,
-              'fromFavorites': true,
-            },
-          );
-        },
-        child: Padding(
-          padding: EdgeInsetsDirectional.only(end: 12.w),
-          child: Column(
-            children: [
-              _buildTopContainer(context),
-              _buildBottomContainer(context),
-            ],
-          ),
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(end: 12.w),
+        child: Column(
+          children: [
+            _buildTopContainer(context),
+            _buildBottomContainer(context),
+          ],
         ),
       ),
     );
@@ -519,37 +503,49 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
                     padding: EdgeInsets.only(top: 8.r),
                     child: BlocBuilder<CartCubit, CartState>(
                       builder: (context, cartState) {
-                        final cartEntity =
-                            (cartState as dynamic).cartEntity as CartEntity;
+                        final cartEntity = cartState.cartEntity;
                         final isInCart =
                             cartEntity.isExist(widget.medicineEntity);
+                        final isLoading = cartState.loadingMedicineIds
+                            .contains(widget.medicineEntity.code);
 
                         return GestureDetector(
-                          onTap: (isInCart || _isAddingToCart)
+                          onTap: (isInCart || isLoading)
                               ? null
                               : () {
-                                  setState(() {
-                                    _isAddingToCart = true;
-                                  });
                                   context
                                       .read<CartCubit>()
                                       .addMedicineToCart(widget.medicineEntity);
                                 },
                           child: Opacity(
                             opacity: isInCart ? 0.5 : 1.0,
-                            child: _isAddingToCart
-                                ? SizedBox(
-                                    width: 32.w,
-                                    height: 32.h,
-                                    child: PremiumLoadingIndicator(
-                                      size: 32.h,
-                                    ),
-                                  )
-                                : SvgPicture.asset(
-                                    Assets.cart,
-                                    width: 32.w,
-                                    height: 32.h,
-                                  ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  Assets.frameCart,
+                                  width: 32.w,
+                                  height: 32.h,
+                                ),
+                                isLoading
+                                    ? SizedBox(
+                                        width: 12.w,
+                                        height: 12.h,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            ColorManager.primaryColor,
+                                          ),
+                                        ),
+                                      )
+                                    : SvgPicture.asset(
+                                        Assets.cartPlus,
+                                        width: 24.w,
+                                        height: 24.h,
+                                      ),
+                              ],
+                            ),
                           ),
                         );
                       },

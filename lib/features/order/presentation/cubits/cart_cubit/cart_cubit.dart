@@ -37,32 +37,58 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  Future<void> _saveCart(CartEntity cart) async {
+  Future<void> _saveCart(CartEntity cart, {String? medicineId}) async {
     try {
       final result = await _cartRepository.saveCart(cart);
       result.fold(
-        (failure) => emit(CartError(
-          message: failure is ServerFailure
-              ? 'Failed to save cart'
-              : 'An error occurred',
-          cartEntity: cart,
-        )),
-        (_) {},
+        (failure) {
+          final newLoadingIds = Set<String>.from(state.loadingMedicineIds);
+          if (medicineId != null) newLoadingIds.remove(medicineId);
+          emit(CartError(
+            message: failure is ServerFailure
+                ? 'Failed to save cart'
+                : 'An error occurred',
+            cartEntity: cart,
+            loadingMedicineIds: newLoadingIds,
+          ));
+        },
+        (_) {
+          if (medicineId != null) {
+            final newLoadingIds = Set<String>.from(state.loadingMedicineIds);
+            newLoadingIds.remove(medicineId);
+            emit(CartItemAdded(
+              cartEntity: cart,
+              loadingMedicineIds: newLoadingIds,
+            ));
+          }
+        },
       );
     } catch (e) {
+      final newLoadingIds = Set<String>.from(state.loadingMedicineIds);
+      if (medicineId != null) newLoadingIds.remove(medicineId);
       emit(CartError(
         message: 'Failed to save cart',
         cartEntity: cart,
+        loadingMedicineIds: newLoadingIds,
       ));
     }
   }
 
-  void addMedicineToCart(MedicineEntity medicineEntity) {
+  void addMedicineToCart(MedicineEntity medicineEntity) async {
     if (state is! CartLoaded && state is! CartInitial) {
       return; // Should not happen if initialized correctly
     }
 
-    final currentCartEntity = (state as dynamic).cartEntity as CartEntity;
+    final currentCartEntity = state.cartEntity;
+    final medicineId = medicineEntity.code;
+
+    // Add to loading state
+    final newLoadingIds = Set<String>.from(state.loadingMedicineIds)
+      ..add(medicineId);
+    emit(CartLoaded(
+      cartEntity: currentCartEntity,
+      loadingMedicineIds: newLoadingIds,
+    ));
 
     CartItemEntity? existingCartItem =
         currentCartEntity.getCartItem(medicineEntity);
@@ -72,7 +98,6 @@ class CartCubit extends Cubit<CartState> {
       // Medicine exists, increase count
       final updatedItem =
           existingCartItem.copyWith(count: existingCartItem.count + 1);
-      // Replace the old item with the updated one
       final newCartItems =
           List<CartItemEntity>.from(currentCartEntity.cartItems);
       final itemIndex = newCartItems.indexWhere(
@@ -80,22 +105,21 @@ class CartCubit extends Cubit<CartState> {
       if (itemIndex != -1) {
         newCartItems[itemIndex] = updatedItem;
       }
-      newCartEntity = currentCartEntity.copyWith(
-          cartItems: newCartItems); // Assuming CartEntity has copyWith
+      newCartEntity = currentCartEntity.copyWith(cartItems: newCartItems);
     } else {
       // Medicine does not exist, add new item
       final newCartItem =
           CartItemEntity(medicineEntity: medicineEntity, count: 1);
       newCartEntity = currentCartEntity.addCartItem(newCartItem);
     }
-    emit(CartItemAdded(cartEntity: newCartEntity));
-    _saveCart(newCartEntity);
+
+    await _saveCart(newCartEntity, medicineId: medicineId);
   }
 
   void deleteMedicineFromCart(CartItemEntity cartItem) {
     if (state is! CartLoaded && state is! CartInitial) return;
 
-    final currentCartEntity = (state as dynamic).cartEntity as CartEntity;
+    final currentCartEntity = state.cartEntity;
     final newCartEntity = currentCartEntity.deleteCartItemFromCart(cartItem);
     emit(CartItemRemoved(cartEntity: newCartEntity));
     _saveCart(newCartEntity);
@@ -109,7 +133,7 @@ class CartCubit extends Cubit<CartState> {
       return;
     }
 
-    final currentCartEntity = (state as dynamic).cartEntity as CartEntity;
+    final currentCartEntity = state.cartEntity;
     final itemIndex = currentCartEntity.cartItems.indexWhere(
         (item) => item.medicineEntity.code == cartItem.medicineEntity.code);
 
@@ -119,17 +143,26 @@ class CartCubit extends Cubit<CartState> {
       final newCartItems =
           List<CartItemEntity>.from(currentCartEntity.cartItems);
       newCartItems[itemIndex] = updatedItem;
-      final newCartEntity = currentCartEntity.copyWith(
-          cartItems: newCartItems); // Assuming CartEntity has copyWith
+      final newCartEntity = currentCartEntity.copyWith(cartItems: newCartItems);
       emit(CartLoaded(cartEntity: newCartEntity));
       _saveCart(newCartEntity);
     }
   }
 
-  void addMedicineToCartWithCount(MedicineEntity medicineEntity, int count) {
+  void addMedicineToCartWithCount(
+      MedicineEntity medicineEntity, int count) async {
     if (state is! CartLoaded && state is! CartInitial) return;
 
-    final currentCartEntity = (state as dynamic).cartEntity as CartEntity;
+    final currentCartEntity = state.cartEntity;
+    final medicineId = medicineEntity.code;
+
+    // Add to loading state
+    final newLoadingIds = Set<String>.from(state.loadingMedicineIds)
+      ..add(medicineId);
+    emit(CartLoaded(
+      cartEntity: currentCartEntity,
+      loadingMedicineIds: newLoadingIds,
+    ));
 
     CartItemEntity? existingCartItem =
         currentCartEntity.getCartItem(medicineEntity);
@@ -139,7 +172,6 @@ class CartCubit extends Cubit<CartState> {
       // Medicine exists, update count
       final updatedItem =
           existingCartItem.copyWith(count: existingCartItem.count + count);
-      // Replace the old item with the updated one
       final newCartItems =
           List<CartItemEntity>.from(currentCartEntity.cartItems);
       final itemIndex = newCartItems.indexWhere(
@@ -147,16 +179,15 @@ class CartCubit extends Cubit<CartState> {
       if (itemIndex != -1) {
         newCartItems[itemIndex] = updatedItem;
       }
-      newCartEntity = currentCartEntity.copyWith(
-          cartItems: newCartItems); // Assuming CartEntity has copyWith
+      newCartEntity = currentCartEntity.copyWith(cartItems: newCartItems);
     } else {
       // Medicine does not exist, add new item with count
       final newCartItem =
           CartItemEntity(medicineEntity: medicineEntity, count: count);
       newCartEntity = currentCartEntity.addCartItem(newCartItem);
     }
-    emit(CartItemAdded(cartEntity: newCartEntity));
-    _saveCart(newCartEntity);
+
+    await _saveCart(newCartEntity, medicineId: medicineId);
   }
 
   /// Clear the entire cart
@@ -179,5 +210,10 @@ class CartCubit extends Cubit<CartState> {
         cartEntity: state.cartEntity,
       ));
     }
+  }
+
+  /// Reset the cubit state to initial (empty cart)
+  void reset() {
+    emit(CartInitial(cartEntity: const CartEntity(cartItems: [])));
   }
 }

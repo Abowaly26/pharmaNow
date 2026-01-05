@@ -4,7 +4,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/services/supabase_storage.dart';
@@ -63,11 +65,26 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SupabaseStorageService.initSupabase();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Parallelize independent initializations to speed up startup
+  await Future.wait<void>([
+    SupabaseStorageService.initSupabase(),
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+    prefs.init(),
+  ]);
+
+  // App Check must be initialized after Firebase.initializeApp
+  // Using debug provider for emulator/dev testing to resolve "No AppCheckProvider installed"
+  try {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider:
+          kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+    );
+    debugPrint("Firebase App Check initialized successfully");
+  } catch (e) {
+    debugPrint("Firebase App Check initialization failed: $e");
+  }
+
   setupGetit();
 
   await _initializeLocalNotifications();
@@ -77,8 +94,7 @@ void main() async {
   await FCMService.instance.init();
   Bloc.observer = CustomBlocObserver();
 
-  await prefs.init();
-  runApp(PharmaNow());
+  runApp(const PharmaNow());
   WidgetsBinding.instance.addPostFrameCallback((_) {
     _initDynamicLinks();
   });
