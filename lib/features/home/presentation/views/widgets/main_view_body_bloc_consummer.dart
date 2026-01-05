@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/main_view_body.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 
 class MainViewBodyBlocConsummer extends StatelessWidget {

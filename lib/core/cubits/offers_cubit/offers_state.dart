@@ -1,24 +1,18 @@
 part of 'offers_cubit.dart';
 
 @immutable
-sealed class OffersState {
-  final List<MedicineEntity> medicines;
-  const OffersState([this.medicines = const []]);
-}
+sealed class OffersState {}
 
-final class OffersInitial extends OffersState {
-  const OffersInitial() : super(const []);
-}
+final class OffersInitial extends OffersState {}
 
-final class OffersLoading extends OffersState {
-  const OffersLoading([super.medicines]);
-}
+final class OffersLoading extends OffersState {}
 
 final class OffersFailure extends OffersState {
   final String errMessage;
-  const OffersFailure(this.errMessage, [super.medicines]);
+  OffersFailure(this.errMessage);
 }
 
 final class OffersSuccess extends OffersState {
-  const OffersSuccess(super.medicines);
+  final List<MedicineEntity> medicines;
+  OffersSuccess(this.medicines);
 }

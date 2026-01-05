@@ -1,24 +1,18 @@
 part of 'medicine_cubit.dart';
 
 @immutable
-sealed class MedicinesState {
-  final List<MedicineEntity> medicines;
-  const MedicinesState([this.medicines = const []]);
-}
+sealed class MedicinesState {}
 
-final class MedicinesInitial extends MedicinesState {
-  const MedicinesInitial() : super(const []);
-}
+final class MedicinesInitial extends MedicinesState {}
 
-final class MedicinesLoading extends MedicinesState {
-  const MedicinesLoading([super.medicines]);
-}
+final class MedicinesLoading extends MedicinesState {}
 
 final class MedicinesFailure extends MedicinesState {
   final String errMessage;
-  const MedicinesFailure(this.errMessage, [super.medicines]);
+  MedicinesFailure(this.errMessage);
 }
 
 final class MedicinesSuccess extends MedicinesState {
-  const MedicinesSuccess(super.medicines);
+  final List<MedicineEntity> medicines;
+  MedicinesSuccess(this.medicines);
 }

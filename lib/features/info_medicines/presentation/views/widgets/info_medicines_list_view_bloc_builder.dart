@@ -13,7 +13,7 @@ class MedicinesListViewBlocBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<MedicinesCubit, MedicinesState>(
       builder: (context, state) {
-        if (state.medicines.isNotEmpty) {
+        if (state is MedicinesSuccess) {
           return InfoMedicinesListView(
             medicines: state.medicines,
           );

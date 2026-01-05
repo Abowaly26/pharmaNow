@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/core/helper_functions/show_custom_bar.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:get_it/get_it.dart';
 
 class CartSnackBarListener extends StatelessWidget {
   final Widget child;
@@ -12,21 +13,25 @@ class CartSnackBarListener extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<CartCubit, CartState>(
       listener: (context, state) {
+        // Use the navigator's context to ensure we have access to Overlay and Navigator
+        final navigatorKey = GetIt.instance<GlobalKey<NavigatorState>>();
+        final targetContext = navigatorKey.currentContext ?? context;
+
         if (state is CartItemAdded) {
           showCustomBar(
-            context,
+            targetContext,
             'Added to cart successfully',
             type: MessageType.success,
           );
         } else if (state is CartItemRemoved) {
           showCustomBar(
-            context,
+            targetContext,
             'Removed from cart',
             type: MessageType.info,
           );
         } else if (state is CartError) {
           showCustomBar(
-            context,
+            targetContext,
             state.message,
             type: MessageType.error,
           );
