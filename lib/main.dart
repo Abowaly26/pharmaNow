@@ -95,17 +95,25 @@ Future<void> _initializeSecondaryServices() async {
       FCMService.instance.init(),
     ]);
 
-    await FirebaseAppCheck.instance.activate(
-      androidProvider:
-          kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
-    );
+    try {
+      await FirebaseAppCheck.instance.activate(
+        androidProvider:
+            kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+      );
+    } catch (e) {
+      debugPrint("Firebase App Check failed silently: $e");
+    }
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     Bloc.observer = CustomBlocObserver();
 
     // Handle initializations that depend on UI or Context safely
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initDynamicLinks();
+      try {
+        _initDynamicLinks();
+      } catch (e) {
+        debugPrint("Dynamic links init failed: $e");
+      }
     });
 
     debugPrint("Secondary services initialized successfully");
@@ -132,6 +140,40 @@ Future<void> _initializeLocalNotifications() async {
       _handleLocalNotificationTap(response.payload);
     },
   );
+
+  // Register Android Notification Channels for granular control
+  final androidPlugin = plugin.resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin>();
+  if (androidPlugin != null) {
+    await androidPlugin.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'pharma_now_orders',
+        'Order Updates',
+        description: 'Notifications about your orders and delivery status',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+      ),
+    );
+    await androidPlugin.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'pharma_now_offers',
+        'Offers & Promotions',
+        description: 'Exclusive discounts and pharmaceutical offers',
+        importance: Importance.high,
+        playSound: true,
+      ),
+    );
+    await androidPlugin.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'pharma_now_system',
+        'System Notifications',
+        description: 'Important app updates and security alerts',
+        importance: Importance.defaultImportance,
+        playSound: true,
+      ),
+    );
+  }
 }
 
 void _handleLocalNotificationTap(String? payload) {

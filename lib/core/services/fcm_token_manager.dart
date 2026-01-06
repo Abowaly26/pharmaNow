@@ -25,9 +25,10 @@ class FCMTokenManager {
     debugPrint(
         "[FCMTokenManager] Permission status: ${settings.authorizationStatus}");
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      await _storeCurrentToken();
-    }
+    // Store token regardless of permission status to enable targeted notifications
+    // once the user allows them later or for quiet pushes if applicable.
+    await _storeCurrentToken();
+
     // Listen for token refreshes.
     FirebaseMessaging.instance.onTokenRefresh.listen(_handleTokenRefresh);
   }

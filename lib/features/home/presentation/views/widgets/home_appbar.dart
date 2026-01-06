@@ -5,6 +5,7 @@ import 'package:pharma_now/core/widgets/profile_avatar.dart';
 import 'package:pharma_now/features/medical_assistant/chat_bot.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:provider/provider.dart';
 
@@ -108,7 +109,45 @@ class HomeAppbar extends StatelessWidget {
   }
 }
 
-class _NotificationsBadgeIcon extends StatelessWidget {
+class _NotificationsBadgeIcon extends StatefulWidget {
+  @override
+  State<_NotificationsBadgeIcon> createState() =>
+      _NotificationsBadgeIconState();
+}
+
+class _NotificationsBadgeIconState extends State<_NotificationsBadgeIcon>
+    with WidgetsBindingObserver {
+  bool _isPermissionAllowed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkPermission();
+    }
+  }
+
+  Future<void> _checkPermission() async {
+    final status = await Permission.notification.status;
+    if (mounted) {
+      setState(() {
+        _isPermissionAllowed = status.isGranted;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
@@ -118,7 +157,7 @@ class _NotificationsBadgeIcon extends StatelessWidget {
       height: 24,
     );
 
-    if (uid == null) {
+    if (uid == null || !_isPermissionAllowed) {
       return Badge(
         isLabelVisible: false,
         backgroundColor: ColorManager.greenColor,
@@ -138,7 +177,7 @@ class _NotificationsBadgeIcon extends StatelessWidget {
       builder: (context, snapshot) {
         final int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
         return Badge(
-          isLabelVisible: count > 0,
+          isLabelVisible: _isPermissionAllowed && count > 0,
           backgroundColor: ColorManager.greenColor,
           textColor: ColorManager.primaryColor,
           label: Text('$count'),

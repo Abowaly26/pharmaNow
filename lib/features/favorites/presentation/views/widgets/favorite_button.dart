@@ -7,6 +7,7 @@ import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/features/favorites/presentation/providers/favorites_provider.dart';
 
 import 'package:pharma_now/features/favorites/presentation/views/widgets/heart_burst_painter.dart';
+import 'package:pharma_now/core/services/notification_service.dart';
 
 class FavoriteButton extends StatefulWidget {
   final String itemId;
@@ -168,6 +169,15 @@ class _FavoriteButtonState extends State<FavoriteButton>
             setState(() => _isSnackBarVisible = false);
           }
         });
+
+        if (isNowFavorite) {
+          final String itemName = widget.itemData['name'] ?? 'Item';
+          NotificationService.instance.showSystemNotification(
+            title: 'Added to Favorites ❤️',
+            body: '$itemName has been added to your favorites list.',
+            type: 'system',
+          );
+        }
       }
     }).catchError((e) {
       if (context.mounted) {

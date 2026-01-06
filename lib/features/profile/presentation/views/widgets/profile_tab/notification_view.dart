@@ -4,6 +4,7 @@ import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/services/user_settings_service.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/features/notifications/presentation/models/user_notification_settings.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../../../core/widgets/custom_app_bar.dart';
 
 class Notifications extends StatefulWidget {
@@ -15,15 +16,43 @@ class Notifications extends StatefulWidget {
   State<Notifications> createState() => _NotificationsState();
 }
 
-class _NotificationsState extends State<Notifications> {
+class _NotificationsState extends State<Notifications>
+    with WidgetsBindingObserver {
   final UserSettingsService _settingsService = getIt<UserSettingsService>();
   UserNotificationSettings? _settings;
   bool _isLoading = true;
+  bool _isPermissionAllowed = false;
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    WidgetsBinding.instance.addObserver(this);
+    _initData();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkPermission();
+    }
+  }
+
+  Future<void> _initData() async {
+    await _checkPermission();
+    await _loadSettings();
+  }
+
+  Future<void> _checkPermission() async {
+    final status = await Permission.notification.status;
+    setState(() {
+      _isPermissionAllowed = status.isGranted;
+    });
   }
 
   Future<void> _loadSettings() async {
@@ -36,8 +65,55 @@ class _NotificationsState extends State<Notifications> {
   }
 
   Future<void> _updateSettings(UserNotificationSettings newSettings) async {
+    if (!_isPermissionAllowed) {
+      _showPermissionDialog();
+      return;
+    }
     setState(() => _settings = newSettings);
     await _settingsService.updateSettings(newSettings);
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.notifications_off_outlined,
+                color: ColorManager.secondaryColor),
+            SizedBox(width: 8),
+            Text('Notifications Disabled'),
+          ],
+        ),
+        content: const Text(
+          'To receive updates about your orders and special offers, please enable notifications in your device settings.',
+          style: TextStyle(height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Later',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorManager.secondaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Go to Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -80,7 +156,8 @@ class _NotificationsState extends State<Notifications> {
                       children: [
                         ToggleRow(
                           title: 'System Notifications',
-                          value: _settings!.systemNotifications,
+                          value: _isPermissionAllowed &&
+                              _settings!.systemNotifications,
                           onChanged: (val) => _updateSettings(
                             UserNotificationSettings(
                               systemNotifications: val,
@@ -92,7 +169,7 @@ class _NotificationsState extends State<Notifications> {
                         const Divider(height: 1, color: Color(0xffC6CCD5)),
                         ToggleRow(
                           title: 'New Offers & Promos',
-                          value: _settings!.offers,
+                          value: _isPermissionAllowed && _settings!.offers,
                           onChanged: (val) => _updateSettings(
                             UserNotificationSettings(
                               systemNotifications:
@@ -105,7 +182,7 @@ class _NotificationsState extends State<Notifications> {
                         const Divider(height: 1, color: Color(0xffC6CCD5)),
                         ToggleRow(
                           title: 'Order Status Updates',
-                          value: _settings!.orders,
+                          value: _isPermissionAllowed && _settings!.orders,
                           onChanged: (val) => _updateSettings(
                             UserNotificationSettings(
                               systemNotifications:

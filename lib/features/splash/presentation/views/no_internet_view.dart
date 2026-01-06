@@ -101,10 +101,10 @@ class _NoInternetViewState extends State<NoInternetView>
                       ),
                     ),
                   ),
-                  // Red Pulse Dot (Top Right)
+                  // Red Pulse Dot (Top Right - Inside Circle)
                   Positioned(
-                    top: 25.h,
-                    right: 25.w,
+                    top: 53.h,
+                    right: 53.w,
                     child: AnimatedBuilder(
                       animation: _controller,
                       builder: (context, child) {
@@ -127,10 +127,10 @@ class _NoInternetViewState extends State<NoInternetView>
                       },
                     ),
                   ),
-                  // Purple Pulse Dot (Bottom Left)
+                  // Purple Pulse Dot (Bottom Left - Inside Circle)
                   Positioned(
-                    bottom: 25.h,
-                    left: 25.w,
+                    bottom: 55.h,
+                    left: 60.w,
                     child: AnimatedBuilder(
                       animation: _controller,
                       builder: (context, child) {

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pharma_now/core/errors/exceptions.dart';
+import 'package:pharma_now/core/services/notification_service.dart';
 
 class FirebaseAuthService {
   static bool _isNormalLogout = false;
@@ -252,6 +253,13 @@ class FirebaseAuthService {
       log('Firebase: Sending password reset email to $email');
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       log('Firebase: Password reset email sent successfully to $email');
+
+      // Trigger local notification
+      NotificationService.instance.showSystemNotification(
+        title: 'Password Reset Sent 📧',
+        body: 'Check your email to reset your password.',
+        type: 'system',
+      );
     } catch (e) {
       log('Firebase: Error sending password reset email to $email: $e');
       rethrow;

@@ -13,6 +13,7 @@ import 'package:pharma_now/core/errors/exceptions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pharma_now/features/cart/di/cart_injection.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/core/services/notification_service.dart';
 
 enum ProfileStatus {
   initial,
@@ -198,6 +199,13 @@ class ProfileProvider extends ChangeNotifier {
         await firebaseUser.updateDisplayName(name);
       }
       _status = ProfileStatus.success;
+
+      // Trigger local notification
+      NotificationService.instance.showSystemNotification(
+        title: 'Profile Updated! ✨',
+        body: 'Your profile changes have been saved successfully.',
+        type: 'system',
+      );
     } catch (e) {
       _errorMessage = 'Profile update failed: ${e.toString()}';
       _status = ProfileStatus.error;
@@ -232,6 +240,13 @@ class ProfileProvider extends ChangeNotifier {
 
       await _saveUserToLocal(_currentUser!);
       _status = ProfileStatus.success;
+
+      // Trigger local notification
+      NotificationService.instance.showSystemNotification(
+        title: 'Profile Image Updated! 📸',
+        body: 'Your new profile photo is now visible.',
+        type: 'system',
+      );
     } catch (e) {
       log('Original upload error: $e', name: 'ProfileProvider');
       if (e.toString().contains('SocketException') ||
@@ -293,6 +308,13 @@ class ProfileProvider extends ChangeNotifier {
     try {
       await _profileRepository.changePassword(currentPassword, newPassword);
       _status = ProfileStatus.success;
+
+      // Trigger local notification
+      NotificationService.instance.showSystemNotification(
+        title: 'Security Alert 🔐',
+        body: 'Your password has been changed successfully.',
+        type: 'system',
+      );
     } catch (e) {
       _errorMessage = e.toString();
       _status = ProfileStatus.error;
