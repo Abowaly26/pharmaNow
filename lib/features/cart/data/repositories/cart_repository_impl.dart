@@ -42,6 +42,11 @@ class CartRepositoryImpl implements CartRepository {
       final cartItems =
           items.map((item) => CartItemEntity.fromJson(item)).toList();
       return Right(CartEntity(cartItems: cartItems));
+    } on FirebaseException catch (e) {
+      if (e.code == 'unavailable' || e.code == 'deadline-exceeded') {
+        return const Left(NetworkFailure('No internet connection'));
+      }
+      return Left(ServerFailure('Server error: ${e.message}'));
     } catch (e) {
       return Left(ServerFailure('Failed to load cart: $e'));
     }
@@ -58,6 +63,11 @@ class CartRepositoryImpl implements CartRepository {
         'lastUpdated': FieldValue.serverTimestamp(),
       });
       return const Right(unit);
+    } on FirebaseException catch (e) {
+      if (e.code == 'unavailable' || e.code == 'deadline-exceeded') {
+        return const Left(NetworkFailure('No internet connection'));
+      }
+      return Left(ServerFailure('Failed to save cart: ${e.message}'));
     } catch (e) {
       return Left(ServerFailure('Failed to save cart: $e'));
     }
@@ -68,6 +78,11 @@ class CartRepositoryImpl implements CartRepository {
     try {
       await _userCartRef.delete();
       return const Right(unit);
+    } on FirebaseException catch (e) {
+      if (e.code == 'unavailable' || e.code == 'deadline-exceeded') {
+        return const Left(NetworkFailure('No internet connection'));
+      }
+      return Left(ServerFailure('Failed to clear cart: ${e.message}'));
     } catch (e) {
       return Left(ServerFailure('Failed to clear cart: $e'));
     }

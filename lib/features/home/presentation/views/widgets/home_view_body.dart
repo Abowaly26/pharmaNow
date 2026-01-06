@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'dart:async';
-
 import 'package:pharma_now/features/home/presentation/views/widgets/medicines_list_view_bloc_builder.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/offers_list_view_bloc_builder.dart';
 import 'package:pharma_now/features/home/presentation/views/widgets/section_widget.dart';

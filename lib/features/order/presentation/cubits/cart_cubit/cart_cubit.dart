@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
-import 'package:pharma_now/core/errors/exceptions.dart';
+import 'package:pharma_now/core/errors/error_handling.dart';
 import 'package:pharma_now/features/cart/domain/repositories/cart_repository.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_entity.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
@@ -25,8 +25,11 @@ class CartCubit extends Cubit<CartState> {
           await _cartRepository.getCart().timeout(const Duration(seconds: 5));
       result.fold(
         (failure) => emit(CartError(
-          message:
-              failure is ServerFailure ? 'Server error' : 'Failed to load cart',
+          message: failure is NetworkFailure
+              ? 'No internet connection'
+              : (failure is ServerFailure
+                  ? 'Server error, please try again'
+                  : 'Failed to load cart'),
           cartEntity: state.cartEntity,
         )),
         (cart) => emit(CartLoaded(cartEntity: cart)),
@@ -34,14 +37,15 @@ class CartCubit extends Cubit<CartState> {
     } catch (e) {
       emit(CartError(
         message: e is TimeoutException
-            ? 'Connection timed out'
+            ? 'Connection timed out, check internet'
             : 'An unexpected error occurred',
         cartEntity: state.cartEntity,
       ));
     }
   }
 
-  Future<void> _saveCart(CartEntity cart, {String? medicineId}) async {
+  Future<void> _saveCart(CartEntity cart,
+      {String? medicineId, CartEntity? previousCartEntity}) async {
     try {
       final result = await _cartRepository
           .saveCart(cart)
@@ -50,11 +54,16 @@ class CartCubit extends Cubit<CartState> {
         (failure) {
           final newLoadingIds = Set<String>.from(state.loadingMedicineIds);
           if (medicineId != null) newLoadingIds.remove(medicineId);
+
+          // ROLLBACK: Use previousCartEntity if available, otherwise fallback to current state
+          // (though current state might be the "new" incorrect one in optimistic cases, so previous is key)
+          final rollbackEntity = previousCartEntity ?? state.cartEntity;
+
           emit(CartError(
-            message: failure is ServerFailure
-                ? 'Failed to save cart'
-                : 'An error occurred',
-            cartEntity: cart,
+            message: failure is NetworkFailure
+                ? 'No internet connection'
+                : 'Failed to add to cart',
+            cartEntity: rollbackEntity,
             loadingMedicineIds: newLoadingIds,
           ));
         },
@@ -72,11 +81,14 @@ class CartCubit extends Cubit<CartState> {
     } catch (e) {
       final newLoadingIds = Set<String>.from(state.loadingMedicineIds);
       if (medicineId != null) newLoadingIds.remove(medicineId);
+
+      final rollbackEntity = previousCartEntity ?? state.cartEntity;
+
       emit(CartError(
         message: e is TimeoutException
-            ? 'Connection timed out'
+            ? 'Connection timed out, check internet'
             : 'Failed to save cart',
-        cartEntity: cart,
+        cartEntity: rollbackEntity,
         loadingMedicineIds: newLoadingIds,
       ));
     }
@@ -121,7 +133,8 @@ class CartCubit extends Cubit<CartState> {
       newCartEntity = currentCartEntity.addCartItem(newCartItem);
     }
 
-    await _saveCart(newCartEntity, medicineId: medicineId);
+    await _saveCart(newCartEntity,
+        medicineId: medicineId, previousCartEntity: currentCartEntity);
   }
 
   void deleteMedicineFromCart(CartItemEntity cartItem) async {
@@ -150,7 +163,9 @@ class CartCubit extends Cubit<CartState> {
           final updatedDeletingIds = Set<String>.from(state.deletingMedicineIds)
             ..remove(medicineId);
           emit(CartError(
-            message: 'Failed to delete item',
+            message: failure is NetworkFailure
+                ? 'No internet connection'
+                : 'Failed to delete item',
             cartEntity: currentCartEntity,
             loadingMedicineIds: state.loadingMedicineIds,
             deletingMedicineIds: updatedDeletingIds,
@@ -172,7 +187,7 @@ class CartCubit extends Cubit<CartState> {
         ..remove(medicineId);
       emit(CartError(
         message: e is TimeoutException
-            ? 'Connection timed out'
+            ? 'Connection timed out, check internet'
             : 'Failed to delete item',
         cartEntity: currentCartEntity,
         loadingMedicineIds: state.loadingMedicineIds,
@@ -204,8 +219,11 @@ class CartCubit extends Cubit<CartState> {
           List<CartItemEntity>.from(currentCartEntity.cartItems);
       newCartItems[itemIndex] = updatedItem;
       final newCartEntity = currentCartEntity.copyWith(cartItems: newCartItems);
+
+      // OPTIMISTIC UPDATE
       emit(CartLoaded(cartEntity: newCartEntity));
-      _saveCart(newCartEntity);
+
+      _saveCart(newCartEntity, previousCartEntity: currentCartEntity);
     }
   }
 
@@ -247,7 +265,8 @@ class CartCubit extends Cubit<CartState> {
       newCartEntity = currentCartEntity.addCartItem(newCartItem);
     }
 
-    await _saveCart(newCartEntity, medicineId: medicineId);
+    await _saveCart(newCartEntity,
+        medicineId: medicineId, previousCartEntity: currentCartEntity);
   }
 
   /// Clear the entire cart
@@ -258,9 +277,9 @@ class CartCubit extends Cubit<CartState> {
           await _cartRepository.clearCart().timeout(const Duration(seconds: 5));
       result.fold(
         (failure) => emit(CartError(
-          message: failure is ServerFailure
-              ? 'Failed to clear cart'
-              : 'An error occurred',
+          message: failure is NetworkFailure
+              ? 'No internet connection'
+              : 'Failed to clear cart',
           cartEntity: state.cartEntity,
         )),
         (_) => emit(CartLoaded(cartEntity: const CartEntity(cartItems: []))),
@@ -268,7 +287,7 @@ class CartCubit extends Cubit<CartState> {
     } catch (e) {
       emit(CartError(
         message: e is TimeoutException
-            ? 'Connection timed out'
+            ? 'Connection timed out, check internet'
             : 'Failed to clear cart',
         cartEntity: state.cartEntity,
       ));

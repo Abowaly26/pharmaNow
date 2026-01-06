@@ -33,6 +33,14 @@ class MainViewBodyBlocConsummer extends StatelessWidget {
             type: MessageType.success,
           );
         }
+        if (state is CartError) {
+          showCustomBar(
+            context,
+            state.message,
+            duration: const Duration(seconds: 2),
+            type: MessageType.error,
+          );
+        }
       },
       child: MainViewbody(CurrentViewIndex: CurrentViewIndex),
     );
