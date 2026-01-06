@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
@@ -20,7 +21,8 @@ class CartCubit extends Cubit<CartState> {
   Future<void> _loadCart() async {
     try {
       emit(CartLoading(cartEntity: state.cartEntity));
-      final result = await _cartRepository.getCart();
+      final result =
+          await _cartRepository.getCart().timeout(const Duration(seconds: 5));
       result.fold(
         (failure) => emit(CartError(
           message:
@@ -31,7 +33,9 @@ class CartCubit extends Cubit<CartState> {
       );
     } catch (e) {
       emit(CartError(
-        message: 'An unexpected error occurred',
+        message: e is TimeoutException
+            ? 'Connection timed out'
+            : 'An unexpected error occurred',
         cartEntity: state.cartEntity,
       ));
     }
@@ -39,7 +43,9 @@ class CartCubit extends Cubit<CartState> {
 
   Future<void> _saveCart(CartEntity cart, {String? medicineId}) async {
     try {
-      final result = await _cartRepository.saveCart(cart);
+      final result = await _cartRepository
+          .saveCart(cart)
+          .timeout(const Duration(seconds: 5));
       result.fold(
         (failure) {
           final newLoadingIds = Set<String>.from(state.loadingMedicineIds);
@@ -67,7 +73,9 @@ class CartCubit extends Cubit<CartState> {
       final newLoadingIds = Set<String>.from(state.loadingMedicineIds);
       if (medicineId != null) newLoadingIds.remove(medicineId);
       emit(CartError(
-        message: 'Failed to save cart',
+        message: e is TimeoutException
+            ? 'Connection timed out'
+            : 'Failed to save cart',
         cartEntity: cart,
         loadingMedicineIds: newLoadingIds,
       ));
@@ -134,7 +142,9 @@ class CartCubit extends Cubit<CartState> {
     final newCartEntity = currentCartEntity.deleteCartItemFromCart(cartItem);
 
     try {
-      final result = await _cartRepository.saveCart(newCartEntity);
+      final result = await _cartRepository
+          .saveCart(newCartEntity)
+          .timeout(const Duration(seconds: 5));
       result.fold(
         (failure) {
           final updatedDeletingIds = Set<String>.from(state.deletingMedicineIds)
@@ -161,7 +171,9 @@ class CartCubit extends Cubit<CartState> {
       final updatedDeletingIds = Set<String>.from(state.deletingMedicineIds)
         ..remove(medicineId);
       emit(CartError(
-        message: 'Failed to delete item',
+        message: e is TimeoutException
+            ? 'Connection timed out'
+            : 'Failed to delete item',
         cartEntity: currentCartEntity,
         loadingMedicineIds: state.loadingMedicineIds,
         deletingMedicineIds: updatedDeletingIds,
@@ -242,7 +254,8 @@ class CartCubit extends Cubit<CartState> {
   Future<void> clearCart() async {
     try {
       emit(CartLoading(cartEntity: state.cartEntity));
-      final result = await _cartRepository.clearCart();
+      final result =
+          await _cartRepository.clearCart().timeout(const Duration(seconds: 5));
       result.fold(
         (failure) => emit(CartError(
           message: failure is ServerFailure
@@ -254,7 +267,9 @@ class CartCubit extends Cubit<CartState> {
       );
     } catch (e) {
       emit(CartError(
-        message: 'Failed to clear cart',
+        message: e is TimeoutException
+            ? 'Connection timed out'
+            : 'Failed to clear cart',
         cartEntity: state.cartEntity,
       ));
     }

@@ -32,6 +32,8 @@ class _FavoriteButtonState extends State<FavoriteButton>
   late Animation<double> _scaleAnimation;
   late Animation<double> _burstAnimation;
   bool _isSnackBarVisible = false;
+  // Local state to prevent rapid clicks before provider updates
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -62,7 +64,11 @@ class _FavoriteButtonState extends State<FavoriteButton>
   }
 
   void _handleTap(FavoritesProvider provider, bool isFavorite) {
-    if (_isSnackBarVisible) return;
+    if (_isSnackBarVisible || _isProcessing) return;
+
+    setState(() {
+      _isProcessing = true;
+    });
 
     HapticFeedback.mediumImpact();
     if (!isFavorite) {
@@ -81,7 +87,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
         final isLoading = provider.isItemLoading(widget.itemId);
 
         return GestureDetector(
-          onTap: (isLoading || _isSnackBarVisible)
+          onTap: (isLoading || _isSnackBarVisible || _isProcessing)
               ? null
               : () => _handleTap(provider, isFavorite),
           child: SizedBox(
@@ -144,7 +150,10 @@ class _FavoriteButtonState extends State<FavoriteButton>
     )
         .then((isNowFavorite) {
       if (context.mounted) {
-        setState(() => _isSnackBarVisible = true);
+        setState(() {
+          _isSnackBarVisible = true;
+          _isProcessing = false;
+        });
         showCustomBar(
           context,
           isNowFavorite ? 'added to favorites' : 'removed from favorites',
@@ -170,12 +179,21 @@ class _FavoriteButtonState extends State<FavoriteButton>
       }
     }).catchError((e) {
       if (context.mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
         showCustomBar(
           context,
-          'Error occurred: ${e.toString()}',
+          'Error occurred: ${e.toString().replaceAll('Exception: ', '')}',
           type: MessageType.error,
           duration: const Duration(seconds: 2),
         );
+      } else {
+        if (mounted) {
+          setState(() {
+            _isProcessing = false;
+          });
+        }
       }
     });
   }

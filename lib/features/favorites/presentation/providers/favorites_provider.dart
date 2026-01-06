@@ -110,10 +110,12 @@ class FavoritesProvider extends ChangeNotifier {
       notifyListeners();
 
       // Perform actual API call
-      final actualResult = await _favoritesService.toggleFavorite(
-        itemId: itemId,
-        itemData: itemData,
-      );
+      final actualResult = await _favoritesService
+          .toggleFavorite(
+            itemId: itemId,
+            itemData: itemData,
+          )
+          .timeout(const Duration(seconds: 5));
 
       // If the actual result differs from our optimistic guess (unlikely but possible), sync it
       if (actualResult != isNowFavorite) {
@@ -137,6 +139,7 @@ class FavoritesProvider extends ChangeNotifier {
         _favorites.removeWhere((item) => item['code'] == itemId);
       }
       notifyListeners();
+      if (e is TimeoutException) throw Exception('Connection timed out');
       rethrow;
     } finally {
       _loadingItemIds.remove(itemId);
@@ -157,10 +160,12 @@ class FavoritesProvider extends ChangeNotifier {
       _loadingItemIds.add(itemId);
       notifyListeners();
 
-      await _favoritesService.addToFavorites(
-        itemId: itemId,
-        itemData: itemData,
-      );
+      await _favoritesService
+          .addToFavorites(
+            itemId: itemId,
+            itemData: itemData,
+          )
+          .timeout(const Duration(seconds: 5));
 
       // Update the local list for immediate response
       if (!_favoriteIds.contains(itemId)) {
@@ -170,6 +175,7 @@ class FavoritesProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error adding item to favorites: $e');
+      if (e is TimeoutException) throw Exception('Connection timed out');
       rethrow;
     } finally {
       _loadingItemIds.remove(itemId);
@@ -191,11 +197,14 @@ class FavoritesProvider extends ChangeNotifier {
       notifyListeners();
 
       // Then remove it from Firebase
-      await _favoritesService.removeFromFavorites(itemId);
+      await _favoritesService
+          .removeFromFavorites(itemId)
+          .timeout(const Duration(seconds: 5));
     } catch (e) {
       debugPrint('Error removing item from favorites: $e');
       // If an error occurs, reload the data
       _listenToFavorites();
+      if (e is TimeoutException) throw Exception('Connection timed out');
       rethrow;
     } finally {
       _loadingItemIds.remove(itemId);
@@ -214,11 +223,14 @@ class FavoritesProvider extends ChangeNotifier {
       notifyListeners();
 
       // Call the service to clear favorites from Firebase
-      await _favoritesService.clearAllFavorites();
+      await _favoritesService
+          .clearAllFavorites()
+          .timeout(const Duration(seconds: 5));
     } catch (e) {
       debugPrint('Error clearing all favorites: $e');
       // If an error occurs, reload the data
       _listenToFavorites();
+      if (e is TimeoutException) throw Exception('Connection timed out');
       rethrow;
     } finally {
       _setLoading(false);
