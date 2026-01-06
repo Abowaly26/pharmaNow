@@ -265,7 +265,7 @@ class _InfoOffersListViewItemState extends State<InfoOffersListViewItem> {
 
                     return GestureDetector(
                       onTap: (isInCart || isLoading)
-                          ? null
+                          ? () {}
                           : () {
                               context
                                   .read<CartCubit>()

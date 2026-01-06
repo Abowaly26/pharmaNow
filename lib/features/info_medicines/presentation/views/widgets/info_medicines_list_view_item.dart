@@ -284,7 +284,7 @@ class _InfoMedicinesListViewItemState extends State<InfoMedicinesListViewItem> {
 
                     return GestureDetector(
                       onTap: (isInCart || isLoading)
-                          ? null
+                          ? () {}
                           : () {
                               context
                                   .read<CartCubit>()

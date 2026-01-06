@@ -255,7 +255,7 @@ class _OffersListViewItemState extends State<OffersListViewItem> {
 
                         return GestureDetector(
                           onTap: (isInCart || isLoading)
-                              ? null
+                              ? () {}
                               : () {
                                   context
                                       .read<CartCubit>()

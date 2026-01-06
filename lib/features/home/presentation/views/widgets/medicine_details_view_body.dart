@@ -477,22 +477,13 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                           widget.medicineEntity, _counter);
                     },
               child: isLoading
-                  ? Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          Assets.frameCart,
-                          height: 32.h,
-                        ),
-                        SizedBox(
-                          height: 12.h,
-                          width: 12.h,
-                          child: const CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      ],
+                  ? SizedBox(
+                      height: 24.h,
+                      width: 24.h,
+                      child: const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
                   : Text(
                       'Add to Cart',
