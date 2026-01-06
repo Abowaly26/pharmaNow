@@ -63,69 +63,89 @@ class _NoInternetViewState extends State<NoInternetView>
                 alignment: Alignment.center,
                 clipBehavior: Clip.none,
                 children: [
-                  // Glow Effect
+                  // Subtle Background Glow
                   Container(
-                    width: 160.w,
-                    height: 160.w,
+                    width: 220.w,
+                    height: 220.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFF3638DA).withOpacity(0.05),
-                    ),
-                  ),
-                  Container(
-                    width: 120.w,
-                    height: 120.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color(0xFF3638DA).withOpacity(0.1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF3638DA).withOpacity(0.08),
+                          blurRadius: 60,
+                          spreadRadius: 20,
+                        ),
+                      ],
                     ),
                   ),
                   // Main Icon Circle
                   Container(
-                    width: 160.w,
-                    height: 160.w,
+                    width: 170.w,
+                    height: 170.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFFF8FAFC), // Slate-50
+                      color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 30,
+                          offset: const Offset(0, 15),
                         ),
                       ],
-                      border: Border.all(
-                        color: const Color(0xFFF1F5F9), // Slate-100
-                        width: 1,
-                      ),
                     ),
                     child: Center(
                       child: Icon(
                         Icons.wifi_off_rounded,
-                        size: 64.sp,
+                        size: 72.sp,
                         color: const Color(0xFF3638DA),
                       ),
                     ),
                   ),
-                  // Red Pulsing Dot
+                  // Red Pulse Dot (Top Right)
                   Positioned(
-                    top: 32.h,
-                    right: 32.w,
+                    top: 25.h,
+                    right: 25.w,
                     child: AnimatedBuilder(
                       animation: _controller,
                       builder: (context, child) {
                         return Container(
-                          width: 12.w,
-                          height: 12.w,
+                          width: 14.w,
+                          height: 14.w,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.red,
+                            color: const Color(0xFFFF6B6B), // Soft Red
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.red
-                                    .withOpacity(0.5 * _fadeAnimation.value),
-                                blurRadius: 8 * _scaleAnimation.value,
+                                color: const Color(0xFFFF6B6B)
+                                    .withOpacity(0.4 * _fadeAnimation.value),
+                                blurRadius: 10 * _scaleAnimation.value,
                                 spreadRadius: 2 * _scaleAnimation.value,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  // Purple Pulse Dot (Bottom Left)
+                  Positioned(
+                    bottom: 25.h,
+                    left: 25.w,
+                    child: AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        return Container(
+                          width: 10.w,
+                          height: 10.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF7E81FF), // Lavender/Purple
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF7E81FF)
+                                    .withOpacity(0.3 * _fadeAnimation.value),
+                                blurRadius: 8 * _scaleAnimation.value,
+                                spreadRadius: 1 * _scaleAnimation.value,
                               ),
                             ],
                           ),
