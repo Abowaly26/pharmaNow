@@ -7,12 +7,13 @@ import '../../../../../core/utils/button_style.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
 import '../../ui_model/entities/cart_item_entity.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
 
 class MedicineDetailsViewBody extends StatefulWidget {
   const MedicineDetailsViewBody({
@@ -94,26 +95,11 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
     return BlocListener<CartCubit, CartState>(
       listener: (context, state) {
         if (state is CartItemAdded) {
-          final screenWidth = MediaQuery.of(context).size.width;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Added to cart',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 12),
-              ),
-              backgroundColor: const Color.fromARGB(255, 109, 193, 111),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(42),
-              ),
-              margin: EdgeInsets.only(
-                left: screenWidth * 0.3,
-                right: screenWidth * 0.3,
-                bottom: 80.h,
-              ),
-              duration: const Duration(seconds: 1),
-            ),
+          showCustomBar(
+            context,
+            'Added to cart',
+            duration: const Duration(seconds: 1),
+            type: MessageType.success,
           );
         }
       },

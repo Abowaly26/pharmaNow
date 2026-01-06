@@ -8,6 +8,7 @@ import 'package:pharma_now/features/favorites/presentation/providers/favorites_p
 
 import 'package:pharma_now/features/favorites/presentation/views/widgets/heart_burst_painter.dart';
 import 'package:pharma_now/core/services/notification_service.dart';
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
 
 class FavoriteButton extends StatefulWidget {
   final String itemId;
@@ -144,27 +145,15 @@ class _FavoriteButtonState extends State<FavoriteButton>
         .then((isNowFavorite) {
       if (context.mounted) {
         setState(() => _isSnackBarVisible = true);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-              SnackBar(
-                content: Text(
-                  textAlign: TextAlign.center,
-                  isNowFavorite
-                      ? 'added to favorites'
-                      : 'removed from favorites',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-                backgroundColor: const Color.fromARGB(255, 109, 193, 111),
-                width: MediaQuery.of(context).size.width * 0.4,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(48),
-                ),
-                duration: const Duration(seconds: 1),
-              ),
-            )
-            .closed
-            .then((_) {
+        showCustomBar(
+          context,
+          isNowFavorite ? 'added to favorites' : 'removed from favorites',
+          duration: const Duration(seconds: 1),
+          type: MessageType.success,
+        );
+
+        // Reset the flag after the duration (approximate since showCustomBar handles animation)
+        Future.delayed(const Duration(seconds: 1), () {
           if (mounted) {
             setState(() => _isSnackBarVisible = false);
           }
@@ -181,12 +170,11 @@ class _FavoriteButtonState extends State<FavoriteButton>
       }
     }).catchError((e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error occurred: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 2),
-          ),
+        showCustomBar(
+          context,
+          'Error occurred: ${e.toString()}',
+          type: MessageType.error,
+          duration: const Duration(seconds: 2),
         );
       }
     });

@@ -1,3 +1,4 @@
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 
@@ -66,7 +67,7 @@ void showCustomBar(
   Color? accentColor,
   Color? iconBackgroundColor,
   IconData? icon,
-  Duration? duration = const Duration(seconds: 3),
+  Duration? duration = const Duration(seconds: 2),
 }) {
   final overlay = Overlay.of(context, rootOverlay: true);
 
@@ -118,7 +119,7 @@ void showCustomBar(
       return Positioned(
         left: 16,
         right: 16,
-        bottom: 14,
+        bottom: 65.h,
         child: IgnorePointer(
           ignoring: false,
           child: Material(

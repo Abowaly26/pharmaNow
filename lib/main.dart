@@ -22,8 +22,10 @@ import 'package:pharma_now/core/services/firebase_auth_service.dart';
 import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:pharma_now/core/services/auth_navigation_observer.dart';
 import 'package:pharma_now/core/services/notification_log_service.dart';
+import 'package:pharma_now/core/services/user_settings_service.dart';
 import 'package:pharma_now/core/services/fcm_service.dart';
 import 'package:pharma_now/features/notifications/presentation/models/notification_payload.dart';
 import 'package:pharma_now/core/network/network_cubit.dart';
@@ -39,6 +41,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint("Handling a background message: ${message.messageId}");
 
   try {
+    // 1. Check System Permission
+    final status = await Permission.notification.status;
+    if (!status.isGranted) {
+      debugPrint("[BackgroundHandler] System permission denied, ignoring");
+      return;
+    }
+
     final data = message.data;
     NotificationPayload? payload;
 
@@ -56,10 +65,28 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       );
     }
 
+    // 2. Check User Settings Toggles (Must match foreground logic)
+    final settingsService = getIt<UserSettingsService>();
+    final settings = await settingsService.getSettings();
+    bool isEnabled = true;
+
+    if (payload.type == 'offer' || payload.type == 'promo') {
+      isEnabled = settings.offers;
+    } else if (payload.type == 'order') {
+      isEnabled = settings.orders;
+    } else {
+      isEnabled = settings.systemNotifications;
+    }
+
+    if (!isEnabled) {
+      debugPrint("[BackgroundHandler] Category ${payload.type} is disabled");
+      return;
+    }
+
     final logService = getIt<NotificationLogService>();
     await logService.addLog(payload, notificationId: message.messageId);
   } catch (e) {
-    debugPrint("Error saving background message to logs: $e");
+    debugPrint("Error in background handler: $e");
   }
 }
 

@@ -50,8 +50,24 @@ class _NotificationsState extends State<Notifications>
 
   Future<void> _checkPermission() async {
     final status = await Permission.notification.status;
+    final isAllowed = status.isGranted;
+
+    if (isAllowed && !_isPermissionAllowed) {
+      // Permission was JUST allowed (e.g. came back from settings)
+      // Force enable all toggles as per requirement
+      final allOnSettings = UserNotificationSettings(
+        systemNotifications: true,
+        offers: true,
+        orders: true,
+      );
+      await _settingsService.updateSettings(allOnSettings);
+      setState(() {
+        _settings = allOnSettings;
+      });
+    }
+
     setState(() {
-      _isPermissionAllowed = status.isGranted;
+      _isPermissionAllowed = isAllowed;
     });
   }
 
@@ -77,27 +93,56 @@ class _NotificationsState extends State<Notifications>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        titlePadding: const EdgeInsets.only(top: 24, left: 24, right: 24),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        title: Row(
           children: [
-            Icon(Icons.notifications_off_outlined,
-                color: ColorManager.secondaryColor),
-            SizedBox(width: 8),
-            Text('Notifications Disabled'),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: ColorManager.secondaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.notifications_off_rounded,
+                  color: ColorManager.secondaryColor, size: 28),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Permission Required',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: ColorManager.blackColor,
+                ),
+              ),
+            ),
           ],
         ),
         content: const Text(
-          'To receive updates about your orders and special offers, please enable notifications in your device settings.',
-          style: TextStyle(height: 1.4),
+          'To start receiving updates about your orders and exclusive offers, notifications must be enabled in your device settings.',
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.5,
+            color: ColorManager.greyColor,
+          ),
         ),
+        actionsPadding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Later',
-              style: TextStyle(color: Colors.grey[600]),
+              'Not Now',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
@@ -106,10 +151,15 @@ class _NotificationsState extends State<Notifications>
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorManager.secondaryColor,
               foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Go to Settings'),
+            child: const Text(
+              'Open Settings',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
