@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 
 import 'package:pharma_now/core/services/storage_service.dart';
 
@@ -42,9 +43,10 @@ class SupabaseStorageService implements StorageService {
       }
 
       if (!isBucketExists) {
-        log('Attempting to create bucket: $bucketName',
-            name: 'SupabaseStorageService');
+        debugPrint(
+            '[SupabaseStorageService] Bucket "$bucketName" not found. If this is a client-side app, please ensure bucket exists in dashboard.');
         try {
+          // We still try to create, but we handle the expected 403 silently or as a hint
           await _supabase.client.storage.createBucket(
             bucketName,
             const BucketOptions(public: true),
@@ -52,22 +54,11 @@ class SupabaseStorageService implements StorageService {
           log('Successfully created bucket: $bucketName',
               name: 'SupabaseStorageService');
         } catch (e) {
-          // If 403, it's expected if using anon key.
-          log('Unable to create bucket "$bucketName" automatically (Permission Denied). This is normal for client-side keys. Please create it manually in the Supabase Dashboard and set it to PUBLIC.',
-              name: 'SupabaseStorageService');
+          // Silent catch for expected permission errors with client keys
         }
       } else if (!isPublic) {
-        log('Bucket "$bucketName" exists but is not public. Attempting to update...',
-            name: 'SupabaseStorageService');
-        try {
-          await _supabase.client.storage.updateBucket(
-            bucketName,
-            const BucketOptions(public: true),
-          );
-        } catch (e) {
-          log('Note: Could not update bucket public status (Permission Denied). Ensure "Public Bucket" is ON for "$bucketName" in Dashboard.',
-              name: 'SupabaseStorageService');
-        }
+        debugPrint(
+            '[SupabaseStorageService] Bucket "$bucketName" is not public. Please set it to PUBLIC in dashboard.');
       }
     } catch (e) {
       log('Unexpected error in createBuckets check for "$bucketName": $e',
@@ -75,7 +66,7 @@ class SupabaseStorageService implements StorageService {
     }
   }
 
-  static initSupabase() async {
+  static Future<void> initSupabase() async {
     if (_isInitialized) return;
     try {
       log('Initializing Supabase at $_supabaseUrl',

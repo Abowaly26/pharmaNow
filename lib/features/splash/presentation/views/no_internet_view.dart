@@ -5,11 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 class NoInternetView extends StatefulWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onCheckSettings;
+  final bool isChecking;
 
   const NoInternetView({
     super.key,
     this.onRetry,
     this.onCheckSettings,
+    this.isChecking = false,
   });
 
   @override
@@ -139,11 +141,12 @@ class _NoInternetViewState extends State<NoInternetView>
               Text(
                 'No Internet Connection',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF0F172A), // Slate-900
                   height: 1.2,
+                  fontFamily: 'Inter',
                 ),
               ),
               SizedBox(height: 12.h),
@@ -154,11 +157,12 @@ class _NoInternetViewState extends State<NoInternetView>
                 child: Text(
                   "We can't reach pharmNow right now. Please check your internet connection settings and try again.",
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF64748B), // Slate-500
                     height: 1.5,
+                    fontFamily: 'Inter',
                   ),
                 ),
               ),
@@ -169,7 +173,7 @@ class _NoInternetViewState extends State<NoInternetView>
                 width: double.infinity,
                 height: 56.h,
                 child: ElevatedButton(
-                  onPressed: widget.onRetry,
+                  onPressed: widget.isChecking ? null : widget.onRetry,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3638DA),
                     foregroundColor: Colors.white,
@@ -180,21 +184,31 @@ class _NoInternetViewState extends State<NoInternetView>
                     ),
                     padding: EdgeInsets.zero,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.refresh_rounded, size: 20.sp),
-                      SizedBox(width: 8.w),
-                      Text(
-                        'Retry',
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
+                  child: widget.isChecking
+                      ? SizedBox(
+                          width: 24.w,
+                          height: 24.w,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.refresh_rounded, size: 20.sp),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'Retry',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               SizedBox(height: 16.h),
@@ -204,9 +218,10 @@ class _NoInternetViewState extends State<NoInternetView>
                 onPressed: widget.onCheckSettings,
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFF64748B), // Slate-500
-                  textStyle: GoogleFonts.inter(
+                  textStyle: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
+                    fontFamily: 'Inter',
                   ),
                 ),
                 child: const Text('Check Connection Settings'),

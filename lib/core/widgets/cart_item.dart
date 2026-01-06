@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,15 +10,15 @@ import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/widgets/cart_item_action_buttons.dart';
 import 'package:pharma_now/features/home/presentation/views/medicine_details_view.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
-import '../../../../../core/utils/color_manger.dart';
-import '../../../../../core/utils/text_styles.dart';
-import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
-import '../../../../../core/widgets/custom_dialog.dart';
+import 'package:pharma_now/core/utils/color_manger.dart';
+import 'package:pharma_now/core/utils/text_styles.dart';
+import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
+import 'package:pharma_now/core/widgets/custom_dialog.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
-import '../../features/order/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
+import 'package:pharma_now/features/order/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
 
 class CartItem extends StatelessWidget {
   const CartItem({
@@ -57,49 +59,106 @@ class CartItem extends StatelessWidget {
             return false;
           },
           builder: (context, state) {
-            return Stack(
-              children: [
-                InkWell(
-                  onTap: isDeleting
-                      ? null
-                      : () {
-                          Navigator.pushNamed(
-                            context,
-                            MedicineDetailsView.routeName,
-                            arguments: {
-                              'medicineEntity': cartItemEntity.medicineEntity,
-                              'fromCart': true,
+            return AnimatedScale(
+              scale: isDeleting ? 0.95 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutBack,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: isDeleting ? 0.7 : 1.0,
+                child: Stack(
+                  children: [
+                    InkWell(
+                      onTap: isDeleting
+                          ? null
+                          : () {
+                              Navigator.pushNamed(
+                                context,
+                                MedicineDetailsView.routeName,
+                                arguments: {
+                                  'medicineEntity':
+                                      cartItemEntity.medicineEntity,
+                                  'fromCart': true,
+                                },
+                              );
                             },
-                          );
-                        },
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 10.h,
-                      left: 16.r,
-                      right: 16.r,
-                    ),
-                    child: Opacity(
-                      opacity: isDeleting ? 0.5 : 1.0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildLeftContainer(),
-                          _buildRightContainer(context, isDeleting),
-                        ],
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          top: 10.h,
+                          left: 16.r,
+                          right: 16.r,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildLeftContainer(),
+                            _buildRightContainer(context, isDeleting),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                    if (isDeleting)
+                      Positioned.fill(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            top: 10.h,
+                            left: 16.r,
+                            right: 16.r,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.r),
+                            child: Stack(
+                              children: [
+                                // Glassmorphism Backdrop
+                                BackdropFilter(
+                                  filter: ImageFilter.blur(
+                                      sigmaX: 4.0, sigmaY: 4.0),
+                                  child: Container(
+                                    color: Colors.white.withOpacity(0.1),
+                                  ),
+                                ),
+                                // Shimmer Effect with Secondary Color
+                                Shimmer.fromColors(
+                                  baseColor: Colors.transparent,
+                                  highlightColor: ColorManager.secondaryColor
+                                      .withOpacity(0.5),
+                                  period: const Duration(milliseconds: 1500),
+                                  child: Container(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                ),
+                                // Center Icon/Text
+                                Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.delete_sweep_rounded,
+                                        color: ColorManager.secondaryColor,
+                                        size: 32.r,
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Text(
+                                        'Removing...',
+                                        style: TextStyles
+                                            .listView_product_subInf
+                                            .copyWith(
+                                          fontSize: 11.sp,
+                                          color: ColorManager.secondaryColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                if (isDeleting)
-                  Positioned.fill(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: ColorManager.primaryColor,
-                        strokeWidth: 2,
-                      ),
-                    ),
-                  ),
-              ],
+              ),
             );
           },
         );

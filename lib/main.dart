@@ -26,18 +26,19 @@ import 'package:pharma_now/core/services/auth_navigation_observer.dart';
 import 'package:pharma_now/core/services/notification_log_service.dart';
 import 'package:pharma_now/core/services/fcm_service.dart';
 import 'package:pharma_now/features/notifications/presentation/models/notification_payload.dart';
+import 'package:pharma_now/core/network/network_cubit.dart';
+import 'package:pharma_now/core/network/network_state.dart';
+import 'package:pharma_now/features/splash/presentation/views/no_internet_view.dart';
 
 import 'core/services/custom_bloc_observer.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  setupGetit(); // Need this to use our services in background isolate
+  setupGetit();
   debugPrint("Handling a background message: ${message.messageId}");
 
-  // Save to Firestore logs
   try {
-    // We need to parse the payload manually here since we don't want to rely on the singleton's private methods
     final data = message.data;
     NotificationPayload? payload;
 
@@ -57,54 +58,66 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     final logService = getIt<NotificationLogService>();
     await logService.addLog(payload, notificationId: message.messageId);
-    debugPrint("Background message saved to logs");
   } catch (e) {
     debugPrint("Error saving background message to logs: $e");
   }
 }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Parallelize independent initializations to speed up startup
-  await Future.wait<void>([
-    SupabaseStorageService.initSupabase(),
-    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
-    prefs.init(),
-  ]);
-
-  // App Check must be initialized after Firebase.initializeApp
-  // Using debug provider for emulator/dev testing to resolve "No AppCheckProvider installed"
   try {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // 1. Initialize Essential Services (Blocking startup for stability)
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    await prefs.init();
+    setupGetit();
+
+    final networkCubit = NetworkCubit();
+
+    runApp(PharmaNow(networkCubit: networkCubit));
+
+    // 2. Initialize Secondary Services (Non-blocking)
+    _initializeSecondaryServices();
+  } catch (e) {
+    debugPrint("Critical startup error: $e");
+    runApp(const PharmaNow());
+  }
+}
+
+Future<void> _initializeSecondaryServices() async {
+  try {
+    // Initialize things that don't need to block initial frame
+    await Future.wait<void>([
+      SupabaseStorageService.initSupabase(),
+      _initializeLocalNotifications(),
+      FCMService.instance.init(),
+    ]);
+
     await FirebaseAppCheck.instance.activate(
       androidProvider:
           kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
     );
-    debugPrint("Firebase App Check initialized successfully");
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    Bloc.observer = CustomBlocObserver();
+
+    // Handle initializations that depend on UI or Context safely
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initDynamicLinks();
+    });
+
+    debugPrint("Secondary services initialized successfully");
   } catch (e) {
-    debugPrint("Firebase App Check initialization failed: $e");
+    debugPrint("Error in secondary services initialization: $e");
   }
-
-  setupGetit();
-
-  await _initializeLocalNotifications();
-
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  await FCMService.instance.init();
-  Bloc.observer = CustomBlocObserver();
-
-  runApp(const PharmaNow());
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    _initDynamicLinks();
-  });
 }
 
 Future<void> _initializeLocalNotifications() async {
   final plugin = getIt<FlutterLocalNotificationsPlugin>();
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-
   const DarwinInitializationSettings initializationSettingsDarwin =
       DarwinInitializationSettings();
 
@@ -139,18 +152,16 @@ final GlobalKey<NavigatorState> navigatorKey =
 final AuthNavigationObserver authNavigationObserver = AuthNavigationObserver();
 
 Future<void> _initDynamicLinks() async {
-  // Handle the initial dynamic link if the app is opened from a terminated state
   final PendingDynamicLinkData? initialData =
       await FirebaseDynamicLinks.instance.getInitialLink();
   if (initialData != null) {
     _handleDynamicLink(initialData);
   }
 
-  // Listen for dynamic links while the app is in foreground/background
   FirebaseDynamicLinks.instance.onLink.listen((event) {
     _handleDynamicLink(event);
   }).onError((error) {
-    // You may want to log or show an error
+    debugPrint("Dynamic Link error: $error");
   });
 }
 
@@ -167,7 +178,8 @@ void _handleDynamicLink(PendingDynamicLinkData data) {
 }
 
 class PharmaNow extends StatefulWidget {
-  const PharmaNow({super.key});
+  final NetworkCubit? networkCubit;
+  const PharmaNow({super.key, this.networkCubit});
 
   @override
   State<PharmaNow> createState() => _PharmaNowState();
@@ -195,18 +207,13 @@ class _PharmaNowState extends State<PharmaNow> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         try {
-          debugPrint('UserCheckTimer: Reloading user...');
           await user.reload();
-          debugPrint('UserCheckTimer: User reloaded successfully');
         } on FirebaseAuthException catch (e) {
-          debugPrint('UserCheckTimer: FirebaseAuthException [${e.code}]');
           if (e.code == 'user-not-found' || e.code == 'user-disabled') {
-            debugPrint(
-                'UserCheckTimer: Security threat/Deletion detected, signing out');
             await FirebaseAuth.instance.signOut();
           }
         } catch (e) {
-          debugPrint('UserCheckTimer: Error reloading user: $e');
+          debugPrint('UserCheckTimer error: $e');
         }
       }
     });
@@ -252,19 +259,56 @@ class _PharmaNowState extends State<PharmaNow> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        if (widget.networkCubit != null)
+          BlocProvider.value(value: widget.networkCubit!)
+        else
+          BlocProvider(create: (_) => NetworkCubit()),
         ...FavoritesInjection.getFavoritesProviders(),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
       child: ScreenUtilInit(
-          designSize: Size(375, 812),
+          designSize: const Size(375, 812),
           minTextAdapt: true,
           splitScreenMode: true,
           builder: (context, child) => MaterialApp(
                 debugShowCheckedModeBanner: false,
+                theme: ThemeData(
+                  fontFamily: 'Inter',
+                  colorScheme:
+                      ColorScheme.fromSeed(seedColor: const Color(0xFF3638DA)),
+                ),
                 navigatorKey: navigatorKey,
                 navigatorObservers: [authNavigationObserver],
                 onGenerateRoute: onGenerateRoute,
                 initialRoute: SplashView.routeName,
+                builder: (context, child) {
+                  return BlocBuilder<NetworkCubit, NetworkState>(
+                    builder: (context, state) {
+                      return Stack(
+                        children: [
+                          if (child != null) child,
+                          if (state is NetworkDisconnected ||
+                              state is NetworkChecking)
+                            Positioned.fill(
+                              child: NoInternetView(
+                                isChecking: state is NetworkChecking,
+                                onRetry: () {
+                                  context
+                                      .read<NetworkCubit>()
+                                      .checkConnection();
+                                },
+                                onCheckSettings: () {
+                                  context
+                                      .read<NetworkCubit>()
+                                      .checkConnection();
+                                },
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
               )),
     );
   }
