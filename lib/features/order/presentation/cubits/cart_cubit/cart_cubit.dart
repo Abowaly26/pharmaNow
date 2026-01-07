@@ -95,8 +95,8 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void addMedicineToCart(MedicineEntity medicineEntity) async {
-    if (state is! CartLoaded && state is! CartInitial) {
-      return; // Should not happen if initialized correctly
+    if (state is CartLoading) {
+      return;
     }
 
     final currentCartEntity = state.cartEntity;
@@ -138,7 +138,7 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void deleteMedicineFromCart(CartItemEntity cartItem) async {
-    if (state is! CartLoaded && state is! CartInitial) return;
+    if (state is CartLoading) return;
 
     final medicineId = cartItem.medicineEntity.code;
     final currentCartEntity = state.cartEntity;
@@ -202,7 +202,7 @@ class CartCubit extends Cubit<CartState> {
 
   // Helper method to update quantity (increase/decrease)
   void updateCartItemQuantity(CartItemEntity cartItem, int newQuantity) {
-    if (state is! CartLoaded && state is! CartInitial) return;
+    if (state is CartLoading) return;
     if (newQuantity <= 0) {
       deleteMedicineFromCart(cartItem);
       return;
@@ -229,7 +229,7 @@ class CartCubit extends Cubit<CartState> {
 
   void addMedicineToCartWithCount(
       MedicineEntity medicineEntity, int count) async {
-    if (state is! CartLoaded && state is! CartInitial) return;
+    if (state is CartLoading) return;
 
     final currentCartEntity = state.cartEntity;
     final medicineId = medicineEntity.code;

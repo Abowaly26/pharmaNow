@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 
 class TextStyles {
@@ -188,40 +188,86 @@ class AppStyles {
     );
   }
 
-  static TextStyle regular12Text = GoogleFonts.poppins(
-      fontSize: 12, fontWeight: FontWeight.w400, color: AppColor.primarycolor);
-  static TextStyle regular11SalePrice = GoogleFonts.poppins(
-      fontSize: 12, fontWeight: FontWeight.w400, color: AppColor.primarycolor);
-  static TextStyle regular14Text = GoogleFonts.poppins(
-      fontSize: 14, fontWeight: FontWeight.w400, color: AppColor.primarycolor);
-  static TextStyle regular18White = GoogleFonts.poppins(
-      fontSize: 18, fontWeight: FontWeight.w400, color: AppColor.whitecolor);
-  static TextStyle light14SearchHint = GoogleFonts.poppins(
-      fontSize: 14, fontWeight: FontWeight.w300, color: AppColor.primarycolor);
-  static TextStyle light16White = GoogleFonts.poppins(
-      fontSize: 16, fontWeight: FontWeight.w300, color: AppColor.whitecolor);
-  static TextStyle light18HintText = GoogleFonts.poppins(
-      fontSize: 18, fontWeight: FontWeight.w300, color: AppColor.whitecolor);
-  static TextStyle semi16TextWhite = GoogleFonts.poppins(
-      fontSize: 16, fontWeight: FontWeight.w600, color: AppColor.whitecolor);
-  static TextStyle semi20Primary = GoogleFonts.poppins(
-      fontSize: 20, fontWeight: FontWeight.w600, color: AppColor.primarycolor);
-  static TextStyle semi24White = GoogleFonts.poppins(
-      fontSize: 24, fontWeight: FontWeight.w600, color: AppColor.whitecolor);
-  static TextStyle medium14Category = GoogleFonts.poppins(
-      fontSize: 14, fontWeight: FontWeight.w500, color: AppColor.primarycolor);
-  static TextStyle medium14LightPrimary = GoogleFonts.poppins(
-      fontSize: 14, fontWeight: FontWeight.w500, color: AppColor.primarycolor);
-  static TextStyle medium14PrimaryDark = GoogleFonts.poppins(
-      fontSize: 14, fontWeight: FontWeight.w500, color: AppColor.primarycolor);
-  static TextStyle medium18Header = GoogleFonts.poppins(
+  static TextStyle regular12Text = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle regular11SalePrice = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle regular14Text = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle regular18White = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w400,
+      color: AppColor.whitecolor,
+      fontFamily: 'Poppins');
+  static TextStyle light14SearchHint = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w300,
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle light16White = TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w300,
+      color: AppColor.whitecolor,
+      fontFamily: 'Poppins');
+  static TextStyle light18HintText = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w300,
+      color: AppColor.whitecolor,
+      fontFamily: 'Poppins');
+  static TextStyle semi16TextWhite = TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: AppColor.whitecolor,
+      fontFamily: 'Poppins');
+  static TextStyle semi20Primary = TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle semi24White = TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      color: AppColor.whitecolor,
+      fontFamily: 'Poppins');
+  static TextStyle medium14Category = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle medium14LightPrimary = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle medium14PrimaryDark = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle medium18Header = TextStyle(
       fontSize: 18.sp,
       fontWeight: FontWeight.w500,
-      color: AppColor.primarycolor);
-  static TextStyle medium18White = GoogleFonts.poppins(
-      fontSize: 18, fontWeight: FontWeight.w500, color: AppColor.whitecolor);
-  static TextStyle medium20White = GoogleFonts.poppins(
-      fontSize: 20, fontWeight: FontWeight.w500, color: AppColor.whitecolor);
+      color: AppColor.primarycolor,
+      fontFamily: 'Poppins');
+  static TextStyle medium18White = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      color: AppColor.whitecolor,
+      fontFamily: 'Poppins');
+  static TextStyle medium20White = TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w500,
+      color: AppColor.whitecolor,
+      fontFamily: 'Poppins');
 }
 
 class AppColor {

@@ -36,96 +36,124 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorManager.primaryColor,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30.r),
-          topRight: Radius.circular(30.r),
+    return BlocListener<CartCubit, CartState>(
+      listener: (context, state) {
+        if (state is CartItemAdded) {
+          showCustomBar(
+            context,
+            'Added to cart',
+            duration: const Duration(seconds: 1),
+            type: MessageType.success,
+          );
+        } else if (state is CartItemRemoved) {
+          showCustomBar(
+            context,
+            'Removed from cart',
+            duration: const Duration(seconds: 1),
+            type: MessageType.success,
+          );
+        } else if (state is CartError) {
+          showCustomBar(
+            context,
+            state.message,
+            duration: const Duration(seconds: 2),
+            type: MessageType.error,
+          );
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: ColorManager.primaryColor,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30.r),
+            topRight: Radius.circular(30.r),
+          ),
         ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.r),
-        child: Column(
-          children: [
-            Consumer<FavoritesProvider>(
-              builder: (context, favoritesProvider, child) {
-                if (favoritesProvider.favorites.isEmpty) {
-                  return const SizedBox
-                      .shrink(); // Return empty space if no favorites
-                }
-                return Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    onPressed: () => _showClearConfirmationDialog(context),
-                    icon: Icon(
-                      Icons.delete_sweep_outlined,
-                      color: ColorManager.redColorF5,
-                    ),
-                    label: Text(
-                      'Clear All',
-                      style: TextStyles.sectionTitle.copyWith(
+        child: Padding(
+          padding: EdgeInsets.all(16.r),
+          child: Column(
+            children: [
+              Consumer<FavoritesProvider>(
+                builder: (context, favoritesProvider, child) {
+                  if (favoritesProvider.favorites.isEmpty) {
+                    return const SizedBox
+                        .shrink(); // Return empty space if no favorites
+                  }
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () => _showClearConfirmationDialog(context),
+                      icon: Icon(
+                        Icons.delete_sweep_outlined,
                         color: ColorManager.redColorF5,
-                        fontWeight: FontWeight.w600,
                       ),
-                    ),
-                    style: TextButton.styleFrom(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                        side: BorderSide(
-                          color: ColorManager.redColorF5.withValues(alpha: 0.5),
-                          width: 1.w,
+                      label: Text(
+                        'Clear All',
+                        style: TextStyles.sectionTitle.copyWith(
+                          color: ColorManager.redColorF5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 12.w, vertical: 8.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                          side: BorderSide(
+                            color:
+                                ColorManager.redColorF5.withValues(alpha: 0.5),
+                            width: 1.w,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-
-            SizedBox(height: 8.h),
-            // Favorites content
-            Expanded(
-              child: Consumer<FavoritesProvider>(
-                builder: (context, favoritesProvider, child) {
-                  if (favoritesProvider.isLoading) {
-                    return const Center(child: PremiumLoadingIndicator());
-                  }
-
-                  if (favoritesProvider.favorites.isEmpty) {
-                    return _buildEmptyState();
-                  }
-
-                  // Convert Map<String, dynamic> to MedicineModel objects
-                  final favorites = favoritesProvider.favorites.map((item) {
-                    return MedicineModel(
-                      name: item['name'] as String? ?? 'Unknown',
-                      description: item['description'] as String? ?? '',
-                      code: item['code'] as String? ?? '',
-                      quantity: item['quantity'] as int? ?? 0,
-                      isNewProduct: item['isNewProduct'] as bool? ?? false,
-                      price: item['price'] as num? ?? 0,
-                      subabaseORImageUrl: item['imageUrl'] as String?,
-                      pharmacyName:
-                          item['pharmacyName'] as String? ?? 'Unknown Pharmacy',
-                      pharmacyId: (item['pharmacyId'] as num?)?.toInt() ?? 0,
-                      pharmcyAddress: item['pharmcyAddress'] as String? ?? '',
-                      reviews: [], // Add empty reviews list
-                      sellingCount:
-                          (item['sellingCount'] as num?)?.toInt() ?? 0,
-                      discountRating:
-                          (item['discountRating'] as num?)?.toInt() ?? 0,
-                      avgRating: (item['avgRating'] as num?)?.toDouble() ?? 0.0,
-                    );
-                  }).toList();
-
-                  return _buildGridView(favorites);
+                  );
                 },
               ),
-            ),
-          ],
+
+              SizedBox(height: 8.h),
+              // Favorites content
+              Expanded(
+                child: Consumer<FavoritesProvider>(
+                  builder: (context, favoritesProvider, child) {
+                    if (favoritesProvider.isLoading) {
+                      return const Center(child: PremiumLoadingIndicator());
+                    }
+
+                    if (favoritesProvider.favorites.isEmpty) {
+                      return _buildEmptyState();
+                    }
+
+                    // Convert Map<String, dynamic> to MedicineModel objects
+                    final favorites = favoritesProvider.favorites.map((item) {
+                      return MedicineModel(
+                        name: item['name'] as String? ?? 'Unknown',
+                        description: item['description'] as String? ?? '',
+                        code: item['code'] as String? ?? '',
+                        quantity: item['quantity'] as int? ?? 0,
+                        isNewProduct: item['isNewProduct'] as bool? ?? false,
+                        price: item['price'] as num? ?? 0,
+                        subabaseORImageUrl: item['imageUrl'] as String?,
+                        pharmacyName: item['pharmacyName'] as String? ??
+                            'Unknown Pharmacy',
+                        pharmacyId: (item['pharmacyId'] as num?)?.toInt() ?? 0,
+                        pharmcyAddress: item['pharmcyAddress'] as String? ?? '',
+                        reviews: [], // Add empty reviews list
+                        sellingCount:
+                            (item['sellingCount'] as num?)?.toInt() ?? 0,
+                        discountRating:
+                            (item['discountRating'] as num?)?.toInt() ?? 0,
+                        avgRating:
+                            (item['avgRating'] as num?)?.toDouble() ?? 0.0,
+                      );
+                    }).toList();
+
+                    return _buildGridView(favorites);
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

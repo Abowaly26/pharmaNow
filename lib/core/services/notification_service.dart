@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
@@ -367,7 +366,8 @@ class _InAppNotificationBannerState extends State<_InAppNotificationBanner>
                                   children: [
                                     Text(
                                       widget.payload.title,
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
                                         fontWeight: FontWeight.w800,
                                         fontSize: 15,
                                         color: ColorManager.blackColor,
@@ -379,7 +379,8 @@ class _InAppNotificationBannerState extends State<_InAppNotificationBanner>
                                       widget.payload.body,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
                                         fontSize: 13,
                                         height: 1.4,
                                         color: ColorManager.blackColor

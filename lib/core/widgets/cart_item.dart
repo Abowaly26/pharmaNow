@@ -236,8 +236,13 @@ class CartItem extends StatelessWidget {
                           cartItemEntity.medicineEntity.subabaseORImageUrl!,
                       fit: BoxFit.contain,
                       placeholder: (context, url) => _buildLoadingAnimation(),
-                      errorWidget: (context, url, error) =>
-                          const Center(child: Text('No image')),
+                      errorWidget: (context, url, error) => Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 55.sp,
+                          color: Colors.grey.withOpacity(0.5),
+                        ),
+                      ),
                     ),
             )),
           ),

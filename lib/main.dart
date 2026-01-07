@@ -122,13 +122,21 @@ Future<void> _initializeSecondaryServices() async {
       FCMService.instance.init(),
     ]);
 
+    // Initialize App Check only once and safeguard against errors
     try {
+      // Check if already activated to avoid "Too many attempts"
+      // Note: There isn't a direct "isActivated" property exposed easily,
+      // but guarding the call with a try-catch and specific provider logic helps.
       await FirebaseAppCheck.instance.activate(
+        // Use debug provider for local dev to avoid Play Integrity quota/error issues
         androidProvider:
             kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+        appleProvider:
+            kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck,
       );
     } catch (e) {
-      debugPrint("Firebase App Check failed silently: $e");
+      // Log specifically if it's the "Too many attempts" or other known issues
+      debugPrint("Firebase App Check warning (non-fatal): $e");
     }
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

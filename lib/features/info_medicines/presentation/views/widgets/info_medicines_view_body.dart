@@ -31,13 +31,19 @@ class _InfoMedicinesViewBodyState extends State<InfoMedicinesViewBody> {
             duration: const Duration(seconds: 1),
             type: MessageType.success,
           );
-        }
-        if (state is CartItemRemoved) {
+        } else if (state is CartItemRemoved) {
           showCustomBar(
             context,
             'Removed from cart',
             duration: const Duration(seconds: 1),
             type: MessageType.success,
+          );
+        } else if (state is CartError) {
+          showCustomBar(
+            context,
+            state.message,
+            duration: const Duration(seconds: 2),
+            type: MessageType.error,
           );
         }
       },

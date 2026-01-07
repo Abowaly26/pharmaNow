@@ -45,13 +45,13 @@ Map<MessageType, Map<String, dynamic>> _getMessageTypeStyles() {
       'iconBackgroundColor': const Color(0xFFFCD34D).withOpacity(0.20),
       'icon': Icons.warning_amber_rounded,
     },
-    MessageType.info: {
-      'backgroundColor': const Color(0x1A3B82F6),
-      'borderColor': const Color(0xFF60A5FA).withOpacity(0.70),
-      'accentColor': const Color(0xFF3B82F6),
-      'iconBackgroundColor': const Color(0xFF60A5FA).withOpacity(0.20),
-      'icon': Icons.info_outline,
-    },
+    // MessageType.info: {
+    //   'backgroundColor': const Color(0x1A3B82F6),
+    //   'borderColor': const Color(0xFF60A5FA).withOpacity(0.70),
+    //   'accentColor': const Color(0xFF3B82F6),
+    //   'iconBackgroundColor': const Color(0xFF60A5FA).withOpacity(0.20),
+    //   'icon': Icons.info_outline,
+    // },
   };
 }
 

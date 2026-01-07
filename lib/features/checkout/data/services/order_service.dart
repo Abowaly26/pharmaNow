@@ -5,6 +5,7 @@ import 'package:pharma_now/features/checkout/domain/entites/orderentity.dart';
 import 'package:pharma_now/features/checkout/domain/entites/shipingadressentity.dart';
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import 'package:pharma_now/core/services/notification_service.dart';
+import 'package:pharma_now/features/checkout/presentation/views/order_history_view.dart';
 
 class OrderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -88,7 +89,7 @@ class OrderService {
         title: 'Order Confirmed! 🎉',
         body: 'Your order #${docRef.id} has been placed successfully.',
         type: 'order',
-        route: 'orders', // Assuming 'orders' is a valid route for order history
+        route: OrderHistoryView.routeName,
       );
 
       return docRef.id;

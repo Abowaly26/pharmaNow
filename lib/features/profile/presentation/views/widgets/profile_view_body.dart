@@ -23,6 +23,7 @@ import '../../../../../core/widgets/password_field.dart';
 import 'profile_tab/notification_view.dart';
 import 'profile_tab/terms_of_service_view.dart';
 import 'profile_tab/help_support_view.dart';
+import '../../../../checkout/presentation/views/order_history_view.dart';
 
 class SettingItem extends StatelessWidget {
   final IconData icon;
@@ -302,6 +303,14 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                     title: "Edit Profile",
                     onTap: () {
                       Navigator.pushNamed(context, EditProfile.routeName);
+                    },
+                  ),
+                  SizedBox(height: 0.009 * height),
+                  SettingItem(
+                    icon: Icons.shopping_bag_outlined,
+                    title: "My Orders",
+                    onTap: () {
+                      Navigator.pushNamed(context, OrderHistoryView.routeName);
                     },
                   ),
                   SizedBox(height: 0.009 * height),

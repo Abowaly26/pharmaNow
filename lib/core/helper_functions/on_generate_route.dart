@@ -16,6 +16,7 @@ import '../../features/home/presentation/views/main_view.dart';
 import '../../features/home/presentation/views/medicine_details_view.dart';
 import '../../features/info_medicines/presentation/views/info_medicines_view.dart';
 import '../../features/notifications/presentation/views/notification_view.dart';
+import '../../features/checkout/presentation/views/order_history_view.dart';
 
 import '../../features/info_offers/presentation/views/info_offers_view.dart';
 import '../../features/on_boarding/presentation/views/onboarding_view.dart';
@@ -164,6 +165,14 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
     case CartView.routeName:
       return MaterialPageRoute(
         builder: (context) => CartView(),
+        settings: setting,
+      );
+
+    case OrderHistoryView.routeName:
+      final args = setting.arguments as Map<String, dynamic>?;
+      final orderId = args?['orderId'] as String?;
+      return MaterialPageRoute(
+        builder: (context) => OrderHistoryView(orderId: orderId),
         settings: setting,
       );
 

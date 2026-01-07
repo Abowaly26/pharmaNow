@@ -15,167 +15,195 @@ import '../../cubit/cubit/search_state.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 
+import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
+
 class SearchViewBody extends StatelessWidget {
   const SearchViewBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Search box
-        Padding(
-          padding: EdgeInsets.all(16.r),
-          child: const Searchtextfield(
-            readOnly: false,
+    return BlocListener<CartCubit, CartState>(
+      listener: (context, state) {
+        if (state is CartItemAdded) {
+          showCustomBar(
+            context,
+            'Added to cart',
+            duration: const Duration(seconds: 1),
+            type: MessageType.success,
+          );
+        } else if (state is CartItemRemoved) {
+          showCustomBar(
+            context,
+            'Removed from cart',
+            duration: const Duration(seconds: 1),
+            type: MessageType.success,
+          );
+        } else if (state is CartError) {
+          showCustomBar(
+            context,
+            state.message,
+            duration: const Duration(seconds: 2),
+            type: MessageType.error,
+          );
+        }
+      },
+      child: Column(
+        children: [
+          // Search box
+          Padding(
+            padding: EdgeInsets.all(16.r),
+            child: const Searchtextfield(
+              readOnly: false,
+            ),
           ),
-        ),
 
-        // Search results display
-        Expanded(
-          child: BlocBuilder<SearchCubit, SearchState>(
-            builder: (context, state) {
-              // Loading state
-              if (state is SearchLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              // Success state
-              else if (state is SearchSuccess) {
-                // No results
-                if (state.products.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.r),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            Assets.search_ups_icon1,
-                            width: 160.sp,
-                            height: 160.sp,
-                            // color: ColorManager.textInputColor,
-                          ),
-                          // Icon(
-                          //   Icons.search_off,
-                          //   size: 90.sp,
-                          //   color: ColorManager.textInputColor,
-                          // ),
-                          SizedBox(height: 16.h),
-                          Text(
-                            'Ups!... no results found for "${state.searchQuery}"',
-                            textAlign: TextAlign.center,
-                            style: TextStyles.sectionTitle.copyWith(
-                              color: ColorManager.blackColor,
-                              fontSize: 18.sp,
+          // Search results display
+          Expanded(
+            child: BlocBuilder<SearchCubit, SearchState>(
+              builder: (context, state) {
+                // Loading state
+                if (state is SearchLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                // Success state
+                else if (state is SearchSuccess) {
+                  // No results
+                  if (state.products.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.r),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SvgPicture.asset(
+                              Assets.search_ups_icon1,
+                              width: 160.sp,
+                              height: 160.sp,
+                              // color: ColorManager.textInputColor,
                             ),
-                          ),
-                          Text(
-                            'Please try another search',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              color: ColorManager.textInputColor,
+                            // Icon(
+                            //   Icons.search_off,
+                            //   size: 90.sp,
+                            //   color: ColorManager.textInputColor,
+                            // ),
+                            SizedBox(height: 16.h),
+                            Text(
+                              'Ups!... no results found for "${state.searchQuery}"',
+                              textAlign: TextAlign.center,
+                              style: TextStyles.sectionTitle.copyWith(
+                                color: ColorManager.blackColor,
+                                fontSize: 18.sp,
+                              ),
                             ),
-                          ),
-                        ],
+                            Text(
+                              'Please try another search',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                color: ColorManager.textInputColor,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    );
+                  }
+
+                  // Display search results in a list view using InfoMedicinesListViewItem structure
+                  return ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    itemCount: state.products.length,
+                    itemBuilder: (context, index) {
+                      final medicine = state.products[index];
+                      return GestureDetector(
+                        onTap: () {
+                          // Navigate to medicine details view
+                          Navigator.pushNamed(
+                            context,
+                            MedicineDetailsView.routeName,
+                            arguments: medicine,
+                          );
+                        },
+                        child: SearchMedicinesListViewItem(
+                          index: index,
+                          medicineEntity: medicine,
+                          searchQuery: state.searchQuery,
+                          onTap: () {
+                            // Navigate to medicine details view
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => MedicineDetailsView(
+                                  medicineEntity: medicine,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  );
+                }
+                // Error state
+                else if (state is SearchError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64.sp,
+                          color: Colors.red,
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          'Error: ${state.message}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: Colors.red[700],
+                          ),
+                        ),
+                        SizedBox(height: 24.h),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<SearchCubit>().resetSearch();
+                          },
+                          child: const Text('Try Again'),
+                        ),
+                      ],
                     ),
                   );
                 }
 
-                // Display search results in a list view using InfoMedicinesListViewItem structure
-                return ListView.builder(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  itemCount: state.products.length,
-                  itemBuilder: (context, index) {
-                    final medicine = state.products[index];
-                    return GestureDetector(
-                      onTap: () {
-                        // Navigate to medicine details view
-                        Navigator.pushNamed(
-                          context,
-                          MedicineDetailsView.routeName,
-                          arguments: medicine,
-                        );
-                      },
-                      child: SearchMedicinesListViewItem(
-                        index: index,
-                        medicineEntity: medicine,
-                        searchQuery: state.searchQuery,
-                        onTap: () {
-                          // Navigate to medicine details view
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MedicineDetailsView(
-                                medicineEntity: medicine,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
-              }
-              // Error state
-              else if (state is SearchError) {
+                // Initial state
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.error_outline,
+                        Icons.search,
                         size: 64.sp,
-                        color: Colors.red,
+                        color: ColorManager.primaryColor,
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        'Error: ${state.message}',
-                        textAlign: TextAlign.center,
+                        'Search for medicines',
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          color: Colors.red[700],
+                          fontSize: 18.sp,
+                          color: ColorManager.primaryColor,
                         ),
-                      ),
-                      SizedBox(height: 24.h),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.read<SearchCubit>().resetSearch();
-                        },
-                        child: const Text('Try Again'),
                       ),
                     ],
                   ),
                 );
-              }
-
-              // Initial state
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.search,
-                      size: 64.sp,
-                      color: ColorManager.primaryColor,
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'Search for medicines',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        color: ColorManager.primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

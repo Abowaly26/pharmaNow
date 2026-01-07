@@ -24,45 +24,35 @@ class SupabaseStorageService implements StorageService {
       try {
         buckets = await _supabase.client.storage.listBuckets();
       } catch (e) {
-        // If we can't list buckets (e.g., RLS policy), we can't check existence.
-        // We'll log a clear instruction and move on.
-        log('Note: Skipping automatic check for bucket "$bucketName". Please ensure it exists and is PUBLIC in your Supabase Dashboard.',
-            name: 'SupabaseStorageService');
+        // RLS policies often prevent listing buckets for anon users.
+        // This is expected behavior, not an error.
+        // We assume the bucket exists and proceed.
         return;
       }
 
       bool isBucketExists = false;
-      bool isPublic = false;
-
       for (var bucket in buckets) {
         if (bucket.id == bucketName) {
           isBucketExists = true;
-          isPublic = bucket.public;
           break;
         }
       }
 
+      // Only attempt creation if we are SURE it doesn't exist and we have permissions (service role).
+      // For client-side apps, this usually fails, so we log fewer warnings.
       if (!isBucketExists) {
-        debugPrint(
-            '[SupabaseStorageService] Bucket "$bucketName" not found. If this is a client-side app, please ensure bucket exists in dashboard.');
+        // Try to create but don't spam logs if it fails due to permissions
         try {
-          // We still try to create, but we handle the expected 403 silently or as a hint
           await _supabase.client.storage.createBucket(
             bucketName,
             const BucketOptions(public: true),
           );
-          log('Successfully created bucket: $bucketName',
-              name: 'SupabaseStorageService');
-        } catch (e) {
-          // Silent catch for expected permission errors with client keys
+        } catch (_) {
+          // Ignore permission errors for creation
         }
-      } else if (!isPublic) {
-        debugPrint(
-            '[SupabaseStorageService] Bucket "$bucketName" is not public. Please set it to PUBLIC in dashboard.');
       }
     } catch (e) {
-      log('Unexpected error in createBuckets check for "$bucketName": $e',
-          name: 'SupabaseStorageService');
+      // Catch-all for other oddities, keep silent to avoid startup noise
     }
   }
 
