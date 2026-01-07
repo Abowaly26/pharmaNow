@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/search/presentation/cubit/cubit/search_state.dart';
-import '../../../../../core/repos/medicine_repo/medicine_repo.dart';
+import 'package:pharma_now/core/repos/medicine_repo/medicine_repo.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../../core/utils/backend_endpoint.dart';
 
 class SearchCubit extends Cubit<SearchState> {
@@ -51,7 +52,7 @@ class SearchCubit extends Cubit<SearchState> {
           (error) => emit(SearchError(message: error.message)),
           (medicines) {
             // Debug output
-            print(
+            debugPrint(
                 'Search results: ${medicines.length} items found for "$cleanQuery"');
             // Add the successful search query to recent searches
             _addRecentSearch(cleanQuery);
@@ -60,7 +61,7 @@ class SearchCubit extends Cubit<SearchState> {
         );
       } catch (error) {
         // Handle unexpected errors
-        print('Unexpected search error: $error');
+        debugPrint('Unexpected search error: $error');
         emit(SearchError(message: 'Unexpected error: $error'));
       }
     });

@@ -1,9 +1,10 @@
 // أضف هذا في ملف helper
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 Future<bool> isValidImageUrl(String? url) async {
   if (url == null || url.isEmpty) {
-    print('Image URL is null or empty');
+    debugPrint('Image URL is null or empty');
     return false;
   }
 
@@ -14,7 +15,7 @@ Future<bool> isValidImageUrl(String? url) async {
         contentType != null &&
         contentType.startsWith('image/');
   } catch (e) {
-    print('Error validating image URL: $e');
+    debugPrint('Error validating image URL: $e');
     return false;
   }
 }

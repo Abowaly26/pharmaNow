@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class NoInternetView extends StatefulWidget {
   final VoidCallback? onRetry;
@@ -71,7 +70,8 @@ class _NoInternetViewState extends State<NoInternetView>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF3638DA).withOpacity(0.08),
+                          color:
+                              const Color(0xFF3638DA).withValues(alpha: 0.08),
                           blurRadius: 60,
                           spreadRadius: 20,
                         ),
@@ -87,7 +87,7 @@ class _NoInternetViewState extends State<NoInternetView>
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 30,
                           offset: const Offset(0, 15),
                         ),
@@ -116,8 +116,8 @@ class _NoInternetViewState extends State<NoInternetView>
                             color: const Color(0xFFFF6B6B), // Soft Red
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFF6B6B)
-                                    .withOpacity(0.4 * _fadeAnimation.value),
+                                color: const Color(0xFFFF6B6B).withValues(
+                                    alpha: 0.4 * _fadeAnimation.value),
                                 blurRadius: 10 * _scaleAnimation.value,
                                 spreadRadius: 2 * _scaleAnimation.value,
                               ),
@@ -142,8 +142,8 @@ class _NoInternetViewState extends State<NoInternetView>
                             color: const Color(0xFF7E81FF), // Lavender/Purple
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF7E81FF)
-                                    .withOpacity(0.3 * _fadeAnimation.value),
+                                color: const Color(0xFF7E81FF).withValues(
+                                    alpha: 0.3 * _fadeAnimation.value),
                                 blurRadius: 8 * _scaleAnimation.value,
                                 spreadRadius: 1 * _scaleAnimation.value,
                               ),
@@ -198,7 +198,8 @@ class _NoInternetViewState extends State<NoInternetView>
                     backgroundColor: const Color(0xFF3638DA),
                     foregroundColor: Colors.white,
                     elevation: 4,
-                    shadowColor: const Color(0xFF3638DA).withOpacity(0.25),
+                    shadowColor:
+                        const Color(0xFF3638DA).withValues(alpha: 0.25),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),

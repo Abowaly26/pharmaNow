@@ -177,7 +177,7 @@ class CartViewBody extends StatelessWidget {
                                   vertical: 4.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(6.r),
                                 ),
                                 child: Text(
@@ -259,14 +259,6 @@ class CartViewBody extends StatelessWidget {
 
   String _formatPrice(double price) {
     return price.round().toString();
-  }
-
-  // Helper method to calculate the discounted price
-  String _calculateDiscountedPrice(
-      double originalPrice, double discountPercentage) {
-    double discountAmount = originalPrice * (discountPercentage / 100);
-    double discountedPrice = originalPrice - discountAmount;
-    return _formatPrice(discountedPrice);
   }
 
   // Calculate total discount percentage

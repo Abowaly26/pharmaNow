@@ -75,7 +75,7 @@ class _FavoriteViewBodyState extends State<FavoriteViewBody> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.r),
                         side: BorderSide(
-                          color: ColorManager.redColorF5.withOpacity(0.5),
+                          color: ColorManager.redColorF5.withValues(alpha: 0.5),
                           width: 1.w,
                         ),
                       ),
@@ -300,7 +300,7 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
         border: Border.all(color: ColorManager.greyColorC6),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -314,7 +314,7 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
               child: widget.medicineEntity.subabaseORImageUrl == null ||
                       widget.medicineEntity.subabaseORImageUrl!.isEmpty
                   ? Container(
-                      color: ColorManager.textInputColor.withOpacity(0.2),
+                      color: ColorManager.textInputColor.withValues(alpha: 0.2),
                       height: 80.h,
                       width: 80.w,
                     )
@@ -328,7 +328,7 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
                           child: Icon(
                             Icons.image_not_supported_outlined,
                             size: 55.sp,
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey.withValues(alpha: 0.5),
                           ),
                         ),
                       ),
@@ -442,7 +442,7 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -602,7 +602,7 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
         border: Border.all(color: Colors.white, width: 2.0),
         boxShadow: [
           BoxShadow(
-            color: indicatorColor.withOpacity(0.3),
+            color: indicatorColor.withValues(alpha: 0.3),
             blurRadius: 4.r,
             spreadRadius: 1.r,
           ),
@@ -633,9 +633,9 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4.r),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
       child: Text(
         statusText,
@@ -654,25 +654,5 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
     double discountAmount = originalPrice * (discountPercentage / 100);
     double discountedPrice = originalPrice - discountAmount;
     return discountedPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.0+$'), '');
-  }
-
-  // Helper method to convert MedicineEntity to MedicineModel for favorites functionality
-  MedicineModel _convertEntityToModel(MedicineEntity entity) {
-    return MedicineModel(
-      name: entity.name,
-      description: entity.description,
-      code: entity.code,
-      quantity: entity.quantity,
-      isNewProduct: entity.isNewProduct,
-      price: entity.price,
-      subabaseORImageUrl: entity.subabaseORImageUrl,
-      pharmacyName: entity.pharmacyName,
-      pharmacyId: entity.pharmacyId,
-      pharmcyAddress: entity.pharmcyAddress,
-      reviews: [], // Initialize with empty list
-      sellingCount: entity.sellingCount,
-      discountRating: entity.discountRating,
-      avgRating: entity.avgRating,
-    );
   }
 }

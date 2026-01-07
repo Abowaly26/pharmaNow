@@ -40,6 +40,7 @@ class FirebaseAuthService {
   Future<String?> getProviderForEmail(String email) async {
     try {
       final methods =
+          // ignore: deprecated_member_use
           await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
       if (methods.isEmpty) return null;
 
@@ -192,6 +193,7 @@ class FirebaseAuthService {
   Future<bool> checkUserExists(String email) async {
     try {
       final methods =
+          // ignore: deprecated_member_use
           await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
       return methods.isNotEmpty;
     } on FirebaseAuthException catch (e) {
@@ -224,6 +226,7 @@ class FirebaseAuthService {
       }
 
       final methods =
+          // ignore: deprecated_member_use
           await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
       log('🔑 Found sign-in methods for "$email": $methods');
       return methods;

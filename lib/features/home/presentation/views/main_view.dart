@@ -22,7 +22,7 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  int CurrentViewIndex = 0;
+  int currentViewIndex = 0;
   @override
   Widget build(BuildContext context) {
     final cartCubit = GetIt.instance<CartCubit>();
@@ -40,7 +40,7 @@ class _MainViewState extends State<MainView> {
             child: Scaffold(
               extendBody: true,
               backgroundColor: ColorManager.primaryColor,
-              appBar: CurrentViewIndex == 0
+              appBar: currentViewIndex == 0
                   ? PreferredSize(
                       preferredSize: Size.fromHeight(80.h),
                       child: HomeAppbar(),
@@ -48,13 +48,13 @@ class _MainViewState extends State<MainView> {
                   : null,
               bottomNavigationBar: CustomBottomNavigationBar(
                 onItemTapped: (int value) {
-                  CurrentViewIndex = value;
+                  currentViewIndex = value;
                   setState(() {});
                 },
               ),
               body: SafeArea(
                 child: MainViewBodyBlocConsummer(
-                  CurrentViewIndex: CurrentViewIndex,
+                  currentViewIndex: currentViewIndex,
                 ),
               ),
             ),

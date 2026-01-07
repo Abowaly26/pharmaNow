@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:pharma_now/features/order/presentation/views/cart_view.dart';
 
-import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/reset_password_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_up_view.dart';
 import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';

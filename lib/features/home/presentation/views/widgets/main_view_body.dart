@@ -8,14 +8,14 @@ import '../../../../profile/presentation/views/profile_view.dart';
 class MainViewbody extends StatelessWidget {
   const MainViewbody({
     super.key,
-    required this.CurrentViewIndex,
+    required this.currentViewIndex,
   });
 
-  final int CurrentViewIndex;
+  final int currentViewIndex;
 
   @override
   Widget build(BuildContext context) {
-    return IndexedStack(index: CurrentViewIndex, children: [
+    return IndexedStack(index: currentViewIndex, children: [
       const HomeView(),
       const CartView(),
       const FavoriteView(),

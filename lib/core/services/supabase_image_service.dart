@@ -1,5 +1,3 @@
-import 'package:pharma_now/core/services/supabase_storage.dart';
-
 class SupabaseImageService {
   /// Generates a public HTTPS URL for an image stored in Supabase.
   /// Used for providing images in FCM payloads.

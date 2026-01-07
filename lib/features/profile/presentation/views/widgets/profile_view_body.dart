@@ -183,6 +183,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
             if (newUrl != null && newUrl.isNotEmpty) {
               await precacheImage(CachedNetworkImageProvider(newUrl), context);
             }
+            if (!mounted) return;
             setState(() {
               _isLocalLoading = false;
               _localImageFile =

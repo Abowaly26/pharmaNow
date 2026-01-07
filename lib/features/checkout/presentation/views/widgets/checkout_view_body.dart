@@ -1038,7 +1038,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         errorMessage,
         type: MessageType.error,
       );
-      print('Order Error: $e');
+      debugPrint('Order Error: $e');
     }
   }
 }

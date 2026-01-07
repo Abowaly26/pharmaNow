@@ -8,10 +8,10 @@ import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
 class MainViewBodyBlocConsummer extends StatelessWidget {
   const MainViewBodyBlocConsummer({
     super.key,
-    required this.CurrentViewIndex,
+    required this.currentViewIndex,
   });
 
-  final int CurrentViewIndex;
+  final int currentViewIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class MainViewBodyBlocConsummer extends StatelessWidget {
           );
         }
       },
-      child: MainViewbody(CurrentViewIndex: CurrentViewIndex),
+      child: MainViewbody(currentViewIndex: currentViewIndex),
     );
   }
 }

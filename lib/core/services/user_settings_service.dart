@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pharma_now/core/services/database_service.dart';
-import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/features/notifications/presentation/models/user_notification_settings.dart';
 
 class UserSettingsService {

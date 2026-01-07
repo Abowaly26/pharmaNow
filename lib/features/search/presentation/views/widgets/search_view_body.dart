@@ -264,7 +264,7 @@ class _SearchMedicinesListViewItemState
         border: Border.all(color: ColorManager.greyColorC6, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -292,7 +292,7 @@ class _SearchMedicinesListViewItemState
                         child: Icon(
                           Icons.image_not_supported_outlined,
                           size: 40.sp,
-                          color: Colors.grey.withOpacity(0.5),
+                          color: Colors.grey.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -354,7 +354,7 @@ class _SearchMedicinesListViewItemState
             bottomRight: Radius.circular(8.r), topRight: Radius.circular(8.r)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -381,8 +381,9 @@ class _SearchMedicinesListViewItemState
                               query: widget.searchQuery ?? '',
                               defaultStyle: TextStyles.listView_product_name,
                               highlightColor: ColorManager.secondaryColor,
-                              highlightBackgroundColor:
-                                  ColorManager.secondaryColor.withOpacity(0.12),
+                              highlightBackgroundColor: ColorManager
+                                  .secondaryColor
+                                  .withValues(alpha: 0.12),
                               highlightFontWeight: FontWeight.w500,
                               caseSensitive: false,
                               maxLines: 1,
@@ -540,7 +541,7 @@ class _SearchMedicinesListViewItemState
         border: Border.all(color: Colors.white, width: 2.0),
         boxShadow: [
           BoxShadow(
-            color: indicatorColor.withOpacity(0.3),
+            color: indicatorColor.withValues(alpha: 0.3),
             blurRadius: 4.r,
             spreadRadius: 1.r,
           ),
@@ -571,9 +572,9 @@ class _SearchMedicinesListViewItemState
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4.r),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
       child: Text(
         statusText,

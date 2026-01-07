@@ -4,6 +4,7 @@ import 'package:pharma_now/core/errors/exceptions.dart';
 import 'package:pharma_now/core/models/medicine_model.dart';
 import 'package:pharma_now/core/repos/medicine_repo/medicine_repo.dart';
 import 'package:pharma_now/core/services/database_service.dart';
+import 'package:flutter/foundation.dart';
 import '../../utils/backend_endpoint.dart';
 
 class MedicineRepoImpl extends MedicineRepo {
@@ -22,7 +23,7 @@ class MedicineRepoImpl extends MedicineRepo {
         return Right([]);
       }
 
-      print('Searching for: "$query"');
+      debugPrint('Searching for: "$query"');
 
       // Call the search service
       final response = await databaseService.searchMedicines(
@@ -31,7 +32,7 @@ class MedicineRepoImpl extends MedicineRepo {
       );
 
       // Debug output
-      print('Search response length: ${response.length}');
+      debugPrint('Search response length: ${response.length}');
 
       // If no results, return empty list
       if (response.isEmpty) {
@@ -45,11 +46,11 @@ class MedicineRepoImpl extends MedicineRepo {
       return Right(medicines);
     } on CustomException catch (e) {
       // Known service error
-      print('CustomException during search: ${e.message}');
+      debugPrint('CustomException during search: ${e.message}');
       return Left(ServerFailure(e.message));
     } catch (e) {
       // Unexpected error
-      print('Unexpected exception during search: $e');
+      debugPrint('Unexpected exception during search: $e');
       return Left(ServerFailure(
           'An error occurred on the server. Please try again later.'));
     }

@@ -92,16 +92,18 @@ class _NotificationItemState extends State<NotificationItem>
             onDismissed: (_) => widget.onDelete(),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9 * widget.animationValue),
+                color:
+                    Colors.white.withValues(alpha: 0.9 * widget.animationValue),
                 borderRadius: BorderRadius.circular(20.r),
                 border: Border.all(
-                  color: Colors.black.withOpacity(0.05 * widget.animationValue),
+                  color: Colors.black
+                      .withValues(alpha: 0.05 * widget.animationValue),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        Colors.black.withOpacity(0.03 * widget.animationValue),
+                    color: Colors.black
+                        .withValues(alpha: 0.03 * widget.animationValue),
                     blurRadius: 15,
                     offset: const Offset(0, 6),
                   ),
@@ -121,7 +123,7 @@ class _NotificationItemState extends State<NotificationItem>
                         child: Container(
                           decoration: BoxDecoration(
                             color: ColorManager.secondaryColor
-                                .withOpacity(widget.animationValue),
+                                .withValues(alpha: widget.animationValue),
                             borderRadius: BorderRadius.horizontal(
                                 right: Radius.circular(8.r)),
                           ),
@@ -151,8 +153,8 @@ class _NotificationItemState extends State<NotificationItem>
                                               ? FontWeight.w600
                                               : FontWeight.w700,
                                           color: ColorManager.blackColor
-                                              .withOpacity(
-                                                  widget.animationValue),
+                                              .withValues(
+                                                  alpha: widget.animationValue),
                                           fontFamily: 'Inter',
                                           letterSpacing: -0.3,
                                         ),
@@ -167,8 +169,9 @@ class _NotificationItemState extends State<NotificationItem>
                                       style: TextStyle(
                                         fontSize: 11.sp,
                                         color: ColorManager.greyColor
-                                            .withOpacity(
-                                                0.6 * widget.animationValue),
+                                            .withValues(
+                                                alpha: 0.6 *
+                                                    widget.animationValue),
                                         fontWeight: FontWeight.w500,
                                         fontFamily: 'Inter',
                                       ),
@@ -179,8 +182,8 @@ class _NotificationItemState extends State<NotificationItem>
                                 Text(
                                   body,
                                   style: TextStyle(
-                                    color: ColorManager.greyColor.withOpacity(
-                                        0.9 * widget.animationValue),
+                                    color: ColorManager.greyColor.withValues(
+                                        alpha: 0.9 * widget.animationValue),
                                     fontSize: 13.sp,
                                     height: 1.4,
                                     fontWeight: FontWeight.w400,
@@ -212,7 +215,7 @@ class _NotificationItemState extends State<NotificationItem>
   Widget _buildDismissBackground() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFEF4444).withOpacity(0.9),
+        color: const Color(0xFFEF4444).withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(20.r),
       ),
       alignment: Alignment.centerRight,
@@ -255,7 +258,8 @@ class _NotificationItemState extends State<NotificationItem>
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08 * widget.animationValue),
+              color:
+                  Colors.black.withValues(alpha: 0.08 * widget.animationValue),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -294,11 +298,12 @@ class _NotificationItemState extends State<NotificationItem>
       width: 48.r,
       height: 48.r,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1 * widget.animationValue),
+        color: color.withValues(alpha: 0.1 * widget.animationValue),
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Icon(iconData,
-          color: color.withOpacity(0.9 * widget.animationValue), size: 22.sp),
+          color: color.withValues(alpha: 0.9 * widget.animationValue),
+          size: 22.sp),
     );
   }
 

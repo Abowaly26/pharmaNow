@@ -3,7 +3,7 @@ import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_up_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/verification_view_signup.dart';
 import 'package:pharma_now/features/auth/presentation/views/forget_password_view.dart';
-import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/reset_password_view.dart';
 import 'package:pharma_now/features/on_boarding/presentation/views/onboarding_view.dart';
 import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 

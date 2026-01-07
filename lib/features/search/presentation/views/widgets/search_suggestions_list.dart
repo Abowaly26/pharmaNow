@@ -34,7 +34,7 @@ class SearchSuggestionsList extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -89,7 +89,8 @@ class SearchSuggestionsList extends StatelessWidget {
           color: ColorManager.blackColor,
         ),
         highlightColor: ColorManager.secondaryColor,
-        highlightBackgroundColor: ColorManager.secondaryColor.withOpacity(0.12),
+        highlightBackgroundColor:
+            ColorManager.secondaryColor.withValues(alpha: 0.12),
         highlightFontWeight: FontWeight.w500,
         caseSensitive: false,
       ),

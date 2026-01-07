@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
 import 'package:pharma_now/features/auth/data/models/user_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pharma_now/features/auth/domain/repo/entities/user_entity.dart';
 
 import '../../constants.dart';
@@ -19,7 +20,7 @@ UserEntity getUser() {
     return userEntity;
   } catch (e) {
     // معالجة أي خطأ في تحليل البيانات
-    print("Error parsing user data: $e");
+    debugPrint("Error parsing user data: $e");
     return UserModel(name: '', email: '', uId: '');
   }
 }

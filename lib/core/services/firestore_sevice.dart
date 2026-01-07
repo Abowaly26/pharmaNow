@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pharma_now/core/services/database_service.dart';
 
 class FireStoreSevice implements DatabaseService {
@@ -82,7 +83,7 @@ class FireStoreSevice implements DatabaseService {
       data['uId'] = querySnapshot.docs.first.id;
       return data;
     } catch (e) {
-      print('Error getting user data by email: $e');
+      debugPrint('Error getting user data by email: $e');
       return null;
     }
   }
@@ -127,7 +128,7 @@ class FireStoreSevice implements DatabaseService {
 
       return results;
     } catch (error) {
-      print('Search error: $error');
+      debugPrint('Search error: $error');
       throw Exception('Search error : $error');
     }
   }

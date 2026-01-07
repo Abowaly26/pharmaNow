@@ -161,7 +161,7 @@ class HelpSupportView extends StatelessWidget {
                   Icon(
                     Icons.support_agent,
                     size: 64.sp,
-                    color: ColorManager.secondaryColor.withOpacity(0.7),
+                    color: ColorManager.secondaryColor.withValues(alpha: 0.7),
                   ),
                   SizedBox(height: 12.h),
                   Text(
@@ -214,13 +214,13 @@ class HelpSupportView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
         ],
         border: Border.all(
-          color: ColorManager.colorLines.withOpacity(0.5),
+          color: ColorManager.colorLines.withValues(alpha: 0.5),
           width: 1.w,
         ),
       ),
@@ -237,7 +237,7 @@ class HelpSupportView extends StatelessWidget {
                   padding: EdgeInsets.all(12.r),
                   decoration: BoxDecoration(
                     color: (iconColor ?? ColorManager.secondaryColor)
-                        .withOpacity(0.05),
+                        .withValues(alpha: 0.05),
                     shape: BoxShape.circle,
                   ),
                   child: iconPath != null
@@ -265,7 +265,7 @@ class HelpSupportView extends StatelessWidget {
                         subtitle,
                         style: TextStyles.description.copyWith(
                           fontSize: 12.sp,
-                          color: ColorManager.greyColor.withOpacity(0.8),
+                          color: ColorManager.greyColor.withValues(alpha: 0.8),
                         ),
                       ),
                     ],
@@ -274,7 +274,7 @@ class HelpSupportView extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 14.sp,
-                  color: ColorManager.colorOfArrows.withOpacity(0.5),
+                  color: ColorManager.colorOfArrows.withValues(alpha: 0.5),
                 ),
               ],
             ),

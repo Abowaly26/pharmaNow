@@ -19,7 +19,7 @@ import 'package:pharma_now/features/profile/presentation/providers/profile_provi
 import 'package:pharma_now/features/splash/presentation/views/splash_view.dart';
 import 'package:pharma_now/firebase_options.dart';
 import 'package:pharma_now/core/services/firebase_auth_service.dart';
-import 'package:pharma_now/features/auth/presentation/views/Reset_password_view.dart';
+import 'package:pharma_now/features/auth/presentation/views/reset_password_view.dart';
 import 'package:pharma_now/features/auth/presentation/views/sign_in_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -222,11 +222,13 @@ final AuthNavigationObserver authNavigationObserver = AuthNavigationObserver();
 
 Future<void> _initDynamicLinks() async {
   final PendingDynamicLinkData? initialData =
+      // ignore: deprecated_member_use
       await FirebaseDynamicLinks.instance.getInitialLink();
   if (initialData != null) {
     _handleDynamicLink(initialData);
   }
 
+  // ignore: deprecated_member_use
   FirebaseDynamicLinks.instance.onLink.listen((event) {
     _handleDynamicLink(event);
   }).onError((error) {
