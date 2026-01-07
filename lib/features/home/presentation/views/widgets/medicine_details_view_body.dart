@@ -10,8 +10,7 @@ import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import 'package:pharma_now/core/widgets/safe_cached_network_image.dart';
 import '../../ui_model/entities/cart_item_entity.dart';
 import 'package:pharma_now/core/helper_functions/build_error_bar.dart';
 
@@ -77,13 +76,6 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
       'description': widget.medicineEntity.description,
       'quantity': widget.medicineEntity.quantity,
     };
-  }
-
-  Widget _buildLoadingAnimation() {
-    return ShimmerLoadingPlaceholder(
-      width: 180.w,
-      height: 180.h,
-    );
   }
 
   @override
@@ -439,18 +431,13 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                             widget.medicineEntity.subabaseORImageUrl ??
                                 'https://i.postimg.cc/2yLfw0qy/image-20.png';
 
-                        return CachedNetworkImage(
+                        return SafeCachedNetworkImage(
                           imageUrl: imageUrl,
                           fit: BoxFit.contain,
-                          placeholder: (context, url) =>
-                              _buildLoadingAnimation(),
-                          errorWidget: (context, url, error) => Center(
-                            child: Icon(
-                              Icons.image_not_supported_outlined,
-                              size: 120.sp,
-                              color: Colors.grey.withOpacity(0.5),
-                            ),
-                          ),
+                          height: 180.h,
+                          width: 180.w,
+                          borderRadius: BorderRadius.circular(12.r),
+                          placeholderIconSize: 120.sp,
                         );
                       },
                     ),

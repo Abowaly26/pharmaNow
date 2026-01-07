@@ -30,20 +30,20 @@ class HomeAppbar extends StatelessWidget {
         );
       },
     ),
-    ActionItem(
-      icon: SvgPicture.asset(
-        Assets.chatText,
-        width: 24,
-        height: 24,
-      ),
-      callback: (BuildContext ctx) {
-        Navigator.of(ctx).push(
-          MaterialPageRoute(
-            builder: (context) => ChatPage(),
-          ),
-        );
-      },
-    ),
+    // ActionItem(
+    //   icon: SvgPicture.asset(
+    //     Assets.chatText,
+    //     width: 24,
+    //     height: 24,
+    //   ),
+    //   callback: (BuildContext ctx) {
+    //     Navigator.of(ctx).push(
+    //       MaterialPageRoute(
+    //         builder: (context) => ChatPage(),
+    //       ),
+    //     );
+    //   },
+    // ),
   ];
 
   @override

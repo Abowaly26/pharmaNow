@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
-import 'package:pharma_now/core/utils/button_style.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -21,27 +20,34 @@ class _BannerSliderState extends State<BannerSlider>
   late PageController _bannerController;
   int _currentBannerIndex = 0;
   Timer? _bannerTimer;
-
   final List<BannerItem> _banners = [
     BannerItem(
       image: Assets.rectangleBanner,
-      title: 'Discount',
-      discount: '50%',
-      buttonText: 'Buy Now',
+      title: 'Medicine Locator',
+      subtitle: 'Find rare medications quickly from trusted nearby pharmacies.',
+      badgeText: 'RARE MEDS',
+      primaryColor: const Color(0xFF3478F6), // Satin Azure
+      backgroundColor: const Color(0xFFEBF3FF),
       overlayImage: Assets.medicineBro,
     ),
     BannerItem(
       image: Assets.rectangleBanner,
-      title: 'Special',
-      discount: '30%',
-      buttonText: 'Shop Now',
+      title: 'Exclusive Deals',
+      subtitle:
+          'Save more with exclusive offers from verified local pharmacies.',
+      badgeText: 'SAVINGS',
+      primaryColor: const Color(0xFF10B981), // Crystal Mint
+      backgroundColor: const Color(0xFFECFDF5),
       overlayImage: Assets.publicHealth,
     ),
     BannerItem(
       image: Assets.rectangleBanner,
-      title: 'New Arrival',
-      discount: '20%',
-      buttonText: 'Explore',
+      title: 'Trusted Medical Delivery',
+      subtitle:
+          'Your medications delivered safely and on time, when you need them.',
+      badgeText: 'TRUSTED',
+      primaryColor: const Color(0xFF8B5CF6), // Velvet Amethyst
+      backgroundColor: const Color(0xFFF5F3FF),
       overlayImage: 'assets/images/on_boarding_image_1.svg',
     ),
   ];
@@ -114,18 +120,23 @@ class _BannerSliderState extends State<BannerSlider>
 
     return Column(
       children: [
-        SizedBox(
-          height: 182.h,
-          child: PageView.builder(
-            controller: _bannerController,
-            itemCount: _banners.length,
-            onPageChanged: (index) {
-              // Update the index on manual swipe
-              _currentBannerIndex = index;
-            },
-            itemBuilder: (context, index) {
-              return _buildBannerItem(_banners[index]);
-            },
+        Listener(
+          onPointerDown: (_) => _stopBannerAutoScroll(),
+          onPointerUp: (_) => _startBannerAutoScroll(),
+          onPointerCancel: (_) => _startBannerAutoScroll(),
+          child: SizedBox(
+            height: 182.h,
+            child: PageView.builder(
+              controller: _bannerController,
+              itemCount: _banners.length,
+              onPageChanged: (index) {
+                // Update the index on manual swipe
+                _currentBannerIndex = index;
+              },
+              itemBuilder: (context, index) {
+                return _buildBannerItem(_banners[index]);
+              },
+            ),
           ),
         ),
         SizedBox(height: 12.h),
@@ -133,11 +144,11 @@ class _BannerSliderState extends State<BannerSlider>
           controller: _bannerController,
           count: _banners.length,
           effect: WormEffect(
-            dotHeight: 8.h,
-            dotWidth: 8.w,
-            spacing: 8.w,
-            dotColor: ColorManager.colorOfsecondPopUp.withOpacity(0.5),
-            activeDotColor: ColorManager.secondaryColor.withOpacity(0.88),
+            dotHeight: 6.h,
+            dotWidth: 6.w,
+            spacing: 10.w,
+            dotColor: ColorManager.secondaryColor.withOpacity(0.1),
+            activeDotColor: ColorManager.secondaryColor,
           ),
         ),
         SizedBox(height: 12.h),
@@ -147,60 +158,154 @@ class _BannerSliderState extends State<BannerSlider>
 
   Widget _buildBannerItem(BannerItem banner) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-      child: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: 180.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.r),
-              color: ColorManager.secondaryColor.withOpacity(0.1),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.r),
-              child: _buildSvgImage(banner.image),
-            ),
+      margin: EdgeInsets.symmetric(horizontal: 8.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
-          if (banner.overlayImage != null)
-            Positioned(
-              top: 6.h,
-              right: 20.w,
-              child: SizedBox(
-                height: 173.h,
-                width: 173.w,
-                child: _buildSvgImage(banner.overlayImage!),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24.r),
+        child: Stack(
+          children: [
+            // Premium Soft Background
+            Container(
+              width: double.infinity,
+              height: 182.h,
+              decoration: BoxDecoration(
+                color: banner.backgroundColor,
               ),
             ),
-          Positioned(
-            top: 16.h,
-            left: 16.w,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  banner.title,
-                  style: TextStyles.bold24Black,
+
+            // Abstract Decorative Elements (Blobs for depth) - Style 2
+            Positioned(
+              top: -50.h,
+              right: -30.w,
+              child: Container(
+                width: 150.w,
+                height: 150.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: banner.primaryColor.withOpacity(0.05),
                 ),
-                Text(
-                  banner.discount,
-                  style: TextStyles.bold24Black
-                      .copyWith(color: ColorManager.redColorF5),
-                ),
-                SizedBox(height: 8.h),
-                ElevatedButton(
-                  style: ButtonStyles.smallButton,
-                  onPressed: () {},
-                  child: Text(
-                    banner.buttonText,
-                    style: TextStyles.buttonLabel,
-                  ),
-                )
-              ],
+              ),
             ),
-          )
-        ],
+            Positioned(
+              bottom: -20.h,
+              left: 50.w,
+              child: Container(
+                width: 80.w,
+                height: 80.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: banner.primaryColor.withOpacity(0.1),
+                ),
+              ),
+            ),
+
+            // Background SVG Pattern (Low opacity)
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.03,
+                child: _buildSvgImage(banner.image),
+              ),
+            ),
+
+            // Illustration with Depth
+            if (banner.overlayImage != null)
+              Positioned(
+                right: 5.w,
+                top: 10.h,
+                bottom: 10.h,
+                child: Hero(
+                  tag: 'banner_image_${banner.title}',
+                  child: Container(
+                    padding: EdgeInsets.all(8.r),
+                    width: 160.w,
+                    child: _buildSvgImage(banner.overlayImage!),
+                  ),
+                ),
+              ),
+
+            // Text Content - Refined Typography
+            Positioned(
+              left: 26.w,
+              top: 0,
+              bottom: 0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Glassmorphism-style Badge
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: banner.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(
+                        color: banner.primaryColor.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      banner.badgeText,
+                      style: TextStyles.bold16White.copyWith(
+                        color: banner.primaryColor,
+                        fontSize: 9.sp,
+                        letterSpacing: 1.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 14.h),
+                  SizedBox(
+                    width: 160.w,
+                    child: Text(
+                      banner.title,
+                      style: TextStyles.bold24Black.copyWith(
+                        color: const Color(0xFF2D3748),
+                        fontSize: 22.sp,
+                        height: 1.2,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  SizedBox(
+                    width: 160.w,
+                    child: Text(
+                      banner.subtitle,
+                      style: TextStyles.regular16White.copyWith(
+                        color: const Color(0xFF718096),
+                        fontSize: 12.sp,
+                        height: 1.4,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Full Banner Interaction
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                splashColor: banner.primaryColor.withOpacity(0.05),
+                highlightColor: banner.primaryColor.withOpacity(0.02),
+                onTap: () {
+                  // Navigate or perform action
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -236,15 +341,19 @@ class _BannerSliderState extends State<BannerSlider>
 class BannerItem {
   final String image;
   final String title;
-  final String discount;
-  final String buttonText;
+  final String subtitle;
+  final String badgeText;
+  final Color primaryColor;
+  final Color backgroundColor;
   final String? overlayImage;
 
   BannerItem({
     required this.image,
     required this.title,
-    required this.discount,
-    required this.buttonText,
+    required this.subtitle,
+    required this.badgeText,
+    required this.primaryColor,
+    required this.backgroundColor,
     this.overlayImage,
   });
 }

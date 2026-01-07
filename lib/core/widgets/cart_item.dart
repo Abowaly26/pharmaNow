@@ -12,11 +12,8 @@ import 'package:pharma_now/features/home/presentation/views/medicine_details_vie
 import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_item_entity.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
-import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
+import 'package:pharma_now/core/widgets/safe_cached_network_image.dart';
 import 'package:pharma_now/core/widgets/custom_dialog.dart';
-
-import 'package:cached_network_image/cached_network_image.dart';
-
 import 'package:pharma_now/features/order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/features/order/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
 
@@ -231,18 +228,14 @@ class CartItem extends StatelessWidget {
                       height: 120.h,
                       width: 100.w,
                     )
-                  : CachedNetworkImage(
+                  : SafeCachedNetworkImage(
                       imageUrl:
                           cartItemEntity.medicineEntity.subabaseORImageUrl!,
                       fit: BoxFit.contain,
-                      placeholder: (context, url) => _buildLoadingAnimation(),
-                      errorWidget: (context, url, error) => Center(
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          size: 55.sp,
-                          color: Colors.grey.withOpacity(0.5),
-                        ),
-                      ),
+                      height: 120.h,
+                      width: 100.w,
+                      borderRadius: BorderRadius.circular(8.r),
+                      placeholderIconSize: 55.sp,
                     ),
             )),
           ),
@@ -481,14 +474,6 @@ class CartItem extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildLoadingAnimation() {
-    return ShimmerLoadingPlaceholder(
-        width: 100.w,
-        height: 120.h,
-        baseColor: Colors.white.withOpacity(0.2),
-        highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
   }
 
   // Helper method to calculate the discounted price

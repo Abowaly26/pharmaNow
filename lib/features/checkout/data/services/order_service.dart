@@ -86,8 +86,9 @@ class OrderService {
 
       // Trigger local notification
       NotificationService.instance.showSystemNotification(
-        title: 'Order Confirmed! 🎉',
-        body: 'Your order #${docRef.id} has been placed successfully.',
+        title: 'Order Received! 🎉',
+        body:
+            'Thank you for your order! Our team will contact you shortly to confirm details and delivery time.',
         type: 'order',
         route: OrderHistoryView.routeName,
       );

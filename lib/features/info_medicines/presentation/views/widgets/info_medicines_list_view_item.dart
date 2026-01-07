@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,7 +7,7 @@ import '../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
-import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import '../../../../../core/widgets/safe_cached_network_image.dart';
 import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 
 class InfoMedicinesListViewItem extends StatefulWidget {
@@ -109,20 +108,13 @@ class _InfoMedicinesListViewItemState extends State<InfoMedicinesListViewItem> {
                       height: 120.h,
                       width: 100.w,
                     )
-                  : ClipRRect(
+                  : SafeCachedNetworkImage(
+                      imageUrl: widget.medicineEntity.subabaseORImageUrl!,
+                      fit: BoxFit.contain,
+                      height: 124.h,
+                      width: 106.w,
                       borderRadius: BorderRadius.circular(8.r),
-                      child: CachedNetworkImage(
-                        imageUrl: widget.medicineEntity.subabaseORImageUrl!,
-                        fit: BoxFit.contain,
-                        placeholder: (context, url) => _buildLoadingAnimation(),
-                        errorWidget: (context, url, error) => Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 55.sp,
-                            color: Colors.grey.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
+                      placeholderIconSize: 55.sp,
                     ),
             ),
           ),
@@ -333,14 +325,6 @@ class _InfoMedicinesListViewItemState extends State<InfoMedicinesListViewItem> {
         ),
       ),
     );
-  }
-
-  Widget _buildLoadingAnimation() {
-    return ShimmerLoadingPlaceholder(
-        width: 100.w,
-        height: 120.h,
-        baseColor: Colors.white.withOpacity(0.2),
-        highlightColor: ColorManager.secondaryColor.withOpacity(0.4));
   }
 
   Widget _buildStockIndicator() {

@@ -182,11 +182,11 @@ Route<dynamic> onGenerateRoute(RouteSettings setting) {
         settings: setting,
       );
 
-    case ChatPage.routeName:
-      return MaterialPageRoute(
-        builder: (context) => const ChatPage(),
-        settings: setting,
-      );
+    // case ChatPage.routeName:
+    //   return MaterialPageRoute(
+    //     builder: (context) => const ChatPage(),
+    //     settings: setting,
+    //   );
 
     case TermsOfServiceView.routeName:
       return MaterialPageRoute(

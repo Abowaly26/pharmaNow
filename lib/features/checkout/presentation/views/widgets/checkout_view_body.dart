@@ -55,11 +55,14 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     'Express Delivery',
     'Standard Delivery',
   ];
+
   final List<String> shippingSubtitles = [
-    'Receive your order within 2 days',
-    'Receive your order within 3-5 days',
+    'Receive your order within 1-3 hours',
+    'Receive your order within same day',
   ];
-  final List<double> shippingPrices = [50, 30];
+
+  final List<double> shippingPrices = [30, 15];
+
   final List<IconData> shippingIcons = [
     Icons.local_shipping,
     Icons.local_shipping_outlined,
@@ -1009,7 +1012,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       // 9. Show success bottom sheet
       showSuccessBottomSheet(
         context,
-        'Your order #$orderId has been placed successfully!\n\nWe\'ll send you a confirmation shortly.',
+        'Your order has been received successfully!\n\nOur customer service team will contact you within 24 hours to confirm your order details and delivery schedule.',
         () {
           Navigator.of(context).pushNamedAndRemoveUntil(
             'MyHomePage',

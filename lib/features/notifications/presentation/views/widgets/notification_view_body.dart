@@ -356,16 +356,9 @@ class NotificationViewBodyState extends State<NotificationViewBody>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: EdgeInsets.all(32.r),
-                  decoration: BoxDecoration(
-                    color: ColorManager.secondaryColor.withOpacity(0.05),
-                    shape: BoxShape.circle,
-                  ),
-                  child: SvgPicture.asset(
-                    Assets.emptyNotific,
-                    width: 140.w,
-                  ),
+                SvgPicture.asset(
+                  Assets.emptyNotific,
+                  width: 260.w,
                 ),
                 SizedBox(height: 32.h),
                 Text(

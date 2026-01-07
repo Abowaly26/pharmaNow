@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -9,7 +8,7 @@ import 'package:pharma_now/core/utils/app_images.dart' show Assets;
 import '../../../../../core/enitites/medicine_entity.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
-import '../../../../../core/widgets/shimmer_loading_placeholder.dart';
+import '../../../../../core/widgets/safe_cached_network_image.dart';
 import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
 
 class MedicineListViewItem extends StatefulWidget {
@@ -99,28 +98,13 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
           Padding(
             padding: EdgeInsets.all(5.r),
             child: Center(
-              child: widget.medicineEntity.subabaseORImageUrl == null ||
-                      widget.medicineEntity.subabaseORImageUrl!.isEmpty
-                  ? Container(
-                      color: ColorManager.textInputColor.withOpacity(0.2),
-                      height: 80.h,
-                      width: 80.w,
-                    )
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(8.r),
-                      child: CachedNetworkImage(
-                        imageUrl: widget.medicineEntity.subabaseORImageUrl!,
-                        fit: BoxFit.contain,
-                        placeholder: (context, url) => _buildLoadingAnimation(),
-                        errorWidget: (context, url, error) => Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 55.sp,
-                            color: Colors.grey.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
-                    ),
+              child: SafeCachedNetworkImage(
+                imageUrl: widget.medicineEntity.subabaseORImageUrl,
+                height: 80.h,
+                width: 80.w,
+                borderRadius: BorderRadius.circular(8.r),
+                placeholderIconSize: 55.sp,
+              ),
             ),
           ),
           Positioned(bottom: 4.h, right: 4.w, child: _buildStockIndicator()),
@@ -320,13 +304,6 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildLoadingAnimation() {
-    return ShimmerLoadingPlaceholder(
-      width: 80.w,
-      height: 80.h,
     );
   }
 

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
+import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/widgets/custom_app_bar.dart';
+import 'package:pharma_now/core/widgets/premium_loading_indicator.dart';
 import 'package:pharma_now/features/checkout/data/services/order_service.dart';
 
 class OrderHistoryView extends StatefulWidget {
@@ -22,7 +25,7 @@ class _OrderHistoryViewState extends State<OrderHistoryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
       appBar: PharmaAppBar(
         title: 'Order History',
         isBack: true,
@@ -76,56 +79,70 @@ class _OrderHistoryBodyState extends State<OrderHistoryBody> {
     return StreamBuilder<QuerySnapshot>(
       stream: orderService.getUserOrders(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildSkeletonLoader();
-        }
-
-        if (snapshot.hasError) {
-          return RefreshIndicator(
-            backgroundColor: ColorManager.primaryColor,
-            color: ColorManager.secondaryColor,
-            onRefresh: _refresh,
-            child: _buildErrorState(),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return RefreshIndicator(
-            backgroundColor: ColorManager.primaryColor,
-            color: ColorManager.secondaryColor,
-            onRefresh: _refresh,
-            child: _buildEmptyState(),
-          );
-        }
-
-        final orders = snapshot.data!.docs;
-
-        // Check for initial order to show details (only once)
-        if (widget.initialOrderId != null &&
-            widget.onOrderFound != null &&
-            !_hasProcessedInitialOrder) {
-          _hasProcessedInitialOrder = true;
-          try {
-            final initialOrderDoc = orders.firstWhere(
-              (doc) => doc.id == widget.initialOrderId,
-            );
-            final data = initialOrderDoc.data() as Map<String, dynamic>;
-            data['orderId'] = initialOrderDoc.id;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              widget.onOrderFound!(data);
-            });
-          } catch (_) {
-            // Order not found
-          }
-        }
-
-        return RefreshIndicator(
-          backgroundColor: ColorManager.primaryColor,
-          color: ColorManager.secondaryColor,
-          onRefresh: _refresh,
-          child: _buildGroupedListView(orders),
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 600),
+          child: _buildBodyContent(context, snapshot),
         );
       },
+    );
+  }
+
+  Widget _buildBodyContent(
+      BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(
+        key: ValueKey('loading'),
+        child: PremiumLoadingIndicator(),
+      );
+    }
+
+    if (snapshot.hasError) {
+      return RefreshIndicator(
+        key: const ValueKey('error'),
+        backgroundColor: ColorManager.primaryColor,
+        color: ColorManager.secondaryColor,
+        onRefresh: _refresh,
+        child: _buildErrorState(),
+      );
+    }
+
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return RefreshIndicator(
+        key: const ValueKey('empty'),
+        backgroundColor: ColorManager.primaryColor,
+        color: ColorManager.secondaryColor,
+        onRefresh: _refresh,
+        child: _buildEmptyState(),
+      );
+    }
+
+    final orders = snapshot.data!.docs;
+
+    // Check for initial order to show details (only once)
+    if (widget.initialOrderId != null &&
+        widget.onOrderFound != null &&
+        !_hasProcessedInitialOrder) {
+      _hasProcessedInitialOrder = true;
+      try {
+        final initialOrderDoc = orders.firstWhere(
+          (doc) => doc.id == widget.initialOrderId,
+        );
+        final data = initialOrderDoc.data() as Map<String, dynamic>;
+        data['orderId'] = initialOrderDoc.id;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          widget.onOrderFound!(data);
+        });
+      } catch (_) {
+        // Order not found
+      }
+    }
+
+    return RefreshIndicator(
+      key: const ValueKey('content'),
+      backgroundColor: ColorManager.primaryColor,
+      color: ColorManager.secondaryColor,
+      onRefresh: _refresh,
+      child: _buildGroupedListView(orders),
     );
   }
 
@@ -253,89 +270,6 @@ class _OrderHistoryBodyState extends State<OrderHistoryBody> {
     }
   }
 
-  Widget _buildSkeletonLoader() {
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: EdgeInsets.only(bottom: 16.h),
-          padding: EdgeInsets.all(18.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 16.h,
-                        width: 150.w,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                      ),
-                      SizedBox(height: 6.h),
-                      Container(
-                        height: 12.h,
-                        width: 100.w,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    height: 24.h,
-                    width: 80.w,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 14.h),
-                child: Divider(color: Colors.grey[100], thickness: 1),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    height: 14.h,
-                    width: 100.w,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                  ),
-                  Container(
-                    height: 18.h,
-                    width: 80.w,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildEmptyState() {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -345,17 +279,10 @@ class _OrderHistoryBodyState extends State<OrderHistoryBody> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: EdgeInsets.all(32.r),
-                decoration: BoxDecoration(
-                  color: ColorManager.secondaryColor.withOpacity(0.05),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 80.r,
-                  color: ColorManager.secondaryColor.withOpacity(0.7),
-                ),
+              SvgPicture.asset(
+                Assets.emptyCart,
+                height: 220.h,
+                width: 220.w,
               ),
               SizedBox(height: 32.h),
               Text(

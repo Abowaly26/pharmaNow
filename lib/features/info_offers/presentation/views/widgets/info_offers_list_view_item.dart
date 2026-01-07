@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -6,7 +5,7 @@ import 'package:pharma_now/core/enitites/medicine_entity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../order/presentation/cubits/cart_cubit/cart_cubit.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
-import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
+import '../../../../../core/widgets/safe_cached_network_image.dart';
 import '../../../../../core/utils/color_manger.dart';
 import '../../../../../core/utils/text_styles.dart';
 import '../../../../favorites/presentation/views/widgets/favorite_button.dart';
@@ -91,20 +90,13 @@ class _InfoOffersListViewItemState extends State<InfoOffersListViewItem> {
                       height: 120.h,
                       width: 100.w,
                     )
-                  : ClipRRect(
+                  : SafeCachedNetworkImage(
+                      imageUrl: widget.medicineEntity.subabaseORImageUrl!,
+                      fit: BoxFit.contain,
+                      height: 124.h,
+                      width: 106.w,
                       borderRadius: BorderRadius.circular(8.r),
-                      child: CachedNetworkImage(
-                        imageUrl: widget.medicineEntity.subabaseORImageUrl!,
-                        fit: BoxFit.contain,
-                        placeholder: (context, url) => _buildLoadingAnimation(),
-                        errorWidget: (context, url, error) => Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 55.sp,
-                            color: Colors.grey.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
+                      placeholderIconSize: 55.sp,
                     ),
             ),
           ),
@@ -314,10 +306,6 @@ class _InfoOffersListViewItemState extends State<InfoOffersListViewItem> {
         ),
       ),
     );
-  }
-
-  Widget _buildLoadingAnimation() {
-    return const ShimmerLoadingPlaceholder();
   }
 
   Widget _buildStockIndicator() {

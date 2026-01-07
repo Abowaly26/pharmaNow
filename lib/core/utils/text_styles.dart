@@ -137,6 +137,20 @@ class TextStyles {
     fontWeight: FontWeight.w400,
     color: Colors.grey[600],
   );
+
+  static TextStyle bold16White = TextStyle(
+    fontSize: 16.sp,
+    fontFamily: 'Inter',
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+  );
+
+  static TextStyle regular16White = TextStyle(
+    fontSize: 16.sp,
+    fontFamily: 'Inter',
+    fontWeight: FontWeight.normal,
+    color: Colors.white,
+  );
 }
 
 class AppStyles {
