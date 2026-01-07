@@ -101,5 +101,6 @@ class Assets {
   static const String checkMark = "assets/images/check_mark.svg";
   static const String cartPlus = "assets/images/cart-plus.svg";
   static const String frameCart = "assets/images/Frame_cart.svg";
-  static const String  facebook = "assets/images/FacebookIcon.svg";
+  static const String facebook = "assets/images/FacebookIcon.svg";
+  static const String noImage = "assets/images/no_image.png";
 }

@@ -430,10 +430,12 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                           fit: BoxFit.contain,
                           placeholder: (context, url) =>
                               _buildLoadingAnimation(),
-                          errorWidget: (context, url, error) => Icon(
-                            Icons.image_not_supported,
-                            size: 80.sp,
-                            color: Colors.grey,
+                          errorWidget: (context, url, error) => Center(
+                            child: Icon(
+                              Icons.image_not_supported_outlined,
+                              size: 120.sp,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
                           ),
                         );
                       },

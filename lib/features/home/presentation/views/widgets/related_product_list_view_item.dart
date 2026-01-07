@@ -42,58 +42,63 @@ class RelatedProudcutListViewItem extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        onError: (exception, stackTrace) =>
-                            const Text('No image available'),
-                        image: NetworkImage('https://via.placeholder.com/150'),
-                      ),
-                    ),
                     height: 80.h,
                     alignment: Alignment.topCenter,
                     padding: EdgeInsets.only(top: 8.h, right: 8.w),
                     width: double.infinity,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Stack(
                       children: [
-                        Stack(
-                          alignment: Alignment
-                              .centerLeft, // Align text within the stack
-                          children: [
-                            // 1. The SVG Banner
-                            SvgPicture.asset(
-                              Assets.gold_banner,
-                              height: 24,
-                              width: 48,
+                        Positioned.fill(
+                          child: Center(
+                            child: Icon(
+                              Icons.image_not_supported_outlined,
+                              size: 55.sp,
+                              color: Colors.grey.withOpacity(0.5),
                             ),
-
-                            Padding(
-                              padding: EdgeInsets.only(
-                                top: 1.h,
-                                left: 20.0.h,
-                              ), // Adjust padding to position text
-                              child: Text(
-                                "50%", // <<< Your Text Here
-                                style: TextStyle(
-                                  color: Colors
-                                      .black, // Choose a contrasting color
-                                  fontSize: 9.sp, // Adjust font size
-                                  fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Stack(
+                              alignment: Alignment
+                                  .centerLeft, // Align text within the stack
+                              children: [
+                                // 1. The SVG Banner
+                                SvgPicture.asset(
+                                  Assets.gold_banner,
+                                  height: 24,
+                                  width: 48,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: 1.h,
+                                    left: 20.0.h,
+                                  ), // Adjust padding to position text
+                                  child: Text(
+                                    "50%", // <<< Your Text Here
+                                    style: TextStyle(
+                                      color: Colors
+                                          .black, // Choose a contrasting color
+                                      fontSize: 9.sp, // Adjust font size
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            GestureDetector(
+                              onTap: onFavoritePressed,
+                              child: SvgPicture.asset(
+                                isFavorite ? Assets.fav : Assets.nFav,
+                                width: 24,
+                                height: 24,
                               ),
                             ),
                           ],
-                        ),
-                        GestureDetector(
-                          onTap: onFavoritePressed,
-                          child: SvgPicture.asset(
-                            isFavorite ? Assets.fav : Assets.nFav,
-                            width: 24,
-                            height: 24,
-                          ),
                         ),
                       ],
                     ),

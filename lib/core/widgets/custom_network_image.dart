@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class CustomNetworkImage extends StatelessWidget {
   const CustomNetworkImage({
@@ -13,8 +13,12 @@ class CustomNetworkImage extends StatelessWidget {
     return Image.network(
       imageUrl,
       fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) =>
-          Center(child: Text('No image available')),
+      errorBuilder: (context, error, stackTrace) => Center(
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          color: Colors.grey.withOpacity(0.5),
+        ),
+      ),
     );
   }
 }

@@ -212,8 +212,11 @@ class _BannerSliderState extends State<BannerSlider>
         fit: BoxFit.contain,
         placeholderBuilder: (context) => Container(
           color: ColorManager.secondaryColor.withOpacity(0.1),
-          child: const Center(
-            child: Icon(Icons.image_not_supported),
+          child: Center(
+            child: Icon(
+              Icons.image_not_supported,
+              size: 60.sp,
+            ),
           ),
         ),
       );
@@ -221,7 +224,7 @@ class _BannerSliderState extends State<BannerSlider>
       debugPrint('Error loading SVG: $e');
       return Container(
         color: ColorManager.secondaryColor.withOpacity(0.1),
-        child: const Center(
+        child: Center(
           child: Icon(Icons.image_not_supported),
         ),
       );

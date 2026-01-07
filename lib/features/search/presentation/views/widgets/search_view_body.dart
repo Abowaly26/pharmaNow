@@ -288,8 +288,13 @@ class _SearchMedicinesListViewItemState
                         if (loadingProgress == null) return child;
                         return _buildLoadingAnimation();
                       },
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Center(child: Text('No image available')),
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 40.sp,
+                          color: Colors.grey.withOpacity(0.5),
+                        ),
+                      ),
                     ),
             ),
           ),
