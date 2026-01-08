@@ -358,7 +358,7 @@ class NotificationViewBodyState extends State<NotificationViewBody>
               children: [
                 SvgPicture.asset(
                   Assets.emptyNotific,
-                  width: 260.w,
+                  width: 240.w,
                 ),
                 SizedBox(height: 32.h),
                 Text(

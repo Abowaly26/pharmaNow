@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,6 +15,7 @@ import 'package:pharma_now/core/widgets/custom_dialog.dart';
 import 'package:pharma_now/core/widgets/shimmer_loading_placeholder.dart';
 import 'package:pharma_now/core/widgets/premium_loading_indicator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pharma_now/core/widgets/safe_cached_network_image.dart';
 
 class FavoriteViewBody extends StatefulWidget {
   const FavoriteViewBody({super.key});
@@ -348,17 +348,10 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
                     )
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(8.r),
-                      child: CachedNetworkImage(
+                      child: SafeCachedNetworkImage(
                         imageUrl: widget.medicineEntity.subabaseORImageUrl!,
                         fit: BoxFit.contain,
-                        placeholder: (context, url) => _buildLoadingAnimation(),
-                        errorWidget: (context, url, error) => Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 55.sp,
-                            color: Colors.grey.withValues(alpha: 0.5),
-                          ),
-                        ),
+                        placeholderIconSize: 55.sp,
                       ),
                     ),
             ),

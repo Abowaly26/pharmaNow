@@ -32,7 +32,6 @@ class _MainViewState extends State<MainView> {
       child: Consumer<ProfileProvider>(
         builder: (context, profileProvider, child) {
           final isNavigatingOut = profileProvider.isNavigatingOut;
-          debugPrint('MainView: build - isNavigatingOut: $isNavigatingOut');
 
           return CustomLoadingOverlay(
             isLoading: isNavigatingOut,

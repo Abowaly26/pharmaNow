@@ -15,15 +15,19 @@ class FCMTokenManager {
   /// Initialize token handling: request permission, store current token and
   /// listen for token refresh events.
   Future<void> init() async {
-    debugPrint("[FCMTokenManager] Initializing...");
+    if (kDebugMode) {
+      debugPrint("[FCMTokenManager] Initializing...");
+    }
     // Request notification permissions (iOS & Android >= 13).
     NotificationSettings settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-    debugPrint(
-        "[FCMTokenManager] Permission status: ${settings.authorizationStatus}");
+    if (kDebugMode) {
+      debugPrint(
+          "[FCMTokenManager] Permission status: ${settings.authorizationStatus}");
+    }
 
     // Store token regardless of permission status to enable targeted notifications
     // once the user allows them later or for quiet pushes if applicable.
@@ -36,7 +40,9 @@ class FCMTokenManager {
   /// Store the current FCM token for the logged‑in user.
   Future<void> _storeCurrentToken() async {
     final String? token = await _messaging.getToken();
-    debugPrint("[FCMTokenManager] Current Token: $token");
+    if (kDebugMode) {
+      debugPrint("[FCMTokenManager] Current Token: $token");
+    }
     if (token != null) {
       await _storeToken(token);
     }

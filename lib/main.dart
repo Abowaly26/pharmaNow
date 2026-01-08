@@ -113,8 +113,16 @@ void main() async {
   }
 }
 
+bool _isSecondaryServicesInitialized = false;
+
 Future<void> _initializeSecondaryServices() async {
+  if (_isSecondaryServicesInitialized) return;
+  _isSecondaryServicesInitialized = true;
+
   try {
+    // Register background handler as early as possible in this sequence
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
     // Initialize things that don't need to block initial frame
     await Future.wait<void>([
       SupabaseStorageService.initSupabase(),
@@ -122,24 +130,23 @@ Future<void> _initializeSecondaryServices() async {
       FCMService.instance.init(),
     ]);
 
-    // Initialize App Check only once and safeguard against errors
+    // Initialize App Check with reinforced error handling
     try {
-      // Check if already activated to avoid "Too many attempts"
-      // Note: There isn't a direct "isActivated" property exposed easily,
-      // but guarding the call with a try-catch and specific provider logic helps.
+      if (kDebugMode) {
+        debugPrint("[AppCheck] Activating App Check...");
+      }
       await FirebaseAppCheck.instance.activate(
-        // Use debug provider for local dev to avoid Play Integrity quota/error issues
         androidProvider:
             kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
         appleProvider:
             kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck,
       );
     } catch (e) {
-      // Log specifically if it's the "Too many attempts" or other known issues
-      debugPrint("Firebase App Check warning (non-fatal): $e");
+      if (kDebugMode) {
+        debugPrint("[AppCheck] Activation warning: $e");
+      }
     }
 
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     Bloc.observer = CustomBlocObserver();
 
     // Handle initializations that depend on UI or Context safely
@@ -281,21 +288,48 @@ class _PharmaNowState extends State<PharmaNow> {
   }
 
   void _startUserCheckTimer() {
-    _userCheckTimer =
-        Timer.periodic(const Duration(seconds: 10), (timer) async {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        try {
-          await user.reload();
-        } on FirebaseAuthException catch (e) {
-          if (e.code == 'user-not-found' || e.code == 'user-disabled') {
-            await FirebaseAuth.instance.signOut();
-          }
-        } catch (e) {
-          debugPrint('UserCheckTimer error: $e');
-        }
-      }
+    // Start with a simpler, less aggressive check
+    // We use a recursive approach with variable delay instead of fixed periodic timer
+    // to allow for backoff in case of errors.
+    _scheduleUserCheck();
+  }
+
+  void _scheduleUserCheck([Duration delay = const Duration(seconds: 45)]) {
+    _userCheckTimer?.cancel();
+    _userCheckTimer = Timer(delay, () async {
+      await _performUserCheck();
     });
+  }
+
+  Future<void> _performUserCheck() async {
+    if (!mounted) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await user.reload();
+        // Reset to normal interval on success
+        _scheduleUserCheck(const Duration(seconds: 45));
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'user-not-found' || e.code == 'user-disabled') {
+          await FirebaseAuth.instance.signOut();
+          return; // Stop timer if logged out
+        }
+
+        // Handle "Too many attempts" or other temporary errors with backoff
+        // This often happens with App Check if polled too frequently
+        debugPrint('[UserCheck] Auth error (backing off): ${e.code}');
+        _scheduleUserCheck(const Duration(minutes: 2));
+      } catch (e) {
+        debugPrint('[UserCheck] Unexpected error: $e');
+        _scheduleUserCheck(const Duration(minutes: 1));
+      }
+    } else {
+      // No user, check less frequently or stop?
+      // We'll check again later just in case auth state changes without us knowing,
+      // though authStateChanges stream usually handles that.
+      _scheduleUserCheck(const Duration(minutes: 1));
+    }
   }
 
   void _listenToAuthChanges() {

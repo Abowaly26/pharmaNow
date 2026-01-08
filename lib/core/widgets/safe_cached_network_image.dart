@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -57,9 +58,17 @@ class SafeCachedNetworkImage extends StatelessWidget {
       // Suppress errors from being thrown to the Flutter framework
       errorListener: (exception) {
         // Silently handle the error - the errorWidget will be shown
-        // This prevents the exception from bubbling up to the console
-        debugPrint(
-            '[SafeCachedNetworkImage] Image load failed: ${exception.toString().split('\n').first}');
+        if (kDebugMode) {
+          final String errorMsg = exception.toString();
+          // Don't show full stack trace for specific HTTP errors
+          if (errorMsg.contains('400') || errorMsg.contains('404')) {
+            debugPrint(
+                '[SafeCachedNetworkImage] Image missing or bad request: $imageUrl');
+          } else {
+            debugPrint(
+                '[SafeCachedNetworkImage] Load failed: ${errorMsg.split('\n').first}');
+          }
+        }
       },
     );
   }
