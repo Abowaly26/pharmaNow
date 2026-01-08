@@ -18,6 +18,7 @@ class OrderEntity extends Equatable {
   final DateTime createdAt;
   final String? userId;
   final String? paymentProofUrl;
+  final String? prescriptionUrl;
   final String? paymentMethodName;
   final String? senderWalletPhone;
   final String? pharmacyWalletNumber;
@@ -34,6 +35,7 @@ class OrderEntity extends Equatable {
     DateTime? createdAt,
     this.userId,
     this.paymentProofUrl,
+    this.prescriptionUrl,
     this.paymentMethodName,
     this.senderWalletPhone,
     this.pharmacyWalletNumber,
@@ -52,6 +54,7 @@ class OrderEntity extends Equatable {
         createdAt,
         userId,
         paymentProofUrl,
+        prescriptionUrl,
         paymentMethodName,
         senderWalletPhone,
         pharmacyWalletNumber,
@@ -63,6 +66,7 @@ class OrderEntity extends Equatable {
     json['paymentMethodName'] = paymentMethodName;
     json['senderWalletPhone'] = senderWalletPhone;
     json['pharmacyWalletNumber'] = pharmacyWalletNumber;
+    json['prescriptionUrl'] = prescriptionUrl;
     return json;
   }
 
@@ -73,6 +77,7 @@ class OrderEntity extends Equatable {
       paymentMethodName: json['paymentMethodName'] as String?,
       senderWalletPhone: json['senderWalletPhone'] as String?,
       pharmacyWalletNumber: json['pharmacyWalletNumber'] as String?,
+      prescriptionUrl: json['prescriptionUrl'] as String?,
     );
   }
 
@@ -88,6 +93,7 @@ class OrderEntity extends Equatable {
     DateTime? createdAt,
     String? userId,
     String? paymentProofUrl,
+    String? prescriptionUrl,
     String? paymentMethodName,
     String? senderWalletPhone,
     String? pharmacyWalletNumber,
@@ -107,6 +113,7 @@ class OrderEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       userId: userId ?? this.userId,
       paymentProofUrl: paymentProofUrl ?? this.paymentProofUrl,
+      prescriptionUrl: prescriptionUrl ?? this.prescriptionUrl,
       paymentMethodName: paymentMethodName ?? this.paymentMethodName,
       senderWalletPhone: senderWalletPhone ?? this.senderWalletPhone,
       pharmacyWalletNumber: pharmacyWalletNumber ?? this.pharmacyWalletNumber,

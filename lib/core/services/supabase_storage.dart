@@ -13,6 +13,7 @@ class SupabaseStorageService implements StorageService {
   static const String _profileImagesBucket = 'Profile_images';
   static const String _medicinesImagesBucket = 'Medicines_images';
   static const String _paymentProofsBucket = 'Payment_proofs';
+  static const String _prescriptionImagesBucket = 'Prescription_image';
   static const String _supabaseUrl = 'https://jzvdrawjkkqbxvhpefhd.supabase.co';
   static const String _supabaseAnonKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6dmRyYXdqa2txYnh2aHBlZmhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTM4NTEsImV4cCI6MjA2MTY4OTg1MX0.M9LnQMmqCCtVsb4HoWkJLw6tnRFzCg4VJHYgb3mh8C8';
@@ -95,6 +96,7 @@ class SupabaseStorageService implements StorageService {
       await createBuckets(_profileImagesBucket);
       await createBuckets(_medicinesImagesBucket);
       await createBuckets(_paymentProofsBucket);
+      await createBuckets(_prescriptionImagesBucket);
     } catch (e) {
       log('Error creating buckets: $e', name: 'SupabaseStorageService');
     }
@@ -177,6 +179,50 @@ class SupabaseStorageService implements StorageService {
     } catch (e) {
       log('Error uploading payment proof: $e', name: 'SupabaseStorageService');
       throw Exception('Failed to upload payment proof: ${e.toString()}');
+    }
+  }
+
+  Future<String> uploadPrescriptionImage(File file, String userId) async {
+    await _ensureInitialized();
+    try {
+      if (!file.existsSync()) {
+        throw Exception('File does not exist at path: ${file.path}');
+      }
+
+      final String extensionName = b.extension(file.path);
+      final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final String fileName = '${timestamp}_prescription$extensionName';
+      final String uploadPath = '$userId/$fileName';
+
+      log('Uploading prescription to $_prescriptionImagesBucket: $uploadPath',
+          name: 'SupabaseStorageService');
+
+      final bytes = await file.readAsBytes();
+
+      await _supabase.client.storage
+          .from(_prescriptionImagesBucket)
+          .uploadBinary(
+            uploadPath,
+            bytes,
+            fileOptions: FileOptions(
+              contentType: _getContentType(extensionName),
+              upsert: true,
+            ),
+          );
+
+      final String publicUrl = _supabase.client.storage
+          .from(_prescriptionImagesBucket)
+          .getPublicUrl(uploadPath);
+
+      return publicUrl;
+    } on SocketException catch (e) {
+      log('Network error uploading prescription: $e',
+          name: 'SupabaseStorageService');
+      throw Exception(
+          'Network error: Failed to upload prescription. Please check your connection.');
+    } catch (e) {
+      log('Error uploading prescription: $e', name: 'SupabaseStorageService');
+      throw Exception('Failed to upload prescription: ${e.toString()}');
     }
   }
 

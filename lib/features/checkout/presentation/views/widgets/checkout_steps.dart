@@ -120,4 +120,4 @@ class CheckoutSteps extends StatelessWidget {
   }
 }
 
-List<String> namedSteps = ["Delivery", "Address", "Payment"];
+List<String> namedSteps = ["Delivery", "Address", "Prescription", "Payment"];

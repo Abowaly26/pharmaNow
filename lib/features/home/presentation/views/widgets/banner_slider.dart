@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:pharma_now/core/utils/app_images.dart';
 import 'package:pharma_now/core/utils/color_manger.dart';
 import 'package:pharma_now/core/utils/text_styles.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class BannerSlider extends StatefulWidget {
@@ -311,29 +312,45 @@ class _BannerSliderState extends State<BannerSlider>
   }
 
   Widget _buildSvgImage(String assetPath) {
-    try {
-      return SvgPicture.asset(
-        assetPath,
-        fit: BoxFit.contain,
-        placeholderBuilder: (context) => Container(
-          color: ColorManager.secondaryColor.withOpacity(0.1),
-          child: Center(
-            child: Icon(
-              Icons.image_not_supported,
-              size: 60.sp,
-            ),
-          ),
-        ),
-      );
-    } catch (e) {
-      debugPrint('Error loading SVG: $e');
-      return Container(
-        color: ColorManager.secondaryColor.withOpacity(0.1),
-        child: Center(
-          child: Icon(Icons.image_not_supported),
-        ),
-      );
+    // If the asset path is invalid/empty, return the error widget immediately
+    if (assetPath.isEmpty) {
+      return _buildErrorWidget();
     }
+
+    return SvgPicture.asset(
+      assetPath,
+      fit: BoxFit.contain,
+      placeholderBuilder: (context) => _buildShimmerLoading(),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return Shimmer.fromColors(
+      baseColor: ColorManager.secondaryColor.withOpacity(0.1),
+      highlightColor: ColorManager.secondaryColor.withOpacity(0.05),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorManager.secondaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          size: 40.sp,
+          color: ColorManager.textInputColor.withOpacity(0.5),
+        ),
+      ),
+    );
   }
 }
 

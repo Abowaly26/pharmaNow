@@ -16,6 +16,7 @@ import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_ent
 import 'package:get_it/get_it.dart';
 import 'package:pharma_now/features/profile/presentation/providers/profile_provider.dart';
 import 'package:pharma_now/core/services/supabase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CheckoutViewBody extends StatefulWidget {
   final Function(bool) onProcessingChanged;
@@ -49,6 +50,10 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
   String? selectedImagePath; // To show preview
   bool isUploadingImage = false;
   File? paymentProofFile;
+
+  // Prescription Data
+  File? prescriptionFile;
+  String? prescriptionImagePath;
 
   // Dynamic shipping options
   final List<String> shippingTitles = [
@@ -128,6 +133,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
 
     // Initialize variables
     paymentProofFile = null;
+    prescriptionFile = null;
 
     pageController.addListener(() {
       setState(() {
@@ -209,7 +215,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
                       child: PageView.builder(
                         controller: pageController,
                         physics: NeverScrollableScrollPhysics(),
-                        itemCount: 3,
+                        itemCount: 4,
                         itemBuilder: (context, index) {
                           return _buildPageContent(
                               index, subtotal, delivery, total);
@@ -259,6 +265,8 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       case 1:
         return _buildAddressPage();
       case 2:
+        return _buildPrescriptionPage();
+      case 3:
         return _buildPaymentPage();
       default:
         return Container();
@@ -440,6 +448,188 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         ),
       ),
     );
+  }
+
+  Widget _buildPrescriptionPage() {
+    return Padding(
+      padding: EdgeInsets.all(20.w),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Upload Prescription',
+              style: TextStyles.bold24Black,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Please upload your prescription if required for your medicines.',
+              style: TextStyles.settingItemSubTitle,
+            ),
+            SizedBox(height: 24.h),
+            GestureDetector(
+              onTap: _pickPrescriptionImage,
+              child: Container(
+                height: 200.h,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(
+                    color: prescriptionFile != null
+                        ? ColorManager.secondaryColor
+                        : Colors.grey[300]!,
+                    width: 2,
+                    style: BorderStyle.solid,
+                  ),
+                  image: prescriptionFile != null
+                      ? DecorationImage(
+                          image: FileImage(prescriptionFile!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: prescriptionFile == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color:
+                                  ColorManager.secondaryColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.cloud_upload_outlined,
+                              size: 40.sp,
+                              color: ColorManager.secondaryColor,
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            'Tap to upload image',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: ColorManager.secondaryColor,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            'Supported: JPG, PNG',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Stack(
+                        children: [
+                          Positioned(
+                            top: 8.h,
+                            right: 8.w,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  prescriptionFile = null;
+                                  prescriptionImagePath = null;
+                                });
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(8.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.red,
+                                  size: 20.sp,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 8.h),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.vertical(
+                                  bottom: Radius.circular(14.r),
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Tap to change',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: Colors.blue.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.blue, size: 20.sp),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      'Uploading a prescription helps pharmacists verify your order faster.',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.blue[800],
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickPrescriptionImage() async {
+    final ImagePicker picker = ImagePicker();
+    try {
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          prescriptionFile = File(image.path);
+          prescriptionImagePath = image.path;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      showCustomBar(context, 'Failed to pick image', type: MessageType.error);
+    }
   }
 
   Widget _buildPaymentPage() {
@@ -831,8 +1021,10 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
       case 0:
         return 'Continue to Address';
       case 1:
-        return 'Continue to Payment';
+        return 'Continue to Prescription';
       case 2:
+        return 'Continue to Payment';
+      case 3:
         return 'Review Order';
       default:
         return 'Next';
@@ -870,6 +1062,9 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
 
       _goToNextPage();
     } else if (currentPage == 2) {
+      // Prescription page - optional validation if needed
+      _goToNextPage();
+    } else if (currentPage == 3) {
       if (selectedPayment == -1) {
         showCustomBar(context, 'Please select a payment method',
             type: MessageType.warning);
@@ -932,7 +1127,24 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
     widget.onProcessingChanged(true);
 
     try {
-      // 1. Check if we need to upload payment proof first
+      // 1. Upload Prescription (if exists)
+      String? prescriptionUrl;
+      if (prescriptionFile != null) {
+        final user = context.read<ProfileProvider>().currentUser;
+        if (user != null) {
+          try {
+            final supabaseService = GetIt.I<SupabaseStorageService>();
+            prescriptionUrl = await supabaseService.uploadPrescriptionImage(
+                prescriptionFile!, user.uId);
+          } catch (e) {
+            // If upload fails, maybe prompt user? For now just log and continue or throw?
+            // Throwing to stop order makes sense if they intended to upload it.
+            throw Exception('Failed to upload prescription: ${e.toString()}');
+          }
+        }
+      }
+
+      // 2. Check if we need to upload payment proof first
       String? uploadedProofUrl;
       final needsProof = selectedPayment >= 0 &&
           paymentOptions[selectedPayment]['requiresInput'] == true;
@@ -996,6 +1208,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
         deliveryFee: delivery,
         totalAmount: total,
         paymentProofUrl: uploadedProofUrl,
+        prescriptionUrl: prescriptionUrl,
         paymentMethodName: paymentOptions[selectedPayment]['title'],
         senderWalletPhone: walletPhone.isNotEmpty ? walletPhone : phone,
         pharmacyWalletNumber: paymentOptions[selectedPayment]['walletNumber'],
