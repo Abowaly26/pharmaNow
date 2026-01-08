@@ -158,8 +158,6 @@ class _NotificationItemState extends State<NotificationItem>
                                           fontFamily: 'Inter',
                                           letterSpacing: -0.3,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     SizedBox(width: 8.w),
@@ -189,8 +187,6 @@ class _NotificationItemState extends State<NotificationItem>
                                     fontWeight: FontWeight.w400,
                                     fontFamily: 'Inter',
                                   ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 if (!widget.log.read) ...[
                                   SizedBox(height: 10.h),

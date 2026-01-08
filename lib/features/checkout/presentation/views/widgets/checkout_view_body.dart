@@ -463,7 +463,7 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
             ),
             SizedBox(height: 8.h),
             Text(
-              'Please upload your prescription if required for your medicines.',
+              'Please upload your prescription to verify your order.',
               style: TextStyles.settingItemSubTitle,
             ),
             SizedBox(height: 24.h),
@@ -1062,7 +1062,12 @@ class _CheckoutViewBodyState extends State<CheckoutViewBody>
 
       _goToNextPage();
     } else if (currentPage == 2) {
-      // Prescription page - optional validation if needed
+      // Prescription page - mandatory validation
+      if (prescriptionFile == null) {
+        showCustomBar(context, 'Please upload your prescription',
+            type: MessageType.warning);
+        return;
+      }
       _goToNextPage();
     } else if (currentPage == 3) {
       if (selectedPayment == -1) {
