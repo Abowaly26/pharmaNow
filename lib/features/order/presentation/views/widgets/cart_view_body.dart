@@ -11,6 +11,7 @@ import 'package:pharma_now/features/home/presentation/ui_model/entities/cart_ite
 import 'package:pharma_now/features/order/presentation/cubits/cart_item_cubit/cart_item_cubit.dart';
 
 import 'package:pharma_now/features/order/presentation/views/widgets/cart_items_list.dart';
+import 'package:pharma_now/features/order/presentation/views/widgets/cart_error_widget.dart';
 
 import '../../cubits/cart_cubit/cart_cubit.dart';
 
@@ -30,13 +31,17 @@ class CartViewBody extends StatelessWidget {
 
         // Show full screen error only if we don't have items yet
         if (state is CartError && cartEntity.cartItems.isEmpty) {
-          return Center(
-            child: Text(
-              state.message,
-              style: TextStyle(
-                fontSize: 16.sp,
-                color: Colors.red,
-              ),
+          return Scaffold(
+            body: Column(
+              children: [
+                const CartHeader(),
+                Expanded(
+                  child: CartErrorWidget(
+                    message: state.message,
+                    onRetry: () => context.read<CartCubit>().loadCart(),
+                  ),
+                ),
+              ],
             ),
           );
         }

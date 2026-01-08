@@ -12,35 +12,33 @@ class InfoOffersListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 350.h,
-      child: ListView.builder(
-        itemCount: medicines.length,
-        shrinkWrap: true,
-        scrollDirection: Axis.vertical,
-        itemBuilder: (context, index) => GestureDetector(
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: 40.h),
+      itemCount: medicines.length,
+      shrinkWrap: false,
+      scrollDirection: Axis.vertical,
+      itemBuilder: (context, index) => GestureDetector(
+        onTap: () {
+          // Navigate to medicine details view
+          Navigator.pushNamed(
+            context,
+            MedicineDetailsView.routeName,
+            arguments: medicines[index],
+          );
+        },
+        child: InfoOffersListViewItem(
+          medicineEntity: medicines[index],
+          index: index,
           onTap: () {
             // Navigate to medicine details view
-            Navigator.pushNamed(
-              context,
-              MedicineDetailsView.routeName,
-              arguments: medicines[index],
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MedicineDetailsView(
+                  medicineEntity: medicines[index],
+                ),
+              ),
             );
           },
-          child: InfoOffersListViewItem(
-            medicineEntity: medicines[index],
-            index: index,
-            onTap: () {
-              // Navigate to medicine details view
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => MedicineDetailsView(
-                    medicineEntity: medicines[index],
-                  ),
-                ),
-              );
-            },
-          ),
         ),
       ),
     );

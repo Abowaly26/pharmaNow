@@ -113,6 +113,7 @@ class SearchViewBody extends StatelessWidget {
 
                   // Display search results in a list view using InfoMedicinesListViewItem structure
                   return ListView.builder(
+                    padding: EdgeInsets.only(bottom: 40.h),
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     itemCount: state.products.length,

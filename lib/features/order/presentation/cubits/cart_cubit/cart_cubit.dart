@@ -15,10 +15,10 @@ class CartCubit extends Cubit<CartState> {
   CartCubit({required CartRepository cartRepository})
       : _cartRepository = cartRepository,
         super(CartInitial(cartEntity: const CartEntity(cartItems: []))) {
-    _loadCart();
+    loadCart();
   }
 
-  Future<void> _loadCart() async {
+  Future<void> loadCart() async {
     try {
       emit(CartLoading(cartEntity: state.cartEntity));
       final result =
