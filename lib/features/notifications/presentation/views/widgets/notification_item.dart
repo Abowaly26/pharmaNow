@@ -54,7 +54,6 @@ class _NotificationItemState extends State<NotificationItem>
 
   void _onTapDown(TapDownDetails details) {
     _controller.reverse();
-    HapticFeedback.lightImpact();
   }
 
   void _onTapUp(TapUpDetails details) {
@@ -113,22 +112,6 @@ class _NotificationItemState extends State<NotificationItem>
                 borderRadius: BorderRadius.circular(20.r),
                 child: Stack(
                   children: [
-                    // Glowing Unread Indicator
-                    if (!widget.log.read)
-                      Positioned(
-                        left: 0,
-                        top: 12.h,
-                        bottom: 12.h,
-                        width: 4.w,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: ColorManager.secondaryColor
-                                .withValues(alpha: widget.animationValue),
-                            borderRadius: BorderRadius.horizontal(
-                                right: Radius.circular(8.r)),
-                          ),
-                        ),
-                      ),
                     Padding(
                       padding: EdgeInsets.fromLTRB(20.w, 16.h, 16.w, 16.h),
                       child: Row(
@@ -188,10 +171,6 @@ class _NotificationItemState extends State<NotificationItem>
                                     fontFamily: 'Inter',
                                   ),
                                 ),
-                                if (!widget.log.read) ...[
-                                  SizedBox(height: 10.h),
-                                  _buildNewTag(),
-                                ],
                               ],
                             ),
                           ),
@@ -248,27 +227,6 @@ class _NotificationItemState extends State<NotificationItem>
   }
 
   Widget _buildTypeIcon(String type, String? imageUrl) {
-    if (imageUrl != null && imageUrl.isNotEmpty) {
-      return Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color:
-                  Colors.black.withValues(alpha: 0.08 * widget.animationValue),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: CircleAvatar(
-          radius: 24.r,
-          backgroundColor: Colors.white,
-          backgroundImage: NetworkImage(imageUrl),
-        ),
-      );
-    }
-
     IconData iconData;
     Color color;
 
@@ -290,36 +248,47 @@ class _NotificationItemState extends State<NotificationItem>
         color = ColorManager.secondaryColor;
     }
 
-    return Container(
-      width: 48.r,
-      height: 48.r,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1 * widget.animationValue),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Icon(iconData,
-          color: color.withValues(alpha: 0.9 * widget.animationValue),
-          size: 22.sp),
-    );
-  }
+    final Widget iconContainer = imageUrl != null && imageUrl.isNotEmpty
+        ? Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black
+                      .withValues(alpha: 0.08 * widget.animationValue),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: 24.r,
+              backgroundColor: Colors.white,
+              backgroundImage: NetworkImage(imageUrl),
+            ),
+          )
+        : Container(
+            width: 48.r,
+            height: 48.r,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1 * widget.animationValue),
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+            child: Icon(
+              iconData,
+              color: color.withValues(alpha: 0.9 * widget.animationValue),
+              size: 22.sp,
+            ),
+          );
 
-  Widget _buildNewTag() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: ColorManager.secondaryColor,
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Text(
-        'NEW',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 9.sp,
-          fontWeight: FontWeight.w800,
-          fontFamily: 'Inter',
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
+    if (!widget.log.read) {
+      return Badge(
+        backgroundColor: Colors.red,
+        smallSize: 10.r,
+        alignment: Alignment.topRight,
+        child: iconContainer,
+      );
+    }
+    return iconContainer;
   }
 }

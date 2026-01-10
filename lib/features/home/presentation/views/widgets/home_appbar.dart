@@ -158,13 +158,7 @@ class _NotificationsBadgeIconState extends State<_NotificationsBadgeIcon>
     );
 
     if (uid == null || !_isPermissionAllowed) {
-      return Badge(
-        isLabelVisible: false,
-        backgroundColor: ColorManager.greenColor,
-        textColor: ColorManager.primaryColor,
-        label: const Text('0'),
-        child: baseIcon,
-      );
+      return baseIcon;
     }
 
     final unreadStream = FirebaseFirestore.instance
@@ -176,8 +170,14 @@ class _NotificationsBadgeIconState extends State<_NotificationsBadgeIcon>
       stream: unreadStream,
       builder: (context, snapshot) {
         final int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+
+        // EXPLICIT CHECK: If count is 0, return ONLY the bell icon.
+        if (count == 0) {
+          return baseIcon;
+        }
+
+        // If count > 0, show the badge.
         return Badge(
-          isLabelVisible: _isPermissionAllowed && count > 0,
           backgroundColor: ColorManager.greenColor,
           textColor: ColorManager.primaryColor,
           label: Text('$count'),

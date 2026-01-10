@@ -234,19 +234,8 @@ class _NoInternetViewState extends State<NoInternetView>
               ),
               SizedBox(height: 16.h),
 
-              // Check Settings Button
-              TextButton(
-                onPressed: widget.onCheckSettings,
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF64748B), // Slate-500
-                  textStyle: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-                child: const Text('Check Connection Settings'),
-              ),
+             
+             
               const Spacer(flex: 2),
             ],
           ),

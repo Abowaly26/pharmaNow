@@ -29,4 +29,18 @@ class NotificationLog {
       'timestamp': timestamp,
     };
   }
+
+  NotificationLog copyWith({
+    String? id,
+    Map<String, dynamic>? payload,
+    bool? read,
+    Timestamp? timestamp,
+  }) {
+    return NotificationLog(
+      id: id ?? this.id,
+      payload: payload ?? this.payload,
+      read: read ?? this.read,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
 }

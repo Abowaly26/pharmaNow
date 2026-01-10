@@ -35,6 +35,10 @@ class NotificationViewBodyState extends State<NotificationViewBody>
 
   @override
   void dispose() {
+    // Mark all as read only when the user LEAVES the screen
+    if (_logs != null && _logs!.any((log) => !log.read)) {
+      _logService.markAllAsRead();
+    }
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -71,34 +75,11 @@ class NotificationViewBodyState extends State<NotificationViewBody>
         _isLoading = false;
       });
     } catch (e) {
-      setState(() => _isLoading = false);
       if (mounted) {
+        setState(() => _isLoading = false);
         showCustomBar(
           context,
           'Error loading notifications: $e',
-          type: MessageType.error,
-        );
-      }
-    }
-  }
-
-  Future<void> markAllAsRead() async {
-    if (_logs == null || _logs!.every((log) => log.read)) return;
-    try {
-      await _logService.markAllAsRead();
-      await _fetchLogs();
-      if (mounted) {
-        showCustomBar(
-          context,
-          'All notifications marked as read',
-          type: MessageType.success,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        showCustomBar(
-          context,
-          'Failed to mark all as read: $e',
           type: MessageType.error,
         );
       }
@@ -205,8 +186,6 @@ class NotificationViewBodyState extends State<NotificationViewBody>
 
         if (logs == null || logs.isEmpty) return const SizedBox.shrink();
 
-        final unreadCount = logs.where((l) => !l.read).length;
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -216,7 +195,7 @@ class NotificationViewBodyState extends State<NotificationViewBody>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    unreadCount > 0 ? '$section ($unreadCount)' : section,
+                    section,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w800,
@@ -225,24 +204,6 @@ class NotificationViewBodyState extends State<NotificationViewBody>
                       letterSpacing: 0.8,
                     ),
                   ),
-                  if (unreadCount > 0)
-                    TextButton(
-                      onPressed: () => _markSectionAsRead(logs),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w),
-                        minimumSize: Size(0, 30.h),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'Mark as read',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: ColorManager.secondaryColor,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -305,18 +266,6 @@ class NotificationViewBodyState extends State<NotificationViewBody>
         );
       },
     );
-  }
-
-  Future<void> _markSectionAsRead(List<NotificationLog> logs) async {
-    try {
-      final unreadLogs = logs.where((l) => !l.read).toList();
-      await Future.wait(unreadLogs.map((l) => _logService.markAsRead(l.id)));
-      _fetchLogs();
-    } catch (e) {
-      if (mounted) {
-        showCustomBar(context, 'Error marking as read: $e');
-      }
-    }
   }
 
   Map<String, List<NotificationLog>> _groupLogs(List<NotificationLog> logs) {

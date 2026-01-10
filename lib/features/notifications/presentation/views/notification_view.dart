@@ -38,36 +38,11 @@ class _NotificationViewState extends State<NotificationView> {
               icon: Icon(Icons.more_vert,
                   color: ColorManager.blackColor, size: 24.sp),
               onSelected: (value) {
-                if (value == 'mark_all_read') {
-                  _bodyKey.currentState?.markAllAsRead();
-                } else if (value == 'clear_all') {
+                if (value == 'clear_all') {
                   _showClearAllDialog(context);
                 }
               },
               itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'mark_all_read',
-                  height: 48.h,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.done_all_rounded,
-                        size: 22.sp,
-                        color: const Color(0xFF6B7280),
-                      ),
-                      SizedBox(width: 12.w),
-                      Text(
-                        'Mark all as read',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF1F2937),
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 PopupMenuItem(
                   value: 'clear_all',
                   height: 48.h,
