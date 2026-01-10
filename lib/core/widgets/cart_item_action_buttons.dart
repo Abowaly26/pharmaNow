@@ -46,11 +46,6 @@ class CartItemActionButtons extends StatelessWidget {
                         cartItemEntity,
                         cartItemEntity.count - 1,
                       );
-                } else {
-                  // If count would be 0, remove the item
-                  context
-                      .read<CartCubit>()
-                      .deleteMedicineFromCart(cartItemEntity);
                 }
               },
             )
