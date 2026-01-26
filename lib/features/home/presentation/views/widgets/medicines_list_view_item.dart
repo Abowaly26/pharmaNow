@@ -100,8 +100,8 @@ class _MedicineListViewItemState extends State<MedicineListViewItem> {
             child: Center(
               child: SafeCachedNetworkImage(
                 imageUrl: widget.medicineEntity.subabaseORImageUrl,
-                height: 80.h,
-                width: 80.w,
+                height: 120.h,
+                width: 100.w,
                 borderRadius: BorderRadius.circular(8.r),
                 placeholderIconSize: 55.sp,
               ),

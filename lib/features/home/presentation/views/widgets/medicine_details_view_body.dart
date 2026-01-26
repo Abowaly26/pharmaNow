@@ -33,6 +33,40 @@ class MedicineDetailsViewBody extends StatefulWidget {
 
 class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
   int _counter = 1;
+  final ScrollController _scrollController = ScrollController();
+  bool _showTopFade = false;
+  bool _showBottomFade = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+    // Initial check after build
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollListener());
+  }
+
+  void _scrollListener() {
+    if (_scrollController.hasClients) {
+      final bool showTop = _scrollController.offset > 5;
+      final bool showBottom = _scrollController.offset <
+              _scrollController.position.maxScrollExtent - 5 &&
+          _scrollController.position.maxScrollExtent > 0;
+
+      if (showTop != _showTopFade || showBottom != _showBottomFade) {
+        setState(() {
+          _showTopFade = showTop;
+          _showBottomFade = showBottom;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   CartItemEntity? _getCartItem() {
     return context
@@ -346,21 +380,46 @@ class _MedicineDetailsViewBodyState extends State<MedicineDetailsViewBody> {
                       ),
                     ],
                     SizedBox(height: 10.h),
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: ScrollConfiguration(
-                        behavior: SmoothScrollBehavior(),
-                        child: SingleChildScrollView(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 4.w, vertical: 4.h),
-                            child: Text(
-                              widget.medicineEntity.description ??
-                                  "Beta Mine is an innovative product that enhances brain health thanks to its rich ingredients, including Vitamin B6, which supports nerve function and maintains heart health.",
-                              style: const TextStyle(
-                                color: Color(0xffA7AEB5),
-                                fontSize: 16,
-                                height: 1.5,
+                    ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            _showTopFade ? Colors.transparent : Colors.white,
+                            Colors.white,
+                            Colors.white,
+                            _showBottomFade ? Colors.transparent : Colors.white,
+                          ],
+                          stops: const [0.0, 0.08, 0.92, 1.0],
+                        ).createShader(bounds);
+                      },
+                      blendMode: BlendMode.dstIn,
+                      child: SizedBox(
+                        height: 120.h,
+                        child: RawScrollbar(
+                          controller: _scrollController,
+                          thumbVisibility: true,
+                          thickness: 4.w,
+                          radius: Radius.circular(8.r),
+                          interactive: true,
+                          thumbColor:
+                              ColorManager.secondaryColor.withOpacity(0.5),
+                          child: SingleChildScrollView(
+                            controller: _scrollController,
+                            physics: const BouncingScrollPhysics(
+                                parent: AlwaysScrollableScrollPhysics()),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.w, vertical: 8.h),
+                              child: Text(
+                                widget.medicineEntity.description ??
+                                    "Beta Mine is an innovative product that enhances brain health thanks to its rich ingredients, including Vitamin B6, which supports nerve function and maintains heart health.",
+                                style: const TextStyle(
+                                  color: Color(0xffA7AEB5),
+                                  fontSize: 16,
+                                  height: 1.5,
+                                ),
                               ),
                             ),
                           ),
