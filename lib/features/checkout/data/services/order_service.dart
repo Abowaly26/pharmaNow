@@ -113,10 +113,8 @@ class OrderService {
     }
 
     return _firestore
-        .collection('users')
-        .doc(currentUserId)
         .collection('orders')
-        .orderBy('createdAt', descending: true)
+        .where('userId', isEqualTo: currentUserId)
         .snapshots();
   }
 

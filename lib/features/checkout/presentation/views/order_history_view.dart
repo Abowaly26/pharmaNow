@@ -116,7 +116,16 @@ class _OrderHistoryBodyState extends State<OrderHistoryBody> {
       );
     }
 
-    final orders = snapshot.data!.docs;
+    final orders = List<QueryDocumentSnapshot>.from(snapshot.data!.docs);
+    // Sort locally by createdAt descending
+    orders.sort((a, b) {
+      final aDate =
+          (a.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+      final bDate =
+          (b.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+      if (aDate == null || bDate == null) return 0;
+      return bDate.compareTo(aDate);
+    });
 
     // Check for initial order to show details (only once)
     if (widget.initialOrderId != null &&
@@ -240,8 +249,8 @@ class _OrderHistoryBodyState extends State<OrderHistoryBody> {
     for (var doc in orders) {
       final data = doc.data() as Map<String, dynamic>;
       data['orderId'] = doc.id;
-      final status =
-          (data['orderStatus'] ?? 'pending').toString().toLowerCase();
+      final rawStatus = (data['orderStatus'] ?? 'pending').toString();
+      final status = _normalizeStatus(rawStatus);
 
       if (groups.containsKey(status)) {
         groups[status]!.add(data);
@@ -254,7 +263,7 @@ class _OrderHistoryBodyState extends State<OrderHistoryBody> {
   }
 
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
+    switch (_normalizeStatus(status)) {
       case 'pending':
         return const Color(0xFFF59E0B);
       case 'processing':
@@ -509,7 +518,7 @@ class OrderCard extends StatelessWidget {
   }
 
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
+    switch (_normalizeStatus(status)) {
       case 'pending':
         return const Color(0xFFF59E0B);
       case 'processing':
@@ -664,8 +673,120 @@ class OrderDetailsSheet extends StatelessWidget {
               ),
             ),
           ),
+          if (_isPending(orderData['orderStatus'] ?? 'pending')) ...[
+            SizedBox(height: 12.h),
+            SizedBox(
+              width: double.infinity,
+              height: 56.h,
+              child: OutlinedButton(
+                onPressed: () => _showDeleteConfirmation(context),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  foregroundColor: const Color(0xFFEF4444),
+                ),
+                child: Text(
+                  'Cancel Order',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  bool _isPending(String status) {
+    return _normalizeStatus(status) == 'pending';
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          title: Text(
+            'Cancel Order?',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w800,
+              fontSize: 18.sp,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to cancel this order? This action cannot be undone.',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              color: ColorManager.greyColor,
+              fontSize: 14.sp,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'No, Keep It',
+                style: TextStyle(
+                  color: ColorManager.greyColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Close dialog
+                final NavigatorState navigator = Navigator.of(context);
+                navigator.pop(); // Close sheet
+
+                try {
+                  final orderService = getIt<OrderService>();
+                  await orderService.deleteOrder(orderData['orderId']);
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Order cancelled successfully'),
+                        backgroundColor: ColorManager.secondaryColor,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to cancel order: $e'),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text(
+                'Yes, Cancel',
+                style: TextStyle(
+                  color: Color(0xFFEF4444),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -738,4 +859,52 @@ class OrderDetailsSheet extends StatelessWidget {
       ],
     );
   }
+}
+
+String _normalizeStatus(String status) {
+  status = status.toLowerCase().trim();
+
+  // Dashboard states mapping (Common English variants)
+  if ([
+    'pending',
+    'waiting',
+    'waiting list',
+    'placed',
+    'waiting_list',
+    'قيد الانتظار',
+    'في الانتظار'
+  ].contains(status)) {
+    return 'pending';
+  }
+  if ([
+    'processing',
+    'accepted',
+    'preparing',
+    'under review',
+    'confirmed',
+    'مؤكد',
+    'مقبول',
+    'جاري التحضير'
+  ].contains(status)) {
+    return 'processing';
+  }
+  if ([
+    'shipped',
+    'on the way',
+    'out for delivery',
+    'on_the_way',
+    'جاري التوصيل'
+  ].contains(status)) {
+    return 'shipped';
+  }
+  if (['delivered', 'completed', 'received', 'done', 'تم التوصيل']
+      .contains(status)) {
+    return 'delivered';
+  }
+  if (['cancelled', 'rejected', 'failed', 'refused', 'ملغي', 'مرفوض']
+      .contains(status)) {
+    return 'cancelled';
+  }
+
+  return 'pending'; // Default fallback
 }
