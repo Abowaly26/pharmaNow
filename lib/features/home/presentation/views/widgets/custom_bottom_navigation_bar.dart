@@ -54,12 +54,13 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar>
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
-      width: 390.w, // Full-width with slight padding
-      height: 65.h, // Increased height for more comfort
-
+      width: 390.w,
+      height: 65.h + bottomPadding,
+      padding: EdgeInsets.only(bottom: bottomPadding),
       decoration: BoxDecoration(
-        color: Color(0xFFF7FAFF), // Changed to white for cleaner look
+        color: const Color(0xFFF7FAFF),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32.r),
           topRight: Radius.circular(32.r),

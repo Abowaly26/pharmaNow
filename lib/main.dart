@@ -11,6 +11,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pharma_now/core/services/supabase_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:pharma_now/core/helper_functions/on_generate_route.dart';
 import 'package:pharma_now/core/services/get_it_service.dart';
 import 'package:pharma_now/core/services/shard_preferences_singlton.dart';
@@ -100,6 +101,8 @@ void main() async {
     );
     await prefs.init();
     setupGetit();
+
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     final networkCubit = NetworkCubit();
 
@@ -380,10 +383,26 @@ class _PharmaNowState extends State<PharmaNow> {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
       child: ScreenUtilInit(
-          designSize: const Size(375, 812),
+          designSize: const Size(393, 852),
           minTextAdapt: true,
           splitScreenMode: true,
-          builder: (context, child) => MaterialApp(
+          builder: (context, child) {
+            final brightness =
+                View.of(context).platformDispatcher.platformBrightness;
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                systemNavigationBarColor: Colors.transparent,
+                systemNavigationBarIconBrightness: brightness == Brightness.dark
+                    ? Brightness.light
+                    : Brightness.dark,
+                statusBarIconBrightness: brightness == Brightness.dark
+                    ? Brightness.light
+                    : Brightness.dark,
+                systemNavigationBarDividerColor: Colors.transparent,
+                systemNavigationBarContrastEnforced: false,
+              ),
+              child: MaterialApp(
                 debugShowCheckedModeBanner: false,
                 theme: ThemeData(
                   fontFamily: 'Inter',
@@ -422,7 +441,9 @@ class _PharmaNowState extends State<PharmaNow> {
                     },
                   );
                 },
-              )),
+              ),
+            );
+          }),
     );
   }
 }
